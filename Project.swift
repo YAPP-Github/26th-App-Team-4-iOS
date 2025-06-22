@@ -22,6 +22,17 @@ let appTargetInfoPlist: InfoPlist = .extendingDefault(
   ]
 )
 
+let dependencies: [TargetDependency] = [
+  .external(name: "Kingfisher"),
+  .external(name: "Moya"),
+  .external(name: "ReactorKit"),
+  .external(name: "RxGesture"),
+  .external(name: "RxKeyboard"),
+  .external(name: "SnapKit"),
+  .external(name: "Then"),
+]
+
+
 let project = Project(
     name: appName,
     organizationName: orgName,
@@ -34,7 +45,7 @@ let project = Project(
             infoPlist: appTargetInfoPlist,
             sources: ["\(appName)/Sources/**"],
             resources: ["\(appName)/Resources/**"],
-            dependencies: []
+            dependencies: dependencies
         ),
         .target(
             name: testTargetName,
