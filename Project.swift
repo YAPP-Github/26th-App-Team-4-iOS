@@ -1,34 +1,50 @@
 import ProjectDescription
 
+let appName = "FITRUN"
+let appTargetName = "FITRUN"
+let testTargetName = "FITRUNTests"
+let orgName = "com.deok"
+
+let appTargetInfoPlist: InfoPlist = .extendingDefault(
+  with: [
+    "UILaunchStoryboardName": "LaunchScreen.storyboard",
+    "UIApplicationSceneManifest": [
+      "UIApplicationSupportsMultipleScenes": true,
+      "UISceneConfigurations": [
+        "UIWindowSceneSessionRoleApplication": [
+          [
+            "UISceneConfigurationName": "Default Configuration",
+            "UISceneDelegateClassName": "$(PRODUCT_MODULE_NAME).SceneDelegate"
+          ],
+        ]
+      ]
+    ],
+  ]
+)
+
 let project = Project(
-    name: "FITRUN",
+    name: appName,
+    organizationName: orgName,
     targets: [
         .target(
-            name: "FITRUN",
+            name: appTargetName,
             destinations: .iOS,
             product: .app,
-            bundleId: "io.tuist.FITRUN",
-            infoPlist: .extendingDefault(
-                with: [
-                    "UILaunchScreen": [
-                        "UIColorName": "",
-                        "UIImageName": "",
-                    ],
-                ]
-            ),
-            sources: ["FITRUN/Sources/**"],
-            resources: ["FITRUN/Resources/**"],
+            bundleId: "\(orgName).\(appTargetName)",
+            infoPlist: appTargetInfoPlist,
+            sources: ["\(appName)/Sources/**"],
+            resources: ["\(appName)/Resources/**"],
             dependencies: []
         ),
         .target(
-            name: "FITRUNTests",
+            name: testTargetName,
             destinations: .iOS,
             product: .unitTests,
-            bundleId: "io.tuist.FITRUNTests",
+            bundleId: "\(orgName).\(testTargetName)",
             infoPlist: .default,
-            sources: ["FITRUN/Tests/**"],
+            sources: ["\(appName)/Tests/**"],
             resources: [],
-            dependencies: [.target(name: "FITRUN")]
+            dependencies: [.target(name: appName)]
         ),
     ]
 )
