@@ -1,13 +1,13 @@
 import ProjectDescription
 
 let project = Project(
-    name: "NetWork",
+    name: "Foundation",
     targets: [
         .target(
-            name: "NetWork",
+            name: "Foundation",
             destinations: .iOS,
             product: .app,
-            bundleId: "io.tuist.NetWork",
+            bundleId: "io.tuist.Foundation",
             infoPlist: .extendingDefault(
                 with: [
                     "UILaunchScreen": [
@@ -16,19 +16,19 @@ let project = Project(
                     ],
                 ]
             ),
-            sources: ["NetWork/Sources/**"],
-            resources: ["NetWork/Resources/**"],
+            sources: ["Foundation/Sources/**"],
+            resources: ["Foundation/Resources/**"],
             dependencies: []
         ),
         .target(
-            name: "NetWorkTests",
+            name: "FoundationTests",
             destinations: .iOS,
             product: .unitTests,
-            bundleId: "io.tuist.NetWorkTests",
+            bundleId: "io.tuist.FoundationTests",
             infoPlist: .default,
-            sources: ["NetWork/Tests/**"],
+            sources: ["Foundation/Tests/**"],
             resources: [],
-            dependencies: [.target(name: "NetWork")]
+            dependencies: [.target(name: "Foundation")]
         ),
     ]
 )

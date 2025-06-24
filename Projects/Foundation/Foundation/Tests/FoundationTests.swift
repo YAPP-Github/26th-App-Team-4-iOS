@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 
-final class NetWorkTests: XCTestCase {
+final class FoundationTests: XCTestCase {
     func test_twoPlusTwo_isFour() {
         XCTAssertEqual(2+2, 4)
     }
