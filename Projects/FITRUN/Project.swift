@@ -43,8 +43,8 @@ let project = Project(
             product: .app,
             bundleId: "\(orgName).\(appTargetName)",
             infoPlist: appTargetInfoPlist,
-            sources: ["\(appName)/Sources/**"],
-            resources: ["\(appName)/Resources/**"],
+            sources: ["Sources/**"],
+            resources: ["Resources/**"],
             dependencies: dependencies
         ),
         .target(
@@ -53,7 +53,7 @@ let project = Project(
             product: .unitTests,
             bundleId: "\(orgName).\(testTargetName)",
             infoPlist: .default,
-            sources: ["\(appName)/Tests/**"],
+            sources: ["Tests/**"],
             resources: [],
             dependencies: [.target(name: appName)]
         ),
