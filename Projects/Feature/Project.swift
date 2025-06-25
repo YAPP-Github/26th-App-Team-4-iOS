@@ -19,7 +19,7 @@ let project = Project(
       sources: ["Feature/Sources/**"],
       resources: ["Feature/Resources/**"],
       dependencies: [
-        .project(target: "Service", path: "../Service"),
+        .project(target: "Domain", path: "../Domain"),
         .project(target: "Core", path: "../Core"),
       ]
     ),
