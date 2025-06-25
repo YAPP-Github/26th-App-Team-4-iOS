@@ -23,13 +23,20 @@ let appTargetInfoPlist: InfoPlist = .extendingDefault(
 )
 
 let dependencies: [TargetDependency] = [
-  .external(name: "Kingfisher"),
-  .external(name: "Moya"),
-  .external(name: "ReactorKit"),
-  .external(name: "RxGesture"),
-  .external(name: "RxKeyboard"),
-  .external(name: "SnapKit"),
-  .external(name: "Then"),
+  // MARK: Module
+  .project(target: "Foundation", path: "../Foundation"),
+  .project(target: "Network", path: "../Network"),
+  .project(target: "Service", path: "../Service"),
+  .project(target: "Feature", path: "../Feature"),
+  
+  // MARK: External
+//  .external(name: "Kingfisher"),
+//  .external(name: "Moya"),
+//  .external(name: "ReactorKit"),
+//  .external(name: "RxGesture"),
+//  .external(name: "RxKeyboard"),
+//  .external(name: "SnapKit"),
+//  .external(name: "Then"),
 ]
 
 

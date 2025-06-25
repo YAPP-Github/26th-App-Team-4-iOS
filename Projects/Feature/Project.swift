@@ -6,7 +6,7 @@ let project = Project(
         .target(
             name: "Feature",
             destinations: .iOS,
-            product: .app,
+            product: .staticFramework,
             bundleId: "io.tuist.Feature",
             infoPlist: .extendingDefault(
                 with: [
