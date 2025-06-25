@@ -24,7 +24,7 @@ let appTargetInfoPlist: InfoPlist = .extendingDefault(
 
 let dependencies: [TargetDependency] = [
   // MARK: Module
-  .project(target: "Foundation", path: "../Foundation"),
+  .project(target: "Core", path: "../Core"),
   .project(target: "Network", path: "../Network"),
   .project(target: "Service", path: "../Service"),
   .project(target: "Feature", path: "../Feature"),
