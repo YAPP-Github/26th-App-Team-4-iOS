@@ -8,20 +8,10 @@ let project = Project(
             destinations: .iOS,
             product: .staticFramework,
             bundleId: "io.tuist.Domain",
-            infoPlist: .extendingDefault(
-                with: [
-                    "UILaunchScreen": [
-                        "UIColorName": "",
-                        "UIImageName": "",
-                    ],
-                ]
-            ),
+            infoPlist: .default,
             sources: ["Domain/Sources/**"],
             resources: ["Domain/Resources/**"],
-            dependencies: [
-              .project(target: "Core", path: "../Core"),
-
-            ]
+            dependencies: []
         ),
         .target(
             name: "DomainTests",

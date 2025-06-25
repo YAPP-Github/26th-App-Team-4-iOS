@@ -8,14 +8,7 @@ let project = Project(
             destinations: .iOS,
             product: .staticFramework,
             bundleId: "io.tuist.Core",
-            infoPlist: .extendingDefault(
-                with: [
-                    "UILaunchScreen": [
-                        "UIColorName": "",
-                        "UIImageName": "",
-                    ],
-                ]
-            ),
+            infoPlist: .default,
             sources: ["Core/Sources/**"],
             resources: ["Core/Resources/**"],
             dependencies: []
