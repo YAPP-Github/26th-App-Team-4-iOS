@@ -18,7 +18,9 @@ let project = Project(
             ),
             sources: ["Network/Sources/**"],
             resources: ["Network/Resources/**"],
-            dependencies: []
+            dependencies: [
+              .project(target: "Core", path: "../Core"),
+            ]
         ),
         .target(
             name: "NetworkTests",
