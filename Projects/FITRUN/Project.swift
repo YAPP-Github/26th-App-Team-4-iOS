@@ -30,39 +30,39 @@ let dependencies: [TargetDependency] = [
   .project(target: "Presentation", path: "../Presentation"),
   
   // MARK: External
-//  .external(name: "Kingfisher"),
-//  .external(name: "Moya"),
-//  .external(name: "ReactorKit"),
-//  .external(name: "RxGesture"),
-//  .external(name: "RxKeyboard"),
-//  .external(name: "SnapKit"),
-//  .external(name: "Then"),
+  //  .external(name: "Kingfisher"),
+  //  .external(name: "Moya"),
+  //  .external(name: "ReactorKit"),
+  //  .external(name: "RxGesture"),
+  //  .external(name: "RxKeyboard"),
+  //  .external(name: "SnapKit"),
+  //  .external(name: "Then"),
 ]
 
 
 let project = Project(
-    name: appName,
-    organizationName: orgName,
-    targets: [
-        .target(
-            name: appTargetName,
-            destinations: .iOS,
-            product: .app,
-            bundleId: "\(orgName).\(appTargetName)",
-            infoPlist: appTargetInfoPlist,
-            sources: ["Sources/**"],
-            resources: ["Resources/**"],
-            dependencies: dependencies
-        ),
-        .target(
-            name: testTargetName,
-            destinations: .iOS,
-            product: .unitTests,
-            bundleId: "\(orgName).\(testTargetName)",
-            infoPlist: .default,
-            sources: ["Tests/**"],
-            resources: [],
-            dependencies: [.target(name: appName)]
-        ),
-    ]
+  name: appName,
+  organizationName: orgName,
+  targets: [
+    .target(
+      name: appTargetName,
+      destinations: .iOS,
+      product: .app,
+      bundleId: "\(orgName).\(appTargetName)",
+      infoPlist: appTargetInfoPlist,
+      sources: ["Sources/**"],
+      resources: ["Resources/**"],
+      dependencies: dependencies
+    ),
+    .target(
+      name: testTargetName,
+      destinations: .iOS,
+      product: .unitTests,
+      bundleId: "\(orgName).\(testTargetName)",
+      infoPlist: .default,
+      sources: ["Tests/**"],
+      resources: [],
+      dependencies: [.target(name: appName)]
+    ),
+  ]
 )
