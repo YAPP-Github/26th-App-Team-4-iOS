@@ -27,7 +27,7 @@ let dependencies: [TargetDependency] = [
   .project(target: "Core", path: "../Core"),
   .project(target: "Data", path: "../Data"),
   .project(target: "Domain", path: "../Domain"),
-  .project(target: "Feature", path: "../Feature"),
+  .project(target: "Presentation", path: "../Presentation"),
   
   // MARK: External
 //  .external(name: "Kingfisher"),
