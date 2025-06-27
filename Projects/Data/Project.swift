@@ -16,6 +16,9 @@ let project = Project(
         .project(target: "Core", path: "../Core"),
         
         .external(name: "Moya"),
+        .external(name: "KakaoSDKCommon"),
+        .external(name: "KakaoSDKAuth"),
+        .external(name: "KakaoSDKUser")
       ]
     ),
     .target(

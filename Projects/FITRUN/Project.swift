@@ -52,7 +52,11 @@ let project = Project(
       infoPlist: appTargetInfoPlist,
       sources: ["Sources/**"],
       resources: ["Resources/**"],
-      dependencies: dependencies
+      dependencies: dependencies,
+      settings: .settings(configurations: [
+        .debug(name: "Debug", xcconfig: "Configs/Debug.xcconfig"),
+        .release(name: "Release", xcconfig: "Configs/Release.xcconfig")
+      ])
     ),
     .target(
       name: testTargetName,

@@ -11,12 +11,10 @@ import UIKit
 import Presentation
 import Domain
 import Data
-import Core
 
 final class LoginCoordinator {
-    func start() -> UIViewController {
-
-        let vc = UIViewController()
-        return vc
-    }
+  func start() -> UIViewController {
+    let vc = LoginViewController()
+    return vc
+  }
 }

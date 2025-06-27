@@ -7,23 +7,22 @@
 
 import UIKit
 
+import KakaoSDKAuth
+
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
   var window: UIWindow?
 
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-//    print("Hello SceneDelegate!")
-//    guard let windowScene = (scene as? UIWindowScene) else { return }
-//    window = UIWindow(windowScene: windowScene)
-//    let viewController = ViewController()
-//    window?.rootViewController = viewController
-//    window?.makeKeyAndVisible()
-//    guard let _ = (scene as? UIWindowScene) else { return }
-      let window = UIWindow(frame: UIScreen.main.bounds)
-      let rootVC = LoginCoordinator().start()
-      window.rootViewController = rootVC
-      window.makeKeyAndVisible()
-      self.window = window
+    guard let windowScene = (scene as? UIWindowScene) else { return }
+
+    let window = UIWindow(windowScene: windowScene)
+
+    let rootVC = LoginCoordinator().start()
+    window.rootViewController = rootVC
+    window.makeKeyAndVisible()
+
+    self.window = window
   }
 
   func sceneDidDisconnect(_ scene: UIScene) {
@@ -54,6 +53,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     // to restore the scene back to its current state.
   }
 
-
+  /*
+   [카카오톡으로 로그인을 위한 설정]
+   카카오톡으로 로그인은 서비스 앱에서 카카오톡으로 이동한 후, 사용자가 [동의하고 계속하기] 버튼 또는 로그인 취소 버튼을 누르면 다시 카카오톡에서 서비스 앱으로 이동하는 과정을 거칩니다. 카카오톡에서 서비스 앱으로 돌아왔을 때 카카오 로그인 처리를 정상적으로 완료하기 위해 SceneDelegate.swift 파일에 handleOpenUrl()을 추가합니다.
+   */
+  func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    guard let url = URLContexts.first?.url else { return }
+    if AuthApi.isKakaoTalkLoginUrl(url) {
+      _ = AuthController.handleOpenUrl(url: url, options: [:])
+    }
+  }
 }
 
