@@ -3,7 +3,7 @@ import ProjectDescription
 let appName = "FITRUN"
 let appTargetName = "FITRUN"
 let testTargetName = "FITRUNTests"
-let orgName = "com.deok"
+let orgName = "com.yapp"
 
 let appTargetInfoPlist: InfoPlist = .extendingDefault(
   with: [
