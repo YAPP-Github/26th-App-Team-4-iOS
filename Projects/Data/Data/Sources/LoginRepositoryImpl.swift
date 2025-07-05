@@ -9,10 +9,6 @@ import Foundation
 import Domain
 import AuthenticationServices
 
-public protocol LoginRepository {
-  func saveUserID(_ id: String)
-}
-
 public final class LoginRepositoryImpl: LoginRepository {
   public init() {}
 
