@@ -28,7 +28,10 @@ let dependencies: [TargetDependency] = [
   .project(target: "Data", path: "../Data"),
   .project(target: "Domain", path: "../Domain"),
   .project(target: "Presentation", path: "../Presentation"),
-  
+
+  .external(name: "RxMoya"),
+  .external(name: "Swinject")
+
   // MARK: External
   //  .external(name: "Kingfisher"),
   //  .external(name: "Moya"),
@@ -49,10 +52,15 @@ let project = Project(
       destinations: .iOS,
       product: .app,
       bundleId: "\(orgName).\(appTargetName)",
+      deploymentTargets: .iOS("15.6"),
       infoPlist: appTargetInfoPlist,
       sources: ["Sources/**"],
       resources: ["Resources/**"],
-      dependencies: dependencies
+      dependencies: dependencies,
+      settings: .settings(configurations: [
+        .debug(name: "Debug", xcconfig: "Configs/Debug.xcconfig"),
+        .release(name: "Release", xcconfig: "Configs/Release.xcconfig")
+      ])
     ),
     .target(
       name: testTargetName,

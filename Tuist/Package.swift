@@ -10,8 +10,12 @@ enum FRDependency: CaseIterable {
   case reactorKit
   case rxGesture
   case rxKeyboard
+  case rxSwift
+  case rxCocoa
   case snapKit
   case then
+  case kakaoSDK
+  case swinject
 
   
   var packageName: String {
@@ -23,6 +27,10 @@ enum FRDependency: CaseIterable {
     case .rxKeyboard: "RxKeyboard"
     case .snapKit: "SnapKit"
     case .then: "Then"
+    case .kakaoSDK: "KakaoOpenSDK"
+    case .swinject: "Swinject"
+    case .rxSwift: "RxSwift"
+    case .rxCocoa: "RxCocoa"
     }
   }
   
@@ -35,6 +43,10 @@ enum FRDependency: CaseIterable {
     case .rxKeyboard: "https://github.com/RxSwiftCommunity/RxKeyboard.git"
     case .snapKit: "https://github.com/SnapKit/SnapKit.git"
     case .then: "https://github.com/devxoul/Then.git"
+    case .kakaoSDK: "https://github.com/kakao/kakao-ios-sdk"
+    case .swinject: "https://github.com/Swinject/Swinject.git"
+    case .rxSwift: "https://github.com/ReactiveX/RxSwift.git"
+    case .rxCocoa: "https://github.com/ReactiveX/RxSwift.git"
     }
   }
   
@@ -47,6 +59,10 @@ enum FRDependency: CaseIterable {
     case .rxKeyboard: "2.0.1"
     case .snapKit: "5.7.1"
     case .then: "3.0.0"
+    case .kakaoSDK: "2.24.4"
+    case .swinject: "2.8.0"
+    case .rxSwift: "6.6.0"
+    case .rxCocoa: "6.6.0"
     }
   }
 }
