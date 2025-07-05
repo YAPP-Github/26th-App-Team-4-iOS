@@ -7,16 +7,29 @@
 
 import UIKit
 
+public protocol CoordinatorFinishDelegate: AnyObject {
+  func coordinatorDidFinish(childCoordinator: Coordinator)
+}
+
 public protocol Coordinator: AnyObject {
   var navigationController: UINavigationController { get set }
-  var children: [Coordinator] { get set }
+  var childCoordinators: [Coordinator] { get set }
+  var type: CoordinatorType { get }
 
   func start()
-  func finish()
 }
 
 extension Coordinator {
   func finish() {
-    children.removeAll()
+    childCoordinators.removeAll()
   }
+}
+
+public enum CoordinatorType {
+  case app
+  case launchScreen
+  case walkthrough
+  case login
+  case onboarding
+  case mainTabBar
 }

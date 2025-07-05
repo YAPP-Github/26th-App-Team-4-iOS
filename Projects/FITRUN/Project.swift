@@ -3,7 +3,7 @@ import ProjectDescription
 let appName = "FITRUN"
 let appTargetName = "FITRUN"
 let testTargetName = "FITRUNTests"
-let orgName = "com.deok"
+let orgName = "com.yapp"
 
 let appTargetInfoPlist: InfoPlist = .extendingDefault(
   with: [
@@ -28,7 +28,10 @@ let dependencies: [TargetDependency] = [
   .project(target: "Data", path: "../Data"),
   .project(target: "Domain", path: "../Domain"),
   .project(target: "Presentation", path: "../Presentation"),
-  
+
+  .external(name: "RxMoya"),
+  .external(name: "Swinject")
+
   // MARK: External
   //  .external(name: "Kingfisher"),
   //  .external(name: "Moya"),
@@ -49,6 +52,7 @@ let project = Project(
       destinations: .iOS,
       product: .app,
       bundleId: "\(orgName).\(appTargetName)",
+      deploymentTargets: .iOS("15.6"),
       infoPlist: appTargetInfoPlist,
       sources: ["Sources/**"],
       resources: ["Resources/**"],

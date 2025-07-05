@@ -16,12 +16,10 @@ import Core
 final class AppCoordinator: Coordinator {
   var navigationController: UINavigationController
   var childCoordinators: [Coordinator] = []
-  private let resolver: Resolver
-  private let disposeBag = DisposeBag()
+  var type: CoordinatorType = .app
 
-  init(navigationController: UINavigationController, resolver: Resolver) {
+  init(navigationController: UINavigationController) {
     self.navigationController = navigationController
-    self.resolver = resolver
 
     navigationController.setNavigationBarHidden(true, animated: false)
   }
@@ -31,91 +29,71 @@ final class AppCoordinator: Coordinator {
   }
 
   private func showLaunchFlow() {
-    let launchCoordinator = resolver.resolve(LaunchCoordinator.self, argument: navigationController)!
-    launchCoordinator.delegate = self
-    childCoordinators.append(launchCoordinator)
-    launchCoordinator.start()
+    let coordinator = LaunchCoordinator(navigationController: navigationController)
+    coordinator.finishDelegate = self
+    childCoordinators.append(coordinator)
+    coordinator.start()
   }
 
   private func showWalkthroughFlow() {
-    navigationController.viewControllers = []
-    let walkthroughCoordinator = resolver.resolve(WalkthroughCoordinator.self, argument: navigationController)!
-    walkthroughCoordinator.delegate = self
-    childCoordinators.append(walkthroughCoordinator)
-    walkthroughCoordinator.start()
+    let coordinator = WalkthroughCoordinator(navigationController: navigationController)
+    coordinator.finishDelegate = self
+    childCoordinators.append(coordinator)
+    coordinator.start()
   }
 
   private func showLoginFlow() {
-    navigationController.viewControllers = []
-    let loginCoordinator = resolver.resolve(LoginCoordinator.self, argument: navigationController)!
-    loginCoordinator.delegate = self
-    childCoordinators.append(loginCoordinator)
-    loginCoordinator.start()
+    let coordinator = LoginCoordinator(navigationController: navigationController)
+    coordinator.finishDelegate = self
+    childCoordinators.append(coordinator)
+    coordinator.start()
   }
 
   private func showOnboardingFlow() {
-    navigationController.viewControllers = []
-    let onboardingCoordinator = resolver.resolve(OnboardingCoordinator.self, argument: navigationController)!
-    onboardingCoordinator.delegate = self
-    childCoordinators.append(onboardingCoordinator)
-    onboardingCoordinator.start()
+    let coordinator = OnboardingCoordinator(navigationController: navigationController)
+    coordinator.finishDelegate = self
+    childCoordinators.append(coordinator)
+    coordinator.start()
   }
 
   private func showMainTabFlow() {
-    navigationController.viewControllers = []
-    let mainTabCoordinator = resolver.resolve(MainTabCoordinator.self, argument: navigationController)!
-    childCoordinators.append(mainTabCoordinator)
-    mainTabCoordinator.start()
-    navigationController.setNavigationBarHidden(false, animated: true)
-  }
-
-  // MARK: - Session Expiration Handling
-  private func setupSessionExpirationObserver() {
 
   }
 }
 
-// MARK: - LaunchCoordinatorDelegate
-extension AppCoordinator: LaunchCoordinatorDelegate {
-  func didFinishLaunch(with status: UserStatus, from coordinator: LaunchCoordinator) {
-    removeChildCoordinator(coordinator)
+// MARK: - CoordinatorFinishDelegate
+extension AppCoordinator: CoordinatorFinishDelegate {
+  func coordinatorDidFinish(childCoordinator: Coordinator) {
+    childCoordinators = childCoordinators.filter({ $0.type != childCoordinator.type })
 
-    switch status {
-    case .needsWalkthrough:
+    switch childCoordinator.type {
+    case .app:
+      childCoordinators.removeAll()
+      navigationController.viewControllers.removeAll()
+
+      showLaunchFlow()
+    case .launchScreen:
+      childCoordinators.removeAll()
+      navigationController.viewControllers.removeAll()
+
       showWalkthroughFlow()
-    case .needsRegistrationOrLogin:
+    case .walkthrough:
+      childCoordinators.removeAll()
+      navigationController.viewControllers.removeAll()
+
       showLoginFlow()
-    case .needsOnboarding:
+    case .login:
+      childCoordinators.removeAll()
+      navigationController.viewControllers.removeAll()
+
       showOnboardingFlow()
-    case .loggedIn:
+    case .onboarding:
+      childCoordinators.removeAll()
+      navigationController.viewControllers.removeAll()
+
       showMainTabFlow()
+    default:
+      break
     }
-  }
-}
-
-// MARK: - WalkthroughCoordinatorDelegate
-extension AppCoordinator: WalkthroughCoordinatorDelegate {
-  func didCompleteWalkthrough(from coordinator: WalkthroughCoordinator) {
-    removeChildCoordinator(coordinator)
-
-    showLoginFlow()
-  }
-}
-
-// MARK: - LoginCoordinatorDelegate
-extension AppCoordinator: LoginCoordinatorDelegate {
-  func didLoginSuccessfully(from coordinator: LoginCoordinator) {
-    removeChildCoordinator(coordinator)
-
-    // TODO: - 상태 확인 후 화면 전환
-    self.showOnboardingFlow()
-  }
-}
-
-// MARK: - OnboardingCoordinatorDelegate
-extension AppCoordinator: OnboardingCoordinatorDelegate {
-  func didCompleteOnboarding(from coordinator: OnboardingCoordinator) {
-    removeChildCoordinator(coordinator)
-    showMainTabFlow()
   }
 }

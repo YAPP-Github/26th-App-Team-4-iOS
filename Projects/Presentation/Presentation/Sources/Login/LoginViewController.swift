@@ -11,37 +11,27 @@ import Then
 import RxSwift
 import RxCocoa
 import AuthenticationServices
-import Moya
 import KakaoSDKAuth
 import KakaoSDKUser
 import ReactorKit
 
 public final class LoginViewController: UIViewController, View {
-  public typealias Reactor = LoginReactor
-
   public var disposeBag = DisposeBag()
 
+  weak var coordinator: LoginCoordinator?
+
   private let appleLoginButton = UIButton().then {
-    $0.setTitle("Apple 로그인", for: .normal)
+    $0.setTitle("애플로 시작하기", for: .normal)
     $0.backgroundColor = .black
     $0.layer.cornerRadius = 8
   }
 
   private let kakaoLoginButton = UIButton().then {
-    $0.setTitle("Kakao 로그인", for: .normal)
+    $0.setTitle("카카오로 시작하기", for: .normal)
     $0.backgroundColor = .yellow
     $0.layer.cornerRadius = 8
   }
 
-  public init(reactor: Reactor) {
-    super.init(nibName: nil, bundle: nil)
-    self.reactor = reactor
-  }
-  
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-  
   public override func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = .white
@@ -56,11 +46,11 @@ public final class LoginViewController: UIViewController, View {
     appleLoginButton.snp.makeConstraints {
       $0.center.equalToSuperview()
       $0.left.right.equalToSuperview().inset(40)
-      $0.height.equalTo(44)
+      $0.height.equalTo(56)
     }
 
     kakaoLoginButton.snp.makeConstraints {
-      $0.top.equalTo(appleLoginButton.snp.bottom).offset(20)
+      $0.top.equalTo(appleLoginButton.snp.bottom).offset(12)
       $0.left.right.height.equalTo(appleLoginButton)
     }
   }
@@ -121,10 +111,10 @@ public final class LoginViewController: UIViewController, View {
       let token,
       error == nil
     else {
-      // TODO: - 오류 대응
       showAlert(title: "카카오 로그인 실패", message: error?.localizedDescription ?? "알 수 없는 오류")
       return
     }
+    print("> 카카오 로그임 로그인 성공")
     reactor?.action.onNext(.loginWithKakao(token: token))
   }
 
@@ -143,6 +133,7 @@ extension LoginViewController: ASAuthorizationControllerDelegate, ASAuthorizatio
       showAlert(title: "애플 로그인 실패", message: "토큰이 유효하지 않습니다.")
       return
     }
+    print("> 카카오 로그임 로그인 성공")
     reactor?.action.onNext(.loginWithApple(token: token))
   }
 
@@ -154,210 +145,3 @@ extension LoginViewController: ASAuthorizationControllerDelegate, ASAuthorizatio
     return view.window!
   }
 }
-
-// MARK: - Moya TargetType
-
-import Moya
-
-public enum LoginAPI {
-    case socialLogin(token: String)
-}
-
-extension LoginAPI: TargetType {
-    public var baseURL: URL { URL(string: "http://fitrun.p-e.kr")! }
-    public var path: String {
-        switch self {
-        case .socialLogin:
-            return "/api/users"
-        }
-    }
-    public var method: Moya.Method {
-        switch self {
-        case .socialLogin:
-            return .post
-        }
-    }
-    public var task: Task {
-        switch self {
-        case let .socialLogin(token):
-            return .requestParameters(parameters: ["token": token], encoding: JSONEncoding.default)
-        }
-    }
-    public var headers: [String : String]? {
-        ["Content-Type": "application/json"]
-    }
-}
-
-
-public struct UserResponse: Codable {
-  let code: String
-  let result: User
-  let timeStamp: String
-}
-
-public struct User: Codable {
-  let id: Int
-  let name: String
-  let email: String
-  let isDeleted: Bool
-}
-
-
-//public final class LoginViewController: UIViewController {
-//  typealias Reactor = LoginReactor
-//
-//  private let disposeBag = DisposeBag()
-//  private let loginResult = PublishRelay<String>()
-//
-//  private let appleLoginButton = UIButton().then {
-//    $0.setTitle("Sign in with Apple", for: .normal)
-//    $0.backgroundColor = .black
-//    $0.layer.cornerRadius = 8
-//  }
-//
-//  private let kakaoLoginButton = UIButton().then {
-//    $0.setTitle("Sign in with Kakao", for: .normal)
-//    $0.backgroundColor = UIColor(red: 0.996, green: 0.871, blue: 0.000, alpha: 1)
-//    $0.setTitleColor(.black, for: .normal)
-//    $0.layer.cornerRadius = 8
-//  }
-//
-//  private let provider = MoyaProvider<LoginAPI>()
-//
-//  init(reducer: Reactor) {
-//    super.init(nibName: nil, bundle: nil)
-//
-//  }
-//
-//  required init?(coder: NSCoder) {
-//    fatalError("init(coder:) has not been implemented")
-//  }
-//
-//  public override func viewDidLoad() {
-//    super.viewDidLoad()
-//    view.backgroundColor = .white
-//    setupUI()
-//    bindUI()
-//  }
-//
-//  private func setupUI() {
-//    view.addSubview(appleLoginButton)
-//    view.addSubview(kakaoLoginButton)
-//
-//    appleLoginButton.snp.makeConstraints {
-//      $0.center.equalToSuperview()
-//      $0.height.equalTo(50)
-//      $0.left.right.equalToSuperview().inset(40)
-//    }
-//
-//    kakaoLoginButton.snp.makeConstraints {
-//      $0.top.equalTo(appleLoginButton.snp.bottom).offset(20)
-//      $0.left.right.height.equalTo(appleLoginButton)
-//    }
-//  }
-//
-//  private func bindUI() {
-//    appleLoginButton.rx.tap
-//      .subscribe(onNext: { [weak self] in
-//        self?.performAppleLogin()
-//      })
-//      .disposed(by: disposeBag)
-//
-//    kakaoLoginButton.rx.tap
-//      .subscribe(onNext: { [weak self] in
-//        self?.performKakaoLogin()
-//      })
-//      .disposed(by: disposeBag)
-//
-//    loginResult
-//      .observe(on: MainScheduler.instance)
-//      .subscribe(onNext: { [weak self] message in
-//        self?.showAlert(title: "로그인 성공", message: message)
-//      })
-//      .disposed(by: disposeBag)
-//  }
-//
-//  // MARK: - Apple Login
-//
-//  private func performAppleLogin() {
-//    let request = ASAuthorizationAppleIDProvider().createRequest()
-//    request.requestedScopes = [.fullName, .email]
-//
-//    let controller = ASAuthorizationController(authorizationRequests: [request])
-//    controller.delegate = self
-//    controller.presentationContextProvider = self
-//    controller.performRequests()
-//  }
-//
-//  // MARK: - Kakao Login
-//
-//  private func performKakaoLogin() {
-//    if UserApi.isKakaoTalkLoginAvailable() {
-//      UserApi.shared.loginWithKakaoTalk { [weak self] oauthToken, error in
-//        if let error = error {
-//          self?.showAlert(title: "카카오 로그인 실패", message: error.localizedDescription)
-//          return
-//        }
-//        guard let token = oauthToken?.accessToken else {
-//          self?.showAlert(title: "카카오 로그인 실패", message: "토큰을 받지 못했습니다.")
-//          return
-//        }
-//        self?.sendAccessTokenToServer(token: token)
-//          .observe(on: MainScheduler.instance)
-//          .subscribe(onSuccess: { result in
-//            self?.loginResult.accept(result)
-//          }, onFailure: { error in
-//            self?.showAlert(title: "서버 인증 실패", message: error.localizedDescription)
-//          })
-//          .disposed(by: self!.disposeBag)
-//      }
-//    } else {
-//      UserApi.shared.loginWithKakaoAccount { [weak self] oauthToken, error in
-//        if let error = error {
-//          self?.showAlert(title: "카카오 로그인 실패", message: error.localizedDescription)
-//          return
-//        }
-//        guard let token = oauthToken?.accessToken else {
-//          self?.showAlert(title: "카카오 로그인 실패", message: "토큰을 받지 못했습니다.")
-//          return
-//        }
-//        self?.sendAccessTokenToServer(token: token)
-//          .observe(on: MainScheduler.instance)
-//          .subscribe(onSuccess: { result in
-//            self?.loginResult.accept(result)
-//          }, onFailure: { error in
-//            self?.showAlert(title: "서버 인증 실패", message: error.localizedDescription)
-//          })
-//          .disposed(by: self!.disposeBag)
-//      }
-//    }
-//  }
-//
-//  // MARK: - Server API Call
-//
-//  private func sendAccessTokenToServer(token: String) -> Single<String> {
-//    return Single.create { [provider] single in
-//      provider.request(.socialLogin(name: "name", email: "email")) { result in
-//        switch result {
-//        case .success(let response):
-//          if (200...299).contains(response.statusCode) {
-//            do {
-//              let decoded = try JSONDecoder().decode(UserResponse.self, from: response.data)
-//              print("✅ 로그인 성공, 사용자 이름: \(decoded.result)")
-//              single(.success("서버 인증 성공"))
-//            } catch {
-//              print("❌ 디코딩 실패:", error)
-//              single(.failure(error))
-//            }
-//          } else {
-//            single(.failure(NSError(domain: "ServerError", code: response.statusCode, userInfo: nil)))
-//          }
-//
-//        case .failure(let error):
-//          single(.failure(error))
-//        }
-//      }
-//
-//      return Disposables.create()
-//    }
-//  }

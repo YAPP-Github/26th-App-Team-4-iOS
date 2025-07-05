@@ -15,11 +15,7 @@ import Core
 public final class OnboardingViewController: UIViewController, View {
   public var disposeBag = DisposeBag()
 
-  private let titleLabel = UILabel().then {
-    $0.text = "Complete Your Profile"
-    $0.font = DesignSystem.Fonts.largeTitle
-    $0.textAlignment = .center
-  }
+  weak var coordinator: OnboardingCoordinator?
 
   private let completeButton = UIButton(type: .system).then {
     $0.setTitle("Complete Onboarding", for: .normal)
@@ -53,14 +49,7 @@ public final class OnboardingViewController: UIViewController, View {
   }
 
   private func setupUI() {
-    view.addSubview(titleLabel)
     view.addSubview(completeButton)
-
-    titleLabel.snp.makeConstraints {
-      $0.centerX.equalToSuperview()
-      $0.centerY.equalToSuperview().offset(-50)
-      $0.leading.trailing.equalToSuperview().inset(20)
-    }
 
     completeButton.snp.makeConstraints {
       $0.leading.trailing.equalToSuperview().inset(40)

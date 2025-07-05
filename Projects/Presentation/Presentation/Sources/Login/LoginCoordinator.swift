@@ -7,35 +7,32 @@
 
 import UIKit
 import Swinject
-import RxSwift
+import Core
 
 public protocol LoginCoordinatorDelegate: AnyObject {
-    func didLoginSuccessfully(from coordinator: LoginCoordinator)
+  func didLoginSuccessfully()
 }
 
 public final class LoginCoordinator: Coordinator {
-    public var navigationController: UINavigationController
-    public var childCoordinators: [Coordinator] = []
-    public weak var delegate: LoginCoordinatorDelegate?
-    private let resolver: Resolver
-    private let disposeBag = DisposeBag()
+  public var navigationController: UINavigationController
+  public var childCoordinators: [Coordinator] = []
+  public var type: CoordinatorType = .login
+  public var finishDelegate: CoordinatorFinishDelegate?
 
-    public init(navigationController: UINavigationController, resolver: Resolver) {
-        self.navigationController = navigationController
-        self.resolver = resolver
-    }
+  public init(navigationController: UINavigationController) {
+    self.navigationController = navigationController
+  }
 
-    public func start() {
-        let viewController = resolver.resolve(LoginViewController.self)!
-        viewController.reactor?.state.map { $0.isLoginSuccess }
-            .filter { $0 }
-            .take(1)
-            .bind(onNext: { [weak self] _ in
-                guard let self = self else { return }
-                self.delegate?.didLoginSuccessfully(from: self)
-            })
-            .disposed(by: disposeBag)
+  public func start() {
+    let viewController = LoginViewController()
+    viewController.coordinator = self
+    viewController.reactor = LoginReactor()
+    navigationController.pushViewController(viewController, animated: false)
+  }
+}
 
-        navigationController.setViewControllers([viewController], animated: true)
-    }
+extension LoginCoordinator: LoginCoordinatorDelegate {
+  public func didLoginSuccessfully() {
+    finishDelegate?.coordinatorDidFinish(childCoordinator: self)
+  }
 }

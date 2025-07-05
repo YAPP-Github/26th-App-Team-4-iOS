@@ -20,3 +20,24 @@ public final class LoginRepositoryImpl: LoginRepository {
     UserDefaults.standard.set(id, forKey: "user_id")
   }
 }
+
+//import Foundation
+//import RxSwift
+//import Moya
+//import RxMoya
+//import Domain
+//
+//public final class DefaultLoginRepository: LoginRepository {
+//  private let provider: MoyaProvider<LoginAPI>
+//
+//  public init(provider: MoyaProvider<LoginAPI> = MoyaProvider<LoginAPI>()) {
+//    self.provider = provider
+//  }
+//
+//  public func login(with token: String) -> Single<User> {
+//    return provider.rx.request(.socialLogin(token: token))
+//      .filterSuccessfulStatusCodes()
+//      .map(UserResponse.self)
+//      .map { $0.result }
+//  }
+//}

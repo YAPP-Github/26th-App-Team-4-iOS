@@ -8,10 +8,13 @@ let project = Project(
       destinations: .iOS,
       product: .staticFramework,
       bundleId: "io.tuist.Core",
+      deploymentTargets: .iOS("15.6"),
       infoPlist: .default,
       sources: ["Core/Sources/**"],
       resources: ["Core/Resources/**"],
-      dependencies: []
+      dependencies: [
+        .project(target: "Domain", path: "../Domain")
+      ]
     ),
     .target(
       name: "CoreTests",

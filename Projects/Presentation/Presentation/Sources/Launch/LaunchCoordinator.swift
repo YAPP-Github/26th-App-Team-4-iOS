@@ -9,35 +9,37 @@ import UIKit
 import Swinject
 import RxSwift
 import Domain
+import Core
 
-public protocol LaunchCoordinatorDelegate: AnyObject {
-    func didFinishLaunch(with status: UserStatus, from coordinator: LaunchCoordinator)
+public protocol LaunchScreenCoordinatorDelegate: AnyObject {
+  func pushWalkthroughFlow()
+  func pushMainTabBarFlow()
 }
 
 public final class LaunchCoordinator: Coordinator {
-    public var navigationController: UINavigationController
-    public var childCoordinators: [Coordinator] = []
-    public weak var delegate: LaunchCoordinatorDelegate?
-    private let resolver: Resolver
-    private let disposeBag = DisposeBag()
+  public var navigationController: UINavigationController
+  public var childCoordinators: [Coordinator] = []
+  public var type: CoordinatorType = .launchScreen
+  public var finishDelegate: CoordinatorFinishDelegate?
 
-    public init(navigationController: UINavigationController, resolver: Resolver) {
-        self.navigationController = navigationController
-        self.resolver = resolver
-    }
+  public init(navigationController: UINavigationController) {
+    self.navigationController = navigationController
+  }
 
-    public func start() {
-        // LaunchViewController 생성 및 Reactor 주입
-        let viewController = resolver.resolve(LaunchViewController.self)!
-        // Reactor는 이미 Assembly에서 주입되도록 구성되어 있음
-        viewController.reactor?.state.compactMap { $0.initialFlow }
-            .take(1) // 한 번만 처리
-            .bind(onNext: { [weak self] status in
-                guard let self = self else { return }
-                self.delegate?.didFinishLaunch(with: status, from: self)
-            })
-            .disposed(by: disposeBag)
+  public func start() {
+    let viewController = LaunchViewController()
+    viewController.coordinator = self
+    viewController.reactor = LaunchReactor()
+    navigationController.setViewControllers([viewController], animated: false)
+  }
+}
 
-        navigationController.pushViewController(viewController, animated: false)
-    }
+extension LaunchCoordinator: LaunchScreenCoordinatorDelegate {
+  public func pushWalkthroughFlow() {
+    finishDelegate?.coordinatorDidFinish(childCoordinator: self)
+  }
+
+  public func pushMainTabBarFlow() {
+    finishDelegate?.coordinatorDidFinish(childCoordinator: self)
+  }
 }

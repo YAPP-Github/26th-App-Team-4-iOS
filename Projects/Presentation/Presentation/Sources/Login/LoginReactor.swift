@@ -7,6 +7,7 @@
 
 import ReactorKit
 import RxSwift
+import Domain
 
 public final class LoginReactor: Reactor {
   // MARK: - Action
@@ -18,8 +19,8 @@ public final class LoginReactor: Reactor {
   // MARK: - Mutation
   public enum Mutation {
     case setLoading(Bool)
-    case setLoginSuccess(String)   // success message
-    case setLoginFailure(Error)    // error object
+    case setLoginSuccess(String)
+    case setLoginFailure(Error)
   }
 
   // MARK: - State
@@ -32,12 +33,6 @@ public final class LoginReactor: Reactor {
 
   // MARK: - Properties
   public let initialState = State()
-  private let loginUseCase: LoginUseCase
-
-  // MARK: - Init
-  public init(loginUseCase: LoginUseCase) {
-    self.loginUseCase = loginUseCase
-  }
 
   // MARK: - Mutate
   public func mutate(action: Action) -> Observable<Mutation> {
@@ -46,12 +41,7 @@ public final class LoginReactor: Reactor {
       return Observable.concat([
         .just(.setLoading(true)),
 
-        loginUseCase.login(with: token)
-          .map { Mutation.setLoginSuccess("로그인 성공: \($0.name)") }
-          .catch { error in .just(.setLoginFailure(error)) }
-          .asObservable(),
-
-          .just(.setLoading(false))
+        // TODO: - 로그인 로직
       ])
     }
   }
@@ -78,49 +68,5 @@ public final class LoginReactor: Reactor {
     }
 
     return newState
-  }
-}
-public protocol LoginUseCase {
-  func login(with token: String) -> Single<User>
-}
-
-public final class DefaultLoginUseCase: LoginUseCase {
-  private let repository: LoginRepository
-
-  public init(repository: LoginRepository) {
-    self.repository = repository
-  }
-
-  public func login(with token: String) -> Single<User> {
-    return repository.login(with: token)
-  }
-}
-
-import RxSwift
-import Domain
-
-public protocol LoginRepository {
-  func login(with token: String) -> Single<User>
-}
-
-
-import Foundation
-import RxSwift
-import Moya
-import RxMoya
-import Domain
-
-public final class DefaultLoginRepository: LoginRepository {
-  private let provider: MoyaProvider<LoginAPI>
-
-  public init(provider: MoyaProvider<LoginAPI> = MoyaProvider<LoginAPI>()) {
-    self.provider = provider
-  }
-
-  public func login(with token: String) -> Single<User> {
-    return provider.rx.request(.socialLogin(token: token))
-      .filterSuccessfulStatusCodes()
-      .map(UserResponse.self)
-      .map { $0.result }
   }
 }

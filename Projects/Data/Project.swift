@@ -8,6 +8,7 @@ let project = Project(
       destinations: .iOS,
       product: .staticFramework,
       bundleId: "io.tuist.Data",
+      deploymentTargets: .iOS("15.6"),
       infoPlist: .default,
       sources: ["Data/Sources/**"],
       resources: ["Data/Resources/**"],
