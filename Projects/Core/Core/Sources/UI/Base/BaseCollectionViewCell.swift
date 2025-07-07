@@ -9,7 +9,7 @@
 import UIKit
 import RxSwift
 
-class BaseCollectionViewCell: UICollectionViewCell {
+public class BaseCollectionViewCell: UICollectionViewCell {
   
   var disposeBag = DisposeBag()
   
@@ -22,9 +22,9 @@ class BaseCollectionViewCell: UICollectionViewCell {
     fatalError("init(coder:) has not been implemented")
   }
 
-  override func prepareForReuse() {
+  public override func prepareForReuse() {
     disposeBag = DisposeBag()
   }
   
-  func initConstraints() { }
+  public func initConstraints() { }
 }

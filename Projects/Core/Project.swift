@@ -1,5 +1,16 @@
 import ProjectDescription
 
+
+let dependencies: [TargetDependency] = [
+    .external(name: "Kingfisher"),
+    .external(name: "Moya"),
+    .external(name: "ReactorKit"),
+    .external(name: "RxGesture"),
+    .external(name: "RxKeyboard"),
+    .external(name: "SnapKit"),
+    .external(name: "Then"),
+]
+
 let project = Project(
   name: "Core",
   targets: [
@@ -11,7 +22,7 @@ let project = Project(
       infoPlist: .default,
       sources: ["Core/Sources/**"],
       resources: ["Core/Resources/**"],
-      dependencies: []
+      dependencies: dependencies
     ),
     .target(
       name: "CoreTests",

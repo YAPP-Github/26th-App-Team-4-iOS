@@ -31,6 +31,8 @@ final class LaunchScreenReactor: Reactor {
     fileprivate(set) var nextScene: NextScene?
   }
   
+  var initialState: State = State()
+  
   func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .initialize:

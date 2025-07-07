@@ -16,7 +16,7 @@ import Core
 final class LoginCoordinator {
     func start() -> UIViewController {
 
-        let vc = UIViewController()
+        let vc = LaunchScreenViewController()
         return vc
     }
 }

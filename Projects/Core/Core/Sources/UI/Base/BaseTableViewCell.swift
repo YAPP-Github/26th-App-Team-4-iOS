@@ -9,7 +9,7 @@
 import UIKit
 import RxSwift
 
-class BaseTableViewCell: UITableViewCell {
+public class BaseTableViewCell: UITableViewCell {
   
   var disposeBag = DisposeBag()
   
@@ -23,11 +23,11 @@ class BaseTableViewCell: UITableViewCell {
     fatalError("init(coder:) has not been implemented")
   }
   
-  override func prepareForReuse() {
+  public override func prepareForReuse() {
     disposeBag = DisposeBag()
   }
   
-  func initUI() {
+  public func initUI() {
     self.backgroundColor = .clear
     self.contentView.backgroundColor = .clear
   }
