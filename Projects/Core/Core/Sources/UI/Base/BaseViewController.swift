@@ -16,7 +16,7 @@ import Then
 
 open class BaseViewController: UIViewController {
   
-  var disposeBag = DisposeBag()
+  public var disposeBag = DisposeBag()
   
   public init() {
     super.init(nibName: nil, bundle: nil)
