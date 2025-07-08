@@ -13,7 +13,7 @@ import Then
 import Domain
 import Core
 
-public final class LaunchScreenViewController: BaseViewController {
+public final class LaunchScreenViewController: BaseViewController, View {
   
   private let logoImageView = UIImageView().then {
     $0.image = UIImage(named: "LaunchScreenLogo", in: Bundle.module, compatibleWith: nil)
@@ -29,7 +29,7 @@ public final class LaunchScreenViewController: BaseViewController {
     }
   }
   
-  func bind(reactor: LaunchScreenReactor) {
+  public func bind(reactor: LaunchScreenReactor) {
     self.rx.viewDidAppear
       .subscribe(with: self) { object, _ in
         reactor.action.onNext(.initialize)
