@@ -41,9 +41,8 @@ public final class OnboardingViewController: UIViewController, View {
     // State
     reactor.state.map { $0.isCompleted }
       .filter { $0 }
-      .take(1)
       .bind(onNext: { [weak self] _ in
-        print("Onboarding completed in VC, coordinator will navigate.")
+        self?.coordinator?.showMainTab()
       })
       .disposed(by: disposeBag)
   }

@@ -9,15 +9,16 @@ import UIKit
 import Swinject
 import Core
 
-public protocol LoginCoordinatorDelegate: AnyObject {
-  func didLoginSuccessfully()
+public protocol LoginCoordinator: Coordinator {
+  func showOnboarding()
 }
 
-public final class LoginCoordinator: Coordinator {
+public final class LoginCoordinatorImpl {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: CoordinatorType = .login
   public var finishDelegate: CoordinatorFinishDelegate?
+
 
   public init(navigationController: UINavigationController) {
     self.navigationController = navigationController
@@ -26,13 +27,14 @@ public final class LoginCoordinator: Coordinator {
   public func start() {
     let viewController = LoginViewController()
     viewController.coordinator = self
-    viewController.reactor = LoginReactor()
+    //    viewController.reactor = container.resolve(LoginReactor.self)
+
     navigationController.pushViewController(viewController, animated: false)
   }
 }
 
-extension LoginCoordinator: LoginCoordinatorDelegate {
-  public func didLoginSuccessfully() {
+extension LoginCoordinatorImpl: LoginCoordinator {
+  public func showOnboarding() {
     finishDelegate?.coordinatorDidFinish(childCoordinator: self)
   }
 }

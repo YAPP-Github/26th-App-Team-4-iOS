@@ -9,11 +9,11 @@ import UIKit
 import Swinject
 import Core
 
-public protocol OnboardingCoordinatorDelegate: AnyObject {
-  func didCompleteOnboarding(from coordinator: OnboardingCoordinator)
+public protocol OnboardingCoordinator: Coordinator {
+  func showMainTab()
 }
 
-public final class OnboardingCoordinator: Coordinator {
+public final class OnboardingCoordinatorImpl {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: CoordinatorType = .onboarding
@@ -22,11 +22,17 @@ public final class OnboardingCoordinator: Coordinator {
   public init(navigationController: UINavigationController) {
     self.navigationController = navigationController
   }
-
+  
   public func start() {
     let viewController = OnboardingViewController()
     viewController.coordinator = self
     viewController.reactor = OnboardingReactor()
     navigationController.pushViewController(viewController, animated: false)
+  }
+}
+
+extension OnboardingCoordinatorImpl: OnboardingCoordinator {
+  public func showMainTab() {
+    finishDelegate?.coordinatorDidFinish(childCoordinator: self)
   }
 }

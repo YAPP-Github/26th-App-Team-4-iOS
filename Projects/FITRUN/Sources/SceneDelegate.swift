@@ -7,6 +7,7 @@
 
 import UIKit
 
+import Core
 import KakaoSDKAuth
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -19,11 +20,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     let window = UIWindow(windowScene: windowScene)
     self.window = window
-    self.window?.backgroundColor = .red
-
+    
     let navigationController = UINavigationController()
     
-    appCoordinator = AppCoordinator(navigationController: navigationController)
+    appCoordinator = AppCoordinatorImpl(navigationController: navigationController)
     appCoordinator?.start()
 
     window.rootViewController = navigationController

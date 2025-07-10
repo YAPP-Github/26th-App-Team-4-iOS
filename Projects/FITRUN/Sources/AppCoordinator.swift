@@ -13,10 +13,11 @@ import Domain
 import Presentation
 import Core
 
-final class AppCoordinator: Coordinator {
+final class AppCoordinatorImpl {
   var navigationController: UINavigationController
   var childCoordinators: [Coordinator] = []
   var type: CoordinatorType = .app
+  var finishDelegate: CoordinatorFinishDelegate?
 
   init(navigationController: UINavigationController) {
     self.navigationController = navigationController
@@ -25,38 +26,48 @@ final class AppCoordinator: Coordinator {
   }
 
   func start() {
-    showLaunchFlow()
+    showLaunch()
   }
+}
 
-  private func showLaunchFlow() {
-    let coordinator = LaunchCoordinator(navigationController: navigationController)
+extension AppCoordinatorImpl: AppCoordinator {
+  func showLaunch() {
+    let coordinator = LaunchCoordinatorImpl(navigationController: navigationController)
     coordinator.finishDelegate = self
     childCoordinators.append(coordinator)
     coordinator.start()
   }
 
-  private func showWalkthroughFlow() {
-    let coordinator = WalkthroughCoordinator(navigationController: navigationController)
+  func showWalkthrough() {
+    self.navigationController.viewControllers.removeAll()
+
+    let coordinator = WalkthroughCoordinatorImpl(navigationController: navigationController)
     coordinator.finishDelegate = self
     childCoordinators.append(coordinator)
     coordinator.start()
   }
 
-  private func showLoginFlow() {
-    let coordinator = LoginCoordinator(navigationController: navigationController)
+  func showSignUp() {
+    self.navigationController.viewControllers.removeAll()
+
+    let coordinator = LoginCoordinatorImpl(navigationController: navigationController)
     coordinator.finishDelegate = self
     childCoordinators.append(coordinator)
     coordinator.start()
   }
 
-  private func showOnboardingFlow() {
-    let coordinator = OnboardingCoordinator(navigationController: navigationController)
+  func showOnboarding() {
+    self.navigationController.viewControllers.removeAll()
+
+    let coordinator = OnboardingCoordinatorImpl(navigationController: navigationController)
     coordinator.finishDelegate = self
     childCoordinators.append(coordinator)
     coordinator.start()
   }
 
-  private func showMainTabFlow() {
+  func showMainTab() {
+    self.navigationController.viewControllers.removeAll()
+
     let coordinator = MainTabBarCoordinator(navigationController: navigationController)
     coordinator.finishDelegate = self
     childCoordinators.append(coordinator)
@@ -65,36 +76,21 @@ final class AppCoordinator: Coordinator {
 }
 
 // MARK: - CoordinatorFinishDelegate
-extension AppCoordinator: CoordinatorFinishDelegate {
+extension AppCoordinatorImpl: CoordinatorFinishDelegate {
   func coordinatorDidFinish(childCoordinator: Coordinator) {
     childCoordinators = childCoordinators.filter({ $0.type != childCoordinator.type })
 
     switch childCoordinator.type {
     case .app:
-      childCoordinators.removeAll()
-      navigationController.viewControllers.removeAll()
-
-      showLaunchFlow()
+      showLaunch()
     case .launchScreen:
-      childCoordinators.removeAll()
-      navigationController.viewControllers.removeAll()
-
-      showWalkthroughFlow()
+      showWalkthrough()
     case .walkthrough:
-      childCoordinators.removeAll()
-      navigationController.viewControllers.removeAll()
-
-      showLoginFlow()
+      showSignUp()
     case .login:
-      childCoordinators.removeAll()
-      navigationController.viewControllers.removeAll()
-
-      showOnboardingFlow()
+      showOnboarding()
     case .onboarding:
-      childCoordinators.removeAll()
-      navigationController.viewControllers.removeAll()
-
-      showMainTabFlow()
+      showMainTab()
     default:
       break
     }

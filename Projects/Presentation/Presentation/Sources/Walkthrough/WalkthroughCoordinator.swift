@@ -9,21 +9,20 @@ import UIKit
 import Swinject
 import Core
 
-public protocol WalkthroughCoordinatorDelegate: AnyObject {
-  func didCompleteWalkthrough()
+public protocol WalkthroughCoordinator: Coordinator {
+  func showLogin()
 }
 
-public final class WalkthroughCoordinator: Coordinator {
+public final class WalkthroughCoordinatorImpl {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: Core.CoordinatorType = .walkthrough
   public var finishDelegate: CoordinatorFinishDelegate?
-  public weak var delegate: WalkthroughCoordinatorDelegate?
-
+  
   public init(navigationController: UINavigationController) {
     self.navigationController = navigationController
   }
-
+  
   public func start() {
     let viewController = WalkthroughViewController()
     viewController.coordinator = self
@@ -32,8 +31,8 @@ public final class WalkthroughCoordinator: Coordinator {
   }
 }
 
-extension WalkthroughCoordinator: WalkthroughCoordinatorDelegate {
-  public func didCompleteWalkthrough() {
+extension WalkthroughCoordinatorImpl: WalkthroughCoordinator {
+  public func showLogin() {
     finishDelegate?.coordinatorDidFinish(childCoordinator: self)
   }
 }

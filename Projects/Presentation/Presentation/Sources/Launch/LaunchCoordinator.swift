@@ -11,21 +11,21 @@ import RxSwift
 import Domain
 import Core
 
-public protocol LaunchScreenCoordinatorDelegate: AnyObject {
-  func pushWalkthroughFlow()
-  func pushMainTabBarFlow()
+public protocol LaunchScreenCoordinator: Coordinator {
+  func showWalkthrough()
+  func showMainTabBar()
 }
 
-public final class LaunchCoordinator: Coordinator {
+public final class LaunchCoordinatorImpl {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: CoordinatorType = .launchScreen
   public var finishDelegate: CoordinatorFinishDelegate?
-
+  
   public init(navigationController: UINavigationController) {
     self.navigationController = navigationController
   }
-
+  
   public func start() {
     let viewController = LaunchViewController()
     viewController.coordinator = self
@@ -34,12 +34,12 @@ public final class LaunchCoordinator: Coordinator {
   }
 }
 
-extension LaunchCoordinator: LaunchScreenCoordinatorDelegate {
-  public func pushWalkthroughFlow() {
+extension LaunchCoordinatorImpl: LaunchScreenCoordinator {
+  public func showWalkthrough() {
     finishDelegate?.coordinatorDidFinish(childCoordinator: self)
   }
-
-  public func pushMainTabBarFlow() {
+  
+  public func showMainTabBar() {
     finishDelegate?.coordinatorDidFinish(childCoordinator: self)
   }
 }

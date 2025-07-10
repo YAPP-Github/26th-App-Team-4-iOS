@@ -15,6 +15,7 @@ public protocol Coordinator: AnyObject {
   var navigationController: UINavigationController { get set }
   var childCoordinators: [Coordinator] { get set }
   var type: CoordinatorType { get }
+  var finishDelegate: CoordinatorFinishDelegate? { get set }
 
   func start()
 }
@@ -22,6 +23,7 @@ public protocol Coordinator: AnyObject {
 extension Coordinator {
   func finish() {
     childCoordinators.removeAll()
+    finishDelegate?.coordinatorDidFinish(childCoordinator: self)
   }
 }
 
@@ -32,4 +34,11 @@ public enum CoordinatorType {
   case login
   case onboarding
   case mainTabBar
+}
+
+public protocol AppCoordinator: Coordinator {
+  func showWalkthrough()
+  func showSignUp()
+  func showOnboarding()
+  func showMainTab()
 }

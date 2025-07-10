@@ -7,25 +7,15 @@
 
 import UIKit
 import ReactorKit
-import RxSwift
-import SnapKit
-import Then
-import Core
 
 public final class LaunchViewController: UIViewController, View {
   public var disposeBag = DisposeBag()
 
-  weak var coordinator: LaunchCoordinator?
-
-  private let titleLabel = UILabel().then {
-    $0.text = "LaunchVC"
-    $0.textColor = .red
-  }
+  weak var coordinator: LaunchScreenCoordinator?
 
   public override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = .yellow
-    setupUI()
+    view.backgroundColor = .orange
   }
 
   public func bind(reactor: LaunchReactor) {
@@ -38,19 +28,11 @@ public final class LaunchViewController: UIViewController, View {
         guard let self = self else { return }
         switch status {
         case .needsWalkthrough:
-          self.coordinator?.pushWalkthroughFlow()
+          self.coordinator?.showWalkthrough()
         case .loggedIn:
-          self.coordinator?.pushMainTabBarFlow()
+          self.coordinator?.showMainTabBar()
         }
       })
       .disposed(by: disposeBag)
-  }
-
-  private func setupUI() {
-    view.addSubview(titleLabel)
-
-    titleLabel.snp.makeConstraints {
-      $0.center.equalToSuperview()
-    }
   }
 }

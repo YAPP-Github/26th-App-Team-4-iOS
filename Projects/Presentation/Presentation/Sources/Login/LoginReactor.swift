@@ -8,65 +8,95 @@
 import ReactorKit
 import RxSwift
 import Domain
+import AuthenticationServices
 
 public final class LoginReactor: Reactor {
-  // MARK: - Action
   public enum Action {
-    case loginWithApple(token: String)
-    case loginWithKakao(token: String)
+    case kakaoLoginTapped
+    case appleLoginTapped
+    case appleLoginCompleted(AppleLoginCredential)
+    case appleLoginFailed(Error)
   }
-
-  // MARK: - Mutation
+  
   public enum Mutation {
-    case setLoading(Bool)
-    case setLoginSuccess(String)
-    case setLoginFailure(Error)
+    case setLoginLoading(Bool)
+    case setLoginResult(Bool)
+    case setSocialLoginResult(SocialLoginResult)
+    case setLoginError(Error)
   }
-
-  // MARK: - State
+  
   public struct State {
-    public var isLoading: Bool = false
-    public var isLoginSuccess: Bool = false
-    public var user: User?
-    public var loginError: Error?
+    var isLoading: Bool = false
+    var isLoggedIn: Bool? = nil
+    var socialLoginResult: SocialLoginResult? = nil
+    var error: Error? = nil
   }
-
-  // MARK: - Properties
+  
   public let initialState = State()
-
+  private let authUseCase: AuthUseCaseType
+  private let appleLoginService: AppleLoginServiceType
+  
+  public init(authUseCase: AuthUseCaseType, appleLoginService: AppleLoginServiceType) {
+    self.authUseCase = authUseCase
+    self.appleLoginService = appleLoginService
+  }
+  
   // MARK: - Mutate
+  
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
-    case .loginWithApple(let token), .loginWithKakao(let token):
-      return Observable.concat([
-        .just(.setLoading(true)),
-
-        // TODO: - 로그인 로직
-      ])
+    case .kakaoLoginTapped:
+      return authUseCase.kakaoLogin()
+        .asObservable()
+        .map { Mutation.setSocialLoginResult($0) }
+        .catch { error in
+          print("Kakao Login Error: \(error.localizedDescription)")
+          return .just(Mutation.setLoginError(error))
+        }
+      
+    case .appleLoginTapped:
+      appleLoginService.login()
+      return .empty()
+      
+    case .appleLoginCompleted(let credential):
+      return authUseCase.appleLogin(
+        identityToken: credential.identityToken,
+        authCode: credential.authorizationCode,
+        email: credential.email,
+        fullName: credential.fullName,
+        userIdentifier: credential.userIdentifier
+      )
+      .asObservable()
+      .map { Mutation.setSocialLoginResult($0) }
+      .catch { error in
+        print("Apple Login Completion Error: \(error.localizedDescription)")
+        return .just(Mutation.setLoginError(error))
+      }
+      
+    case .appleLoginFailed(let error):
+      print("Apple Login Failed: \(error.localizedDescription)")
+      return .just(Mutation.setLoginError(error))
     }
   }
-
+  
   // MARK: - Reduce
+  
   public func reduce(state: State, mutation: Mutation) -> State {
     var newState = state
-
+    newState.error = nil
+    
     switch mutation {
-    case .setLoading(let isLoading):
+    case .setLoginLoading(let isLoading):
       newState.isLoading = isLoading
-      if isLoading {
-        newState.isLoginSuccess = false
-        newState.loginError = nil
-      }
-
-    case .setLoginSuccess(let message):
-      newState.isLoginSuccess = true
-      newState.loginError = nil
-
-    case .setLoginFailure(let error):
-      newState.loginError = error
-      newState.isLoginSuccess = false
+    case .setLoginResult(let isSuccess):
+      newState.isLoggedIn = isSuccess
+    case .setSocialLoginResult(let result):
+      newState.socialLoginResult = result
+      newState.isLoggedIn = true 
+    case .setLoginError(let error):
+      newState.error = error
+      newState.isLoading = false
     }
-
     return newState
   }
 }

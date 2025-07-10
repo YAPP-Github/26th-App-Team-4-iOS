@@ -50,7 +50,7 @@ public final class WalkthroughViewController: UIViewController, View {
       .filter { $0 == true }
       .subscribe(onNext: { [weak self] _ in
         guard let self = self else { return }
-        self.coordinator?.didCompleteWalkthrough()
+        self.coordinator?.showLogin()
       })
       .disposed(by: disposeBag)
   }
