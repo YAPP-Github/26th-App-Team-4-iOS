@@ -1,0 +1,31 @@
+//
+//  AuthUseCase.swift
+//  Domain
+//
+//  Created by dong eun shin on 7/7/25.
+//
+
+import Foundation
+import AuthenticationServices
+import RxSwift
+
+public protocol AuthUseCaseType {
+  func kakaoLogin(idToken: String) -> Single<LoginResult>
+  func appleLogin(idToken: String) -> Single<LoginResult>
+}
+
+public final class AuthUseCaseImpl: AuthUseCaseType {
+  private let authRepository: AuthRepository
+  
+  public init(authRepository: AuthRepository) {
+    self.authRepository = authRepository
+  }
+  
+  public func kakaoLogin(idToken: String) -> Single<LoginResult> {
+    return self.authRepository.kakaoLogin(idToken: idToken)
+  }
+  
+  public func appleLogin(idToken: String) -> Single<LoginResult> {
+    return authRepository.appleLogin(idToken: idToken)
+  }
+}

@@ -1,0 +1,8 @@
+//
+//  Release.xcconfig
+//  Manifests
+//
+//  Created by dong eun shin on 6/26/25.
+//
+
+#include "Kakao.xcconfig"

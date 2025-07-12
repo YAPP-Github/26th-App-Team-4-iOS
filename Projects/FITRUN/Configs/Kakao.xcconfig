@@ -1,0 +1,8 @@
+//
+//  Kakao.xcconfig
+//  Manifests
+//
+//  Created by dong eun shin on 6/26/25.
+//
+
+KAKAO_NATIVE_APP_KEY = 151757d22b8448d0130efb3ff134d58d

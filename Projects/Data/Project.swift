@@ -8,6 +8,7 @@ let project = Project(
       destinations: .iOS,
       product: .staticFramework,
       bundleId: "io.tuist.Data",
+      deploymentTargets: .iOS("15.6"),
       infoPlist: .default,
       sources: ["Data/Sources/**"],
       resources: ["Data/Resources/**"],
@@ -16,6 +17,9 @@ let project = Project(
         .project(target: "Core", path: "../Core"),
         
         .external(name: "Moya"),
+        .external(name: "KakaoSDKCommon"),
+        .external(name: "KakaoSDKAuth"),
+        .external(name: "KakaoSDKUser")
       ]
     ),
     .target(
