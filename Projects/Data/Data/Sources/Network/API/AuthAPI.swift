@@ -9,45 +9,47 @@ import Foundation
 import Moya
 import Domain
 
-public enum AuthAPI: BaseAPI {
-  case login(id: String, pw: String)
-  case register(id: String, pw: String, name: String)
+public enum AuthAPI {
+  case appleLogin(idToken: String)
+  case kakaoLogin(accessToken: String)
   case refreshToken(refreshToken: String)
-  case socialLogin(info: SocialLoginInfo)
-  
+}
+
+extension AuthAPI: TargetType {
+  public var baseURL: URL {
+    guard let url = URL(string: "http://fitrun.p-e.kr/api/v1/auth") else {
+      fatalError("Invalid Base URL: Please set YOUR_BACKEND_SERVER_BASE_URL in AuthAPI.")
+    }
+    return url
+  }
+
   public var path: String {
     switch self {
-    case .login: return "/auth/login"
-    case .register: return "/auth/register"
-    case .refreshToken: return "/auth/refresh"
-    case .socialLogin: return "/auth/social-login"
+    case .appleLogin:
+      return "/login/apple"
+    case .kakaoLogin:
+      return "/login/kakao"
+    case .refreshToken:
+      return "refresh"
     }
   }
-  
+
   public var method: Moya.Method {
+    return .post
+  }
+
+  public var task: Moya.Task {
     switch self {
-    case .login, .register, .refreshToken, .socialLogin: return .post
+    case let .appleLogin(idToken):
+      return .requestParameters(parameters: ["idToken": idToken], encoding: JSONEncoding.default)
+    case let .kakaoLogin(accessToken):
+      return .requestParameters(parameters: ["idToken": accessToken], encoding: JSONEncoding.default)
+    case .refreshToken(refreshToken: let refreshToken):
+      return .requestParameters(parameters: ["Authorization": refreshToken], encoding: JSONEncoding.default)
     }
   }
-  
-  public var task: Task {
-    switch self {
-    case .login(let id, let pw):
-      return .requestParameters(parameters: ["id": id, "password": pw], encoding: JSONEncoding.default)
-    case .register(let id, let pw, let name):
-      return .requestParameters(parameters: ["id": id, "password": pw, "name": name], encoding: JSONEncoding.default)
-    case .refreshToken(let refreshToken):
-      return .requestParameters(parameters: ["refreshToken": refreshToken], encoding: JSONEncoding.default)
-    case .socialLogin(let info):
-      var parameters: [String: Any] = [
-        "provider": info.provider,
-        "token": info.token
-      ]
-      if let id = info.id { parameters["id"] = id }
-      if let name = info.name { parameters["name"] = name }
-      if let email = info.email { parameters["email"] = email }
-      if let authCode = info.authorizationCode { parameters["authorizationCode"] = authCode }
-      return .requestParameters(parameters: parameters, encoding: JSONEncoding.default)
-    }
+
+  public var headers: [String : String]? {
+    return ["Content-Type": "application/json"]
   }
 }

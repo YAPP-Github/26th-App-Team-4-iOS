@@ -19,6 +19,20 @@ let appTargetInfoPlist: InfoPlist = .extendingDefault(
         ]
       ]
     ],
+    "CFBundleURLTypes": [
+      [
+        "CFBundleTypeRole": "Editor",
+        "CFBundleURLSchemes": ["kakao$(KAKAO_NATIVE_APP_KEY)"]
+      ]
+    ],
+    "KAKAO_NATIVE_APP_KEY": "$(KAKAO_NATIVE_APP_KEY)",
+    "LSApplicationQueriesSchemes": [
+      "kakaokompassauth",
+      "kakaolink"
+    ],
+    "NSAppTransportSecurity": [
+      "NSAllowsArbitraryLoads": true
+    ],
   ]
 )
 
@@ -29,7 +43,7 @@ let dependencies: [TargetDependency] = [
   .project(target: "Domain", path: "../Domain"),
   .project(target: "Presentation", path: "../Presentation"),
 
-  .external(name: "RxMoya"),
+    .external(name: "RxMoya"),
   .external(name: "Swinject")
 
   // MARK: External

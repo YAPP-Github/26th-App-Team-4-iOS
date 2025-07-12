@@ -5,6 +5,10 @@
 //  Created by dong eun shin on 6/27/25.
 //
 
-public protocol LoginRepository {
+import Foundation
+import RxSwift
 
+public protocol AuthRepository {
+  func kakaoLogin(idToken: String) -> Single<LoginResult>
+  func appleLogin(idToken: String) -> Single<LoginResult>
 }

@@ -6,39 +6,26 @@
 //
 
 import Foundation
+import AuthenticationServices
 import RxSwift
 
 public protocol AuthUseCaseType {
-  func kakaoLogin() -> Single<SocialLoginResult>
-  func appleLogin(identityToken: String, authCode: String?, email: String?, fullName: String?, userIdentifier: String) -> Single<SocialLoginResult>
+  func kakaoLogin(idToken: String) -> Single<LoginResult>
+  func appleLogin(idToken: String) -> Single<LoginResult>
 }
 
-public struct SocialLoginResult {
-  public let accessToken: String
-  public let refreshToken: String
-  public let isNewUser: Bool
+public final class AuthUseCaseImpl: AuthUseCaseType {
+  private let authRepository: AuthRepository
   
-  public init(accessToken: String, refreshToken: String, isNewUser: Bool) {
-    self.accessToken = accessToken
-    self.refreshToken = refreshToken
-    self.isNewUser = isNewUser
+  public init(authRepository: AuthRepository) {
+    self.authRepository = authRepository
   }
-}
-
-public struct SocialLoginInfo {
-  public let provider: String
-  public let token: String
-  public let id: String?
-  public let name: String?
-  public let email: String?
-  public let authorizationCode: String?
   
-  public init(provider: String, token: String, id: String?, name: String?, email: String?, authorizationCode: String?) {
-    self.provider = provider
-    self.token = token
-    self.id = id
-    self.name = name
-    self.email = email
-    self.authorizationCode = authorizationCode
+  public func kakaoLogin(idToken: String) -> Single<LoginResult> {
+    return self.authRepository.kakaoLogin(idToken: idToken)
+  }
+  
+  public func appleLogin(idToken: String) -> Single<LoginResult> {
+    return authRepository.appleLogin(idToken: idToken)
   }
 }

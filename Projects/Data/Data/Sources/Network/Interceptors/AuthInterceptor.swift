@@ -19,9 +19,7 @@ public protocol TokenStorageType: AnyObject {
 }
 
 public class MockTokenStorage: TokenStorageType {
-  public init() { // <--- Add 'public' here
-    // Your existing initialization logic
-  }
+  public init() {}
   private var accessToken: String? = "mock_access_token"
   private var refreshToken: String? = "mock_refresh_token"
 
@@ -100,7 +98,6 @@ public final class AuthInterceptor: PluginType {
   }
 
   // MARK: Custom 401 Handling Method
-  // 이 메서드는 NetworkService에서 호출되어 401 오류 발생 시 토큰 갱신을 시도합니다.
   public func handleUnauthorizedError<T>(
     originalTarget: T // 원본 요청 타겟 (재시도용)
   ) -> Single<Moya.Response> where T: TargetType {
@@ -110,7 +107,6 @@ public final class AuthInterceptor: PluginType {
       return refreshTokenSubject
         .take(1)
         .flatMap { _ in
-          // 더미 응답을 반환하여 NetworkService가 원본 요청을 재시도하게 합니다.
           Single.just(Moya.Response(statusCode: 200, data: Data()))
         }
         .asSingle()
@@ -133,7 +129,6 @@ public final class AuthInterceptor: PluginType {
         self.isTokenRefreshing = false
         self.refreshTokenSubject.onNext(response.accessToken)
         print("AuthInterceptor: Token refresh successful.")
-        // 성공적인 더미 응답으로 NetworkService가 원본 요청 재시도를 트리거하도록 합니다.
         return Single.just(Moya.Response(statusCode: 200, data: Data()))
       }
       .catch { [weak self] error in

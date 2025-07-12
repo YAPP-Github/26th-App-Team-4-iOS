@@ -8,6 +8,8 @@
 import UIKit
 import Swinject
 import Core
+import Domain
+import Data
 
 public protocol LoginCoordinator: Coordinator {
   func showOnboarding()
@@ -27,7 +29,9 @@ public final class LoginCoordinatorImpl {
   public func start() {
     let viewController = LoginViewController()
     viewController.coordinator = self
-    //    viewController.reactor = container.resolve(LoginReactor.self)
+    viewController.reactor = LoginReactor(authUseCase: AuthUseCaseImpl(authRepository: AuthRepositoryImpl(networkService: AuthNetworkService(), tokenStorage: AuthTokenStorage())))
+    // TODO: - resolve
+    //container.resolve(LoginReactor.self)
 
     navigationController.pushViewController(viewController, animated: false)
   }
