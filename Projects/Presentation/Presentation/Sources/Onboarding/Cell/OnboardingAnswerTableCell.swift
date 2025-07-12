@@ -17,9 +17,14 @@ public final class OnboardingAnswerTableCell: BaseTableViewCell {
   public override var isSelected: Bool {
     didSet {
       let borderColor = isSelected
-        ? UIColor.systemOrange.cgColor
+        ? FRColor.FG.Icon.interactive.primary.cgColor
         : UIColor.systemGray4.cgColor
+      
+      let bgColor = isSelected
+      ? UIColor(hex: "#FFF3EC")
+      : UIColor.white
       containerView.layer.borderColor = borderColor
+      containerView.backgroundColor = bgColor
       checkmarkView.isHidden = !isSelected
     }
   }

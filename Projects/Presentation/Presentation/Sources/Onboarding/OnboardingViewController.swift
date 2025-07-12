@@ -16,7 +16,7 @@ import Core
 public final class OnboardingViewController: BaseViewController, View {
 
   weak var coordinator: OnboardingCoordinator?
-  private var currentIndex = 0
+  private var lastStepIdx = 0
 
   
   private let backButton = UIButton().then {
@@ -34,7 +34,7 @@ public final class OnboardingViewController: BaseViewController, View {
 
   private let nextButton = UIButton(type: .system).then {
     $0.setTitle("다음", for: .normal)
-    $0.setTitleColor(.black, for: .normal)
+    $0.setTitleColor(FRColor.FG.Icon.interactive.primary, for: .normal)
     $0.titleLabel?.font = .boldSystemFont(ofSize: 16)
   }
 
@@ -44,6 +44,11 @@ public final class OnboardingViewController: BaseViewController, View {
     $0.axis = .horizontal
     $0.spacing = 40
     $0.alignment = .center
+  }
+  
+  private let activityIndicator = UIActivityIndicatorView().then {
+    $0.tintColor = FRColor.FG.Icon.interactive.primary
+    $0.hidesWhenStopped = true
   }
 
   private lazy var pageVC = UIPageViewController(
@@ -75,7 +80,7 @@ public final class OnboardingViewController: BaseViewController, View {
     pageVC.didMove(toParent: self)
 
     pageVC.setViewControllers(
-      [pages[currentIndex]],
+      [pages[lastStepIdx]],
       direction: .forward,
       animated: false
     )
@@ -86,75 +91,77 @@ public final class OnboardingViewController: BaseViewController, View {
       $0.bottom.equalToSuperview()
     }
 
-    // disable swipe gesture
+    // 스와이프로 이동 방지
     for subview in pageVC.view.subviews {
       if let scrollView = subview as? UIScrollView {
         scrollView.isScrollEnabled = false
       }
     }
     
-    updateProgress()
+    view.addSubview(activityIndicator)
+    activityIndicator.snp.makeConstraints {
+      $0.edges.equalToSuperview()
+    }
   }
 
   public func bind(reactor: OnboardingReactor) {
-//    // Action
-//    completeButton.rx.tap
-//      .map { Reactor.Action.completeOnboardingTapped }
-//      .bind(to: reactor.action)
-//      .disposed(by: disposeBag)
-//
-//    // State
-//    reactor.state.map { $0.isCompleted }
-//      .filter { $0 }
-//      .bind(onNext: { [weak self] _ in
-//        self?.coordinator?.showMainTab()
-//      })
-//      .disposed(by: disposeBag)
-  }
-  
-  public override func action() {
+    // 페이지 뷰컨 이벤트 리액터에 전달
+    pages.forEach { page in
+      page.selection
+        .map { OnboardingReactor.Action.select(question: $0.0, index: $0.1) }
+        .bind(to: reactor.action)
+        .disposed(by: disposeBag)
+    }
+    
     backButton.rx.tap
-      .subscribe(with: self) { object, _ in
-        object.goBack()
-      }
+      .map { OnboardingReactor.Action.moveBack }
+      .bind(to: reactor.action)
       .disposed(by: disposeBag)
     
     nextButton.rx.tap
-      .subscribe(with: self) { object, _ in
-        object.goNext()
+      .map { OnboardingReactor.Action.moveNext }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+    
+    reactor.state.map(\.currentStep)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .subscribe(with: self) { object, idx in
+        object.handleStepChanged(stepIdx: idx)
       }
+      .disposed(by: disposeBag)
+    
+    reactor.state.map(\.isNextEnabled)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .subscribe(with: self) { object, enabled in
+        object.nextButton.isEnabled = enabled
+        object.nextButton.alpha = enabled ? 1 : 0.3
+      }
+      .disposed(by: disposeBag)
+    
+    reactor.state.map(\.isLoading)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .bind(to: activityIndicator.rx.isAnimating)
       .disposed(by: disposeBag)
   }
   
-  private func goNext() {
-    guard currentIndex < pages.count - 1 else { return }
-    let nextIndex = currentIndex + 1
-    pageVC.setViewControllers(
-      [pages[nextIndex]],
-      direction: .forward,
+  private func handleStepChanged(stepIdx: Int) {
+    let vc = self.pages[stepIdx]
+    self.pageVC.setViewControllers(
+      [ vc ],
+      direction: stepIdx > lastStepIdx ? .forward : .reverse,
       animated: true
     )
-    currentIndex = nextIndex
-    updateProgress()
+    updateProgress(stepIdx: stepIdx)
+    lastStepIdx = stepIdx
   }
   
-  private func goBack() {
-    guard currentIndex > 0 else { return }
-    let prevIndex = currentIndex - 1
-    pageVC.setViewControllers(
-      [pages[prevIndex]],
-      direction: .reverse,
-      animated: true
-    )
-    currentIndex = prevIndex
-    updateProgress()
-  }
-  
-  private func updateProgress() {
-    let total = Float(pages.count)
-    guard total > 0 else { return }
-    progressView.setProgress(
-      Float(currentIndex + 1) / total,
+  private func updateProgress(stepIdx: Int) {
+    let total = Float(self.pages.count)
+    self.progressView.setProgress(
+      Float(stepIdx + 1) / total,
       animated: true
     )
   }

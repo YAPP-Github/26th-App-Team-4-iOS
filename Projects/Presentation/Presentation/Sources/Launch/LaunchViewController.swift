@@ -18,8 +18,6 @@ public final class LaunchViewController: BaseViewController, View {
   }
   
   public override func initUI() {
-    print("\(type(of: self)) - \(#function)")
-    
     super.initUI()
     view.backgroundColor = UIColor(hex: "#FF6600")
     view.addSubview(logoImageView)
