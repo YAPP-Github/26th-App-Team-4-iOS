@@ -14,8 +14,6 @@ public final class LaunchViewController: BaseViewController, View {
   weak var coordinator: LaunchScreenCoordinator?
 
   private let logoImageView = UIImageView().then {
-    let image = UIImage(named: "LaunchScreenLogo", in: Bundle.module, compatibleWith: nil)
-    print(image)
     $0.image = UIImage(named: "LaunchScreenLogo", in: Bundle.module, compatibleWith: nil)
   }
   
@@ -23,7 +21,7 @@ public final class LaunchViewController: BaseViewController, View {
     print("\(type(of: self)) - \(#function)")
     
     super.initUI()
-    
+    view.backgroundColor = UIColor(hex: "#FF6600")
     view.addSubview(logoImageView)
     logoImageView.snp.makeConstraints {
       $0.center.equalToSuperview()
@@ -31,11 +29,11 @@ public final class LaunchViewController: BaseViewController, View {
   }
   
   public func bind(reactor: LaunchReactor) {
-//    self.rx.viewDidAppear
-//      .subscribe(with: self) { object, _ in
-//        reactor.action.onNext(.checkUserStatus)
-//      }
-//      .disposed(by: disposeBag)
+    self.rx.viewDidAppear
+      .subscribe(with: self) { object, _ in
+        reactor.action.onNext(.checkUserStatus)
+      }
+      .disposed(by: disposeBag)
     
     reactor.state.map { $0.userStatus }
       .observe(on: MainScheduler.instance)
