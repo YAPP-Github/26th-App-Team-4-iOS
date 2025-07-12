@@ -38,7 +38,7 @@ public enum FRColor {
       public static let primary: UIColor = UIColor(hex: "#1A1C20")
       
       public enum interactive {
-        public static let primary: UIColor = UIColor(hex: "#000000")
+        public static let primary: UIColor = UIColor(hex: "#FF6600")
       }
     }
   }
