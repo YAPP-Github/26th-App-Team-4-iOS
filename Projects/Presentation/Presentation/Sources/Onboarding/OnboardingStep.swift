@@ -53,7 +53,7 @@ public enum OnboardingStep: CaseIterable {
   }
 }
 
-public enum OnboardingQuestion: CaseIterable {
+public enum OnboardingQuestion: CaseIterable, Equatable {
   case basicReaction
   case basicDirection
   case basicFollow
@@ -138,6 +138,22 @@ public enum OnboardingQuestion: CaseIterable {
         "체력 증진을 위해 뛰어볼래요",
         "대회 준비를 위해 뛰어볼래요"
       ]
+    }
+  }
+}
+
+public extension OnboardingQuestion {
+  var apiType: String {
+    switch self {
+    case .basicReaction: return "EXPLOSIVE_STRENGTH"
+    case .basicDirection: return "AGILITY"
+    case .basicFollow: return "COORDINATION"
+    case .basicBalance:return "BALANCE"
+    case .expFrequency: return "EXERCISE_EXPERIENCE"
+    case .expExperience: return "RUNNING_EXPERIENCE"
+    case .adapt5Min: return "RUNNING_ENDURANCE"
+    case .adaptSpeed: return "PACE_AWARENESS"
+    case .goalSelection: return "GOAL_SELECTION"
     }
   }
 }

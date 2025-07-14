@@ -8,6 +8,8 @@
 import UIKit
 import Swinject
 import Core
+import Domain
+import Data
 
 public protocol OnboardingCoordinator: Coordinator {
   func showMainTab()
@@ -26,7 +28,7 @@ public final class OnboardingCoordinatorImpl {
   public func start() {
     let viewController = OnboardingViewController()
     viewController.coordinator = self
-    viewController.reactor = OnboardingReactor()
+    viewController.reactor = OnboardingReactor(saveOnboardingUseCase: SaveOnboardingUseCaseImpl(repository: OnboardingRepositoryImpl()))
     navigationController.pushViewController(viewController, animated: false)
   }
 }

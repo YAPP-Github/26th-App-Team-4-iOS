@@ -45,7 +45,11 @@ public final class OnboardingReactor: Reactor {
   
   public var initialState: State = State()
   
-  public init() { }
+  private let saveOnboardingUseCase: SaveOnboardingUseCase
+  
+  public init(saveOnboardingUseCase: SaveOnboardingUseCase) {
+    self.saveOnboardingUseCase = saveOnboardingUseCase
+  }
   
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
@@ -100,7 +104,7 @@ public final class OnboardingReactor: Reactor {
   private func handleMoveNext() -> Observable<Mutation> {
     let next = currentState.currentStep + 1
     if next >= OnboardingStep.allCases.count {
-      return .just(.setCompleted(true))
+      return saveOnboarding()
     }
 
     let enabled = canProceed(
@@ -110,6 +114,32 @@ public final class OnboardingReactor: Reactor {
     return Observable.concat([
       .just(.setCurrentStep(next)),
       .just(.setNextEnabled(enabled))
+    ])
+  }
+  
+  private func saveOnboarding() -> Observable<Mutation> {
+    let answers = OnboardingStep.allCases
+      .flatMap { $0.questions }
+      .compactMap { question -> OnboardingAnswer? in
+        guard let idx: Int = currentState.selections[question] else { return nil }
+        let answerChar = ["A","B","C","D"][idx]
+        return OnboardingAnswer(
+          questionType: question.apiType,
+          answer: answerChar
+        )
+      }
+    
+    return .concat([
+      .just(.setLoading(true)),
+      saveOnboardingUseCase.execute(answers)
+        .map { success in
+          success
+            ? Mutation.setCompleted(true)
+            : Mutation.setError("서버 응답이 SUCCESS 가 아닙니다.")
+        }
+        .catch { .just(.setError($0.localizedDescription)) }
+        .asObservable(),
+      .just(.setLoading(false))
     ])
   }
   
