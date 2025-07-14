@@ -12,7 +12,7 @@ import RxSwift
 import Domain
 
 public final class OnboardingRepositoryImpl: OnboardingRepository {
-  
+
   private let provider: NetworkProvider<UserAPI>
   
   /// 기본적으로 UserAPI 를 사용합니다.
@@ -23,23 +23,18 @@ public final class OnboardingRepositoryImpl: OnboardingRepository {
   }
 
   public func saveOnboarding(answers: [OnboardingAnswer]) -> Single<Bool> {
-    print("\(type(of: self)) - \(#function)")
-
-    let payload: [[String: Any]] = answers.map {
-      [
-        "questionType": $0.questionType,
-        "answer": $0.answer
+    let payload: [[String: Any]] = answers.compactMap { ans in
+      guard ans.questionType != "GOAL_SELECTION" else { return nil }
+      return [
+        "questionType": ans.questionType,
+        "answer": ans.answer
       ]
     }
-    
+    let request = UserAPI.saveOnboarding(answers: payload)
     return provider
       .request(.saveOnboarding(answers: payload))
-//      .filter(statusCodes: 200..<300)
-      .map {
-        print("OnboardingRepositoryImpl - saveOnboarding", $0)
-        return $0
-      }
-      .map(APIResponse<OnboardingDTD>.self)
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<OnboardingDTO>.self)
       .map { $0.code == "SUCCESS" }
       .asSingle()
   }
