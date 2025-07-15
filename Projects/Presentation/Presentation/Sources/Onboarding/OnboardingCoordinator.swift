@@ -28,7 +28,7 @@ public final class OnboardingCoordinatorImpl {
   public func start() {
     let viewController = OnboardingViewController()
     viewController.coordinator = self
-    viewController.reactor = OnboardingReactor(saveOnboardingUseCase: SaveOnboardingUseCaseImpl(repository: OnboardingRepositoryImpl()))
+    viewController.reactor = OnboardingReactor(saveOnboardingUseCase: OnboardingUseCaseImpl(repository: OnboardingRepositoryImpl()))
     navigationController.pushViewController(viewController, animated: false)
   }
 }

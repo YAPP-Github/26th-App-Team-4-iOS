@@ -45,9 +45,9 @@ public final class OnboardingReactor: Reactor {
   
   public var initialState: State = State()
   
-  private let saveOnboardingUseCase: SaveOnboardingUseCase
+  private let saveOnboardingUseCase: OnboardingUseCase
   
-  public init(saveOnboardingUseCase: SaveOnboardingUseCase) {
+  public init(saveOnboardingUseCase: OnboardingUseCase) {
     self.saveOnboardingUseCase = saveOnboardingUseCase
   }
   
@@ -104,7 +104,11 @@ public final class OnboardingReactor: Reactor {
   private func handleMoveNext() -> Observable<Mutation> {
     let next = currentState.currentStep + 1
     if next >= OnboardingStep.allCases.count {
-      return saveOnboarding()
+      return .concat([
+        .just(.setLoading(true)),
+        saveAllOnboardingAndPurpose(),
+        .just(.setLoading(false))
+      ])
     }
 
     let enabled = canProceed(
@@ -117,11 +121,12 @@ public final class OnboardingReactor: Reactor {
     ])
   }
   
-  private func saveOnboarding() -> Observable<Mutation> {
+  private func saveAllOnboardingAndPurpose() -> Observable<Mutation> {
     let answers = OnboardingStep.allCases
       .flatMap { $0.questions }
       .compactMap { question -> OnboardingAnswer? in
         guard let idx: Int = currentState.selections[question] else { return nil }
+        if question == .goalSelection { return nil }
         let answerChar = ["A","B","C","D"][idx]
         return OnboardingAnswer(
           questionType: question.apiType,
@@ -129,18 +134,30 @@ public final class OnboardingReactor: Reactor {
         )
       }
     
-    return .concat([
-      .just(.setLoading(true)),
-      saveOnboardingUseCase.execute(answers)
-        .map { success in
-          success
-            ? Mutation.setCompleted(true)
-            : Mutation.setError("서버 응답이 SUCCESS 가 아닙니다.")
-        }
-        .catch { .just(.setError($0.localizedDescription)) }
-        .asObservable(),
-      .just(.setLoading(false))
-    ])
+    guard let purposeIdx = currentState.selections[.goalSelection] else {
+      return .just(.setError("목적을 선택해주세요."))
+    }
+    let goals = [
+      "WEIGHT_LOSS_PURPOSE",
+      "HEALTH_MAINTENANCE_PURPOSE",
+      "DAILY_STRENGTH_IMPROVEMENT",
+      "COMPETITION_PREPARATION"
+    ]
+    
+    let purpose = goals[purposeIdx]
+    
+    return saveOnboardingUseCase.saveOnboarding(answers)
+      .flatMap { _ in
+        self.saveOnboardingUseCase.savePurpose(purpose)
+      }
+      .map { _ in
+        .setCompleted(true)
+      }
+      .catch { error in
+        // 하나라도 실패하면 error
+        .just(.setError(error.localizedDescription))
+      }
+      .asObservable()
   }
   
   private func handleMoveBack() -> Observable<Mutation> {
