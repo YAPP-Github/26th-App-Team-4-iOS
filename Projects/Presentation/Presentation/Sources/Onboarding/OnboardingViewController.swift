@@ -145,6 +145,15 @@ public final class OnboardingViewController: BaseViewController, View {
       .distinctUntilChanged()
       .bind(to: activityIndicator.rx.isAnimating)
       .disposed(by: disposeBag)
+    
+    reactor.state.map(\.isCompleted)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .filter { $0 }
+      .subscribe(with: self) { object, _ in
+        object.showRunnerTypeVC()
+      }
+      .disposed(by: disposeBag)
   }
   
   private func handleStepChanged(stepIdx: Int) {
@@ -164,6 +173,13 @@ public final class OnboardingViewController: BaseViewController, View {
       Float(stepIdx + 1) / total,
       animated: true
     )
+  }
+  
+  private func showRunnerTypeVC() {
+    let vc = RunnerTypeViewController()
+    vc.modalTransitionStyle = .crossDissolve
+    vc.modalPresentationStyle = .overFullScreen
+    self.present(vc, animated: true)
   }
 }
 

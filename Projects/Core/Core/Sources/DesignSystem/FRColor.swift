@@ -48,6 +48,7 @@ public enum FRColor {
 
     
     public enum interactive {
+      public static let primary: UIColor = UIColor(hex: "#FF6600")
       public static let secondary: UIColor = UIColor(hex: "#2A3038")
     }
 
