@@ -19,7 +19,7 @@ public enum UserAPI: BaseAPI {
     case .fetchUserProfile(let userId): return "/users/\(userId)"
     case .updateUserProfile(let userId, _): return "/users/\(userId)"
     case .saveOnboarding: return "/users/onboarding"
-    case .type: return "users/type"
+    case .type: return "/users/type"
     }
   }
   
@@ -43,7 +43,7 @@ public enum UserAPI: BaseAPI {
       print(answer)
       return .requestParameters(parameters: ["answers": answer], encoding: JSONEncoding.default)
     case .type:
-      return .requestParameters(parameters: ["Authorization": ""], encoding: JSONEncoding.default)
+      return .requestParameters(parameters: [:], encoding: URLEncoding.default)
     }
   }
 }

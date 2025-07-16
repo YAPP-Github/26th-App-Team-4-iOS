@@ -149,9 +149,9 @@ public final class OnboardingViewController: BaseViewController, View {
     reactor.state.map(\.isCompleted)
       .observe(on: MainScheduler.instance)
       .distinctUntilChanged()
-      .filter { $0 }
-      .subscribe(with: self) { object, _ in
-        object.showRunnerTypeVC()
+      .compactMap { $0 }
+      .subscribe(with: self) { object, runnerType in
+        object.showRunnerTypeVC(runnerType: runnerType)
       }
       .disposed(by: disposeBag)
   }
@@ -175,8 +175,9 @@ public final class OnboardingViewController: BaseViewController, View {
     )
   }
   
-  private func showRunnerTypeVC() {
+  private func showRunnerTypeVC(runnerType: String) {
     let vc = RunnerTypeViewController()
+    vc.runnerType = runnerType
     vc.modalTransitionStyle = .crossDissolve
     vc.modalPresentationStyle = .overFullScreen
     self.present(vc, animated: true)

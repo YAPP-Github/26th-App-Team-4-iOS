@@ -48,4 +48,13 @@ public final class OnboardingRepositoryImpl: OnboardingRepository {
       .map { $0.code == "SUCCESS" }
       .asSingle()
   }
+  
+  public func getRuunerType() -> RxSwift.Single<String?> {
+    return userProvider
+      .request(.type)
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<RunnerTypeDTO>.self)
+      .map { $0.result?.runnerType }
+      .asSingle()
+  }
 }

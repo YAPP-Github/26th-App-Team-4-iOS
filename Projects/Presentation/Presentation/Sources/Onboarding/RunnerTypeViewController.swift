@@ -15,6 +15,8 @@ import Core
 
 public final class RunnerTypeViewController: BaseViewController {
   
+  public var runnerType: String = "워밍업"
+  
   private let typeTitleLabel = UILabel().then {
     $0.text = "체력 분석완료\n나는 워밍업 러너에 가까워요"
     $0.font = .systemFont(ofSize: 24, weight: .bold)
@@ -47,6 +49,7 @@ public final class RunnerTypeViewController: BaseViewController {
     super.initUI()
     
     view.addSubview(typeTitleLabel)
+    typeTitleLabel.text = "체력 분석완료\n나는 \(runnerType) 러너에 가까워요"
     typeTitleLabel.snp.makeConstraints { make in
       make.top.equalTo(view.safeAreaLayoutGuide).offset(72)
       make.centerX.equalToSuperview()

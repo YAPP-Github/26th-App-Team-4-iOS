@@ -13,4 +13,6 @@ public protocol OnboardingRepository {
   func saveOnboarding(answers: [OnboardingAnswer]) -> Single<Bool>
   /// 온보딩 러닝 목적 설정 API
   func savePurpose(purpose: String) -> Single<Bool>
+  /// 러너 타입 확인 api
+  func getRuunerType() -> Single<String?>
 }

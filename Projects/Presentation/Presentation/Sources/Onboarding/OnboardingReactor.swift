@@ -24,7 +24,7 @@ public final class OnboardingReactor: Reactor {
     case setSelection(question: OnboardingQuestion, index: Int)
     case setNextEnabled(Bool)
     case setLoading(Bool)
-    case setCompleted(Bool)
+    case setCompleted(runnerType: String)
     case setError(String?)
   }
   
@@ -38,7 +38,7 @@ public final class OnboardingReactor: Reactor {
     /// 로딩 여부
     public fileprivate(set) var isLoading: Bool = false
     /// 온보딩 완료. 다음페이지로 이동
-    public fileprivate(set) var isCompleted: Bool = false
+    public fileprivate(set) var isCompleted: String? = nil
     /// 에러
     public fileprivate(set) var errorMessage: String?
   }
@@ -150,11 +150,13 @@ public final class OnboardingReactor: Reactor {
       .flatMap { _ in
         self.saveOnboardingUseCase.savePurpose(purpose)
       }
-      .map { _ in
-        .setCompleted(true)
+      .flatMap { _ in
+        self.saveOnboardingUseCase.getRuunerType()
+      }
+      .map {
+        .setCompleted(runnerType: $0 ?? "워밍업")
       }
       .catch { error in
-        // 하나라도 실패하면 error
         .just(.setError(error.localizedDescription))
       }
       .asObservable()
