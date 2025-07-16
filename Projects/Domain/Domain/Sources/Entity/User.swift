@@ -7,17 +7,17 @@
 
 import Foundation
 
-public struct User: Codable, Equatable {
-  public let id: String
-  public let name: String
-  public var isNew: Bool
-
-  public init(id: String, name: String, isNew: Bool) {
-    self.id = id
-    self.name = name
-    self.isNew = isNew
-  }
-}
+//public struct User: Codable, Equatable {
+//  public let id: String
+//  public let name: String
+//  public var isNew: Bool
+//
+//  public init(id: String, name: String, isNew: Bool) {
+//    self.id = id
+//    self.name = name
+//    self.isNew = isNew
+//  }
+//}
 
 public enum UserStatus: Equatable {
   case needsWalkthrough  

@@ -11,15 +11,15 @@ import Moya
 public enum UserAPI: BaseAPI {
   case fetchUserProfile(userId: String)
   case updateUserProfile(userId: String, name: String)
-  case saveOnboarding
+  case saveOnboarding(answers: [[String: Any]])
   case type
   
   public var path: String {
     switch self {
     case .fetchUserProfile(let userId): return "/users/\(userId)"
     case .updateUserProfile(let userId, _): return "/users/\(userId)"
-    case .saveOnboarding: return "/users"
-    case .type: return "users/type"
+    case .saveOnboarding: return "/users/onboarding"
+    case .type: return "/users/type"
     }
   }
   
@@ -38,10 +38,12 @@ public enum UserAPI: BaseAPI {
       return .requestPlain
     case .updateUserProfile(_, let name):
       return .requestParameters(parameters: ["name": name], encoding: JSONEncoding.default)
-    case .saveOnboarding:
-      return .requestParameters(parameters: ["answers": [:]], encoding: JSONEncoding.default)
+    case let .saveOnboarding(answer):
+      print("UserAPI - \(#function)")
+      print(answer)
+      return .requestParameters(parameters: ["answers": answer], encoding: JSONEncoding.default)
     case .type:
-      return .requestParameters(parameters: ["Authorization": ""], encoding: JSONEncoding.default)
+      return .requestParameters(parameters: [:], encoding: URLEncoding.default)
     }
   }
 }
