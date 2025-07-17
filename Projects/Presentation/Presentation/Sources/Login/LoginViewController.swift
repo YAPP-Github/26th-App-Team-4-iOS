@@ -24,58 +24,73 @@ public class LoginViewController: UIViewController, View {
   weak var coordinator: LoginCoordinator?
 
   // MARK: - UI Components
-  private let logoStackView: UIStackView = {
-    let stack = UIStackView()
+  private let logoStackView = UIStackView().then { stack in
     stack.axis = .horizontal
     stack.spacing = 10.84
     stack.alignment = .center
-    stack.distribution = .fillEqually
+    stack.distribution = .fill
     stack.backgroundColor = .blue
-    return stack
-  }()
+  }
 
   private let logoImageView = UIImageView().then { imageView in
     imageView.contentMode = .scaleAspectFit
-    if let logoImage = UIImage(named: "logo") {
+    if let logoImage = UIImage(named: "logo", in: Bundle.module, compatibleWith: nil) {
       imageView.image = logoImage
     }
-    imageView.backgroundColor = .blue
+    imageView.backgroundColor = .yellow
   }
 
   private let logolabel = UILabel().then { label in
     label.text = "fitrun"
     label.textColor = .orange
+    label.setContentCompressionResistancePriority(.required, for: .horizontal)
+    label.setContentHuggingPriority(.defaultLow, for: .horizontal)
   }
 
   private let loginButtonStackView = UIStackView().then { stack in
     stack.axis = .vertical
     stack.spacing = 12
     stack.alignment = .fill
-    stack.distribution = .fillEqually
+    stack.distribution = .fill
   }
 
-  private let kakaoLoginButton = UIButton().then {
-    $0.setTitle("카카오로 시작하기", for: .normal)
-    $0.setImage( UIImage(named: "kakao_icon", in: Bundle.module, compatibleWith: nil)
-                 , for: .normal)
-    $0.backgroundColor = UIColor(red: 254/255, green: 229/255, blue: 0/255, alpha: 1.0)
-    $0.layer.cornerRadius = 10
-    $0.clipsToBounds = true
-    $0.setTitleColor(.black, for: .normal)
-    $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-  }
+  private let kakaoLoginButton: UIButton = {
+    var config = UIButton.Configuration.filled()
 
-  private let appleLoginButton = UIButton().then {
-    $0.setTitle("애플로 시작하기", for: .normal)
-    $0.setImage(UIImage(systemName: "applelogo"), for: .normal)
-    $0.backgroundColor = .black
-    $0.layer.cornerRadius = 10
-    $0.clipsToBounds = true
-    $0.setTitleColor(.white, for: .normal)
-    $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-    $0.layer.borderWidth = 1
-    $0.layer.borderColor = UIColor.white.cgColor
-  }
+    if let originalImage = UIImage(named: "kakao_icon", in: Bundle.module, compatibleWith: nil) {
+      let resizedImage = originalImage.resized(to: CGSize(width: 26, height: 26))
+      config.image = resizedImage
+    }
+
+    config.title = "카카오로 시작하기"
+    config.imagePlacement = .leading
+    config.imagePadding = 6
+    config.baseForegroundColor = .black
+    config.baseBackgroundColor = .yellow
+
+    let button = UIButton(configuration: config, primaryAction: nil)
+    button.layer.cornerRadius = 10
+    button.clipsToBounds = true
+
+    return button
+  }()
+
+  private let appleLoginButton: UIButton = {
+    var config = UIButton.Configuration.filled()
+    config.title = "애플로 시작하기"
+    config.image = UIImage(systemName: "applelogo")
+    config.imagePlacement = .leading
+    config.imagePadding = 8.5
+    config.baseBackgroundColor = .black
+
+    let button = UIButton(configuration: config, primaryAction: nil)
+    button.layer.cornerRadius = 10
+    button.clipsToBounds = true
+    button.layer.borderWidth = 1
+    button.layer.borderColor = UIColor.white.cgColor
+
+    return button
+  }()
 
   private let appleIDButton = ASAuthorizationAppleIDButton(authorizationButtonType: .signIn, authorizationButtonStyle: .black).then {
     $0.layer.cornerRadius = 10
@@ -100,26 +115,25 @@ public class LoginViewController: UIViewController, View {
     view.backgroundColor = .white
     view.addSubview(loginButtonStackView)
     view.addSubview(appleIDButton)
-    //    view.addSubview(logoStackView)
+    view.addSubview(logoStackView)
     view.addSubview(activityIndicator)
-    //
-    //    logoStackView.addArrangedSubview(logoImageView)
-    //    logoStackView.addArrangedSubview(logolabel)
-    //    logoStackView.snp.makeConstraints { make in
-    //      make.leading.trailing.equalToSuperview().inset(40)
-    //      make.height.equalTo(77)
-    //      make.center.equalToSuperview()
-    //    }
-    //
-    //    logoImageView.snp.makeConstraints { make in
-    //      make.width.equalTo(41.19)
-    //      make.height.equalTo(54.74)
-    //    }
-
+    logoStackView.addArrangedSubview(logoImageView)
+    logoStackView.addArrangedSubview(logolabel)
     loginButtonStackView.addArrangedSubview(kakaoLoginButton)
+    loginButtonStackView.addArrangedSubview(appleLoginButton)
+
+    logoImageView.snp.makeConstraints { make in
+      make.height.equalTo(54.74)
+      make.width.equalTo(41.19)
+    }
+
+    logoStackView.snp.makeConstraints { make in
+      make.height.equalTo(77)
+      make.center.equalToSuperview()
+    }
+
     loginButtonStackView.snp.makeConstraints { make in
       make.leading.trailing.equalToSuperview().inset(40)
-      make.height.equalTo(120)
       make.bottom.equalToSuperview().inset(78)
     }
 
@@ -127,7 +141,6 @@ public class LoginViewController: UIViewController, View {
       make.height.equalTo(50)
     }
 
-    loginButtonStackView.addArrangedSubview(appleLoginButton)
     appleLoginButton.snp.makeConstraints { make in
       make.height.equalTo(50)
     }
@@ -300,6 +313,26 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
 // MARK: - ASAuthorizationControllerPresentationContextProviding
 extension LoginViewController: ASAuthorizationControllerPresentationContextProviding {
   public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-    return self.view.window!
+    guard let window = self.view.window else {
+      fatalError("Window is not available for presenting authorization controller")
+    }
+    return window
+  }
+}
+
+extension UIImage {
+  func resized(to newSize: CGSize) -> UIImage? {
+    // 이미지가 없으면 nil 반환
+    guard let cgImage = cgImage else { return nil }
+
+    let format = UIGraphicsImageRendererFormat()
+    format.scale = scale // 원본 이미지의 스케일 유지 (ex: @2x, @3x)
+    format.opaque = false // 투명도 유지
+
+    let renderer = UIGraphicsImageRenderer(size: newSize, format: format)
+    let image = renderer.image { _ in
+      self.draw(in: CGRect(origin: .zero, size: newSize))
+    }
+    return image
   }
 }

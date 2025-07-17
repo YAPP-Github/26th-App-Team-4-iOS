@@ -19,7 +19,7 @@ public final class LoginCoordinatorImpl {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: CoordinatorType = .login
-  public var finishDelegate: CoordinatorFinishDelegate?
+  public weak var finishDelegate: CoordinatorFinishDelegate?
 
 
   public init(navigationController: UINavigationController) {

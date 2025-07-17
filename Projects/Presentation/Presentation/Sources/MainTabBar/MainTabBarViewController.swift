@@ -8,14 +8,14 @@
 import UIKit
 import Core
 
-public final class MainTabBarController: UITabBarController {
+public final class MainTabBarController: BaseViewController {
 
-    public override func viewDidLoad() {
-        super.viewDidLoad()
+  public override func viewDidLoad() {
+    super.viewDidLoad()
+    setupUI()
+  }
 
-    }
+  private func setupUI() {
 
-    private func setupTabs() {
-
-    }
+  }
 }

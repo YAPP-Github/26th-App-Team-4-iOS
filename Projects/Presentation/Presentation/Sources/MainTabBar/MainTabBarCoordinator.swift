@@ -17,7 +17,7 @@ public final class MainTabBarCoordinator: Coordinator {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: CoordinatorType = .mainTabBar
-  public var finishDelegate: CoordinatorFinishDelegate?
+  public weak var finishDelegate: CoordinatorFinishDelegate?
 
   public init(navigationController: UINavigationController) {
     self.navigationController = navigationController

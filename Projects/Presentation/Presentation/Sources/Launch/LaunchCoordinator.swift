@@ -20,7 +20,7 @@ public final class LaunchCoordinatorImpl {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: CoordinatorType = .launchScreen
-  public var finishDelegate: CoordinatorFinishDelegate?
+  public weak var finishDelegate: CoordinatorFinishDelegate?
   
   public init(navigationController: UINavigationController) {
     self.navigationController = navigationController

@@ -17,7 +17,7 @@ final class AppCoordinatorImpl {
   var navigationController: UINavigationController
   var childCoordinators: [Coordinator] = []
   var type: CoordinatorType = .app
-  var finishDelegate: CoordinatorFinishDelegate?
+  weak var finishDelegate: CoordinatorFinishDelegate?
 
   init(navigationController: UINavigationController) {
     self.navigationController = navigationController
@@ -47,7 +47,7 @@ extension AppCoordinatorImpl: AppCoordinator {
     coordinator.start()
   }
 
-  func showSignUp() {
+  func showLogin() {
     self.navigationController.viewControllers.removeAll()
 
     let coordinator = LoginCoordinatorImpl(navigationController: navigationController)
@@ -86,7 +86,7 @@ extension AppCoordinatorImpl: CoordinatorFinishDelegate {
     case .launchScreen:
       showWalkthrough()
     case .walkthrough:
-      showSignUp()
+      showLogin()
     case .login:
       showOnboarding()
     case .onboarding:

@@ -11,7 +11,7 @@ import Domain
 
 public enum AuthAPI {
   case appleLogin(idToken: String)
-  case kakaoLogin(accessToken: String)
+  case kakaoLogin(idToken: String)
   case refreshToken(refreshToken: String)
 }
 
@@ -42,8 +42,8 @@ extension AuthAPI: TargetType {
     switch self {
     case let .appleLogin(idToken):
       return .requestParameters(parameters: ["idToken": idToken], encoding: JSONEncoding.default)
-    case let .kakaoLogin(accessToken):
-      return .requestParameters(parameters: ["idToken": accessToken], encoding: JSONEncoding.default)
+    case let .kakaoLogin(idToken):
+      return .requestParameters(parameters: ["idToken": idToken], encoding: JSONEncoding.default)
     case .refreshToken(refreshToken: let refreshToken):
       return .requestParameters(parameters: ["Authorization": refreshToken], encoding: JSONEncoding.default)
     }

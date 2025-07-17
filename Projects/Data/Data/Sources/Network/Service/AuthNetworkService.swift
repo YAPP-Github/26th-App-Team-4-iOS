@@ -36,7 +36,7 @@ public final class AuthNetworkService: AuthNetworkServiceType {
   }
 
   public func requestKakaoLogin(idToken: String) -> Single<LoginResultDTO> {
-    return provider.rx.request(.kakaoLogin(accessToken: idToken))
+    return provider.rx.request(.kakaoLogin(idToken: idToken))
       .filterSuccessfulStatusCodes()
       .map(APIResponse<LoginResultDTO>.self)
       .flatMap { response in

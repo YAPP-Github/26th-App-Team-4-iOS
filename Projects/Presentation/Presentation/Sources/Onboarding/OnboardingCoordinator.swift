@@ -15,11 +15,11 @@ public protocol OnboardingCoordinator: Coordinator {
   func showMainTab()
 }
 
-public final class OnboardingCoordinatorImpl {
+public final class OnboardingCoordinatorImpl: OnboardingCoordinator {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: CoordinatorType = .onboarding
-  public var finishDelegate: CoordinatorFinishDelegate?
+  public weak var finishDelegate: CoordinatorFinishDelegate?
   
   public init(navigationController: UINavigationController) {
     self.navigationController = navigationController
@@ -33,7 +33,7 @@ public final class OnboardingCoordinatorImpl {
   }
 }
 
-extension OnboardingCoordinatorImpl: OnboardingCoordinator {
+extension OnboardingCoordinatorImpl {
   public func showMainTab() {
     finishDelegate?.coordinatorDidFinish(childCoordinator: self)
   }
