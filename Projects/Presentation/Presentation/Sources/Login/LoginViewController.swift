@@ -15,6 +15,7 @@ import AuthenticationServices
 import Moya
 import RxMoya
 import ReactorKit
+import Core
 
 public class LoginViewController: UIViewController, View {
   public typealias Reactor = LoginReactor
@@ -317,22 +318,5 @@ extension LoginViewController: ASAuthorizationControllerPresentationContextProvi
       fatalError("Window is not available for presenting authorization controller")
     }
     return window
-  }
-}
-
-extension UIImage {
-  func resized(to newSize: CGSize) -> UIImage? {
-    // 이미지가 없으면 nil 반환
-    guard let cgImage = cgImage else { return nil }
-
-    let format = UIGraphicsImageRendererFormat()
-    format.scale = scale // 원본 이미지의 스케일 유지 (ex: @2x, @3x)
-    format.opaque = false // 투명도 유지
-
-    let renderer = UIGraphicsImageRenderer(size: newSize, format: format)
-    let image = renderer.image { _ in
-      self.draw(in: CGRect(origin: .zero, size: newSize))
-    }
-    return image
   }
 }
