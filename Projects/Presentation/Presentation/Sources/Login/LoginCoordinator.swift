@@ -29,7 +29,7 @@ public final class LoginCoordinatorImpl {
   public func start() {
     let viewController = LoginViewController()
     viewController.coordinator = self
-    viewController.reactor = LoginReactor(authUseCase: AuthUseCaseImpl(authRepository: AuthRepositoryImpl(networkService: AuthNetworkService(), tokenStorage: AuthTokenStorage())))
+    viewController.reactor = LoginReactor(authUseCase: AuthUseCaseImpl(authRepository: AuthRepositoryImpl(networkService: AuthNetworkServiceImpl(), tokenStorage: AuthTokenStorageImpl())))
     // TODO: - resolve
     //container.resolve(LoginReactor.self)
 

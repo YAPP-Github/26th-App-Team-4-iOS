@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol AuthTokenStorageType {
+public protocol AuthTokenStorage {
   func saveAccessToken(_ token: String)
   func getAccessToken() -> String?
   func saveRefreshToken(_ token: String)
@@ -15,7 +15,7 @@ public protocol AuthTokenStorageType {
   func clearTokens()
 }
 
-public class AuthTokenStorage: AuthTokenStorageType {
+public class AuthTokenStorageImpl: AuthTokenStorage {
   public init() {}
   public func saveAccessToken(_ token: String) {
     UserDefaults.standard.set(token, forKey: "accessToken")

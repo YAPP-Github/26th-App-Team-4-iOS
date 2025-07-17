@@ -10,10 +10,10 @@ import RxSwift
 import Domain
 
 public final class AuthRepositoryImpl: AuthRepository {
-  private let networkService: AuthNetworkServiceType
-  private let tokenStorage: AuthTokenStorageType
+  private let networkService: AuthNetworkService
+  private let tokenStorage: AuthTokenStorage
   
-  public init(networkService: AuthNetworkServiceType, tokenStorage: AuthTokenStorageType) {
+  public init(networkService: AuthNetworkService, tokenStorage: AuthTokenStorage) {
     self.networkService = networkService
     self.tokenStorage = tokenStorage
   }

@@ -16,7 +16,7 @@ public struct CommonNetworkHeaders {
     ]
 
     // AuthTokenStorageType 을 구현한 싱글톤 또는 DI 컨테이너에서 가져오세요.
-    if let token = AuthTokenStorage().getAccessToken() {
+    if let token = AuthTokenStorageImpl().getAccessToken() {
       headers["Authorization"] = "Bearer \(token)"
     }
 
