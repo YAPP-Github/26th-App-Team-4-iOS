@@ -73,6 +73,12 @@ public final class PaceCountSettingViewController: BaseViewController {
   public override func action() {
     super.action()
     
+    backButton.rx.tap
+      .subscribe(with: self) { object, _ in
+        object.navigationController?.popViewController(animated: true)
+      }
+      .disposed(by: disposeBag)
+    
     RxKeyboard.instance.visibleHeight
       .skip(1)
       .drive(with: self) { object, height in
