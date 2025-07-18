@@ -20,6 +20,9 @@ public final class PaceCountSettingViewController: BaseViewController {
   
   private let goalSegmentedView = GoalSegmentedView()
   
+  private let goalRunningCountView = GoalRunningCountView().then {
+    $0.isHidden = true
+  }
   private let goalPaceView = GoalPaceView()
   
   private let nextButton = UIButton().then {
@@ -47,11 +50,16 @@ public final class PaceCountSettingViewController: BaseViewController {
       $0.leading.trailing.equalToSuperview().inset(20)
     }
     
-    view.addSubview(goalPaceView)
-    goalPaceView.snp.makeConstraints {
+    view.addSubview(goalRunningCountView)
+    goalRunningCountView.snp.makeConstraints {
       $0.top.equalTo(goalSegmentedView.snp.bottom).offset(24)
       $0.leading.trailing.equalToSuperview().inset(20)
       $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
+    }
+
+    view.addSubview(goalPaceView)
+    goalPaceView.snp.makeConstraints {
+      $0.edges.equalTo(goalRunningCountView)
     }
     
     view.addSubview(nextButton)
@@ -81,5 +89,31 @@ public final class PaceCountSettingViewController: BaseViewController {
         object.view.layoutIfNeeded()
       }
       .disposed(by: self.disposeBag)
+    
+    goalSegmentedView.selectedSegment
+      .distinctUntilChanged()
+      .observe(on: MainScheduler.asyncInstance)
+      .subscribe(with: self) { object, index in
+        object.switchGoalView(to: index)
+      }
+      .disposed(by: disposeBag)
   }
+  
+  private func switchGoalView(to index: GoalSegmentedView.Segment) {
+    let showPaceView = (index == .pace)
+    let toHideView = showPaceView ? goalRunningCountView : goalPaceView
+    let toShowView = showPaceView ? goalPaceView : goalRunningCountView
+
+    UIView.animate(withDuration: 0.15, animations: {
+      toHideView.alpha = 0
+    }, completion: { _ in
+      toHideView.isHidden = true
+      toShowView.alpha = 0
+      toShowView.isHidden = false
+      UIView.animate(withDuration: 0.15) {
+        toShowView.alpha = 1
+      }
+    })
+  }
+
 }
