@@ -32,6 +32,10 @@ public final class PaceCountSettingViewController: BaseViewController {
     $0.layer.cornerRadius = 16
   }
   
+  private let goalSaveAlertView = GoalSaveAlertView().then {
+    $0.isHidden = true
+  }
+  
   public override func initUI() {
     super.initUI()
     
@@ -67,6 +71,11 @@ public final class PaceCountSettingViewController: BaseViewController {
       $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(12)
       $0.leading.trailing.equalToSuperview().inset(20)
       $0.height.equalTo(56)
+    }
+    
+    view.addSubview(goalSaveAlertView)
+    goalSaveAlertView.snp.makeConstraints {
+      $0.edges.equalToSuperview()
     }
   }
   
@@ -121,5 +130,4 @@ public final class PaceCountSettingViewController: BaseViewController {
       }
     })
   }
-
 }
