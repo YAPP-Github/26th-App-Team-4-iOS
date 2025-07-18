@@ -5,39 +5,50 @@
 //  Created by JDeoks on 7/19/25.
 //
 
-
-
 import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
 import RxGesture
-
 import Core
 
 public final class GoalPaceView: BaseView {
+
+  // MARK: - Properties
+
+  /// Discrete slider steps
+  private let steps: [Float] = [0, 1, 2]
+  /// Publicly readable current pace string
+  public private(set) var currentPace: String = "7'30\"" {
+    didSet {
+      paceLabel.text = currentPace
+    }
+  }
   
-  let steps: [Float] = [0, 1, 2]
-  
+  private let paceOptions = ["9'00\"", "7'30\"", "5'30\""]
+
+  // MARK: - UI Components
+
   private let weekLabel = UILabel().then {
     $0.text = "일주일에"
     $0.font = .systemFont(ofSize: 16, weight: .semibold)
     $0.textColor = UIColor(hex: "#555D6D")
+    $0.textAlignment = .center
   }
-  
-  private let paceLabel = UILabel().then {
-    $0.text = "0'00\""
+
+  private lazy var paceLabel = UILabel().then {
+    $0.text = currentPace
     $0.font = .systemFont(ofSize: 52, weight: .bold)
     $0.textColor = .black
     $0.textAlignment = .center
     $0.isUserInteractionEnabled = true
   }
-  
+
   private let paceLabelBottomLineView = UIView().then {
     $0.backgroundColor = UIColor(hex: "#FF6600")
     $0.isHidden = true
   }
-  
+
   private let hiddenTextField = UITextField().then {
     $0.keyboardType = .numberPad
     $0.textColor = .clear
@@ -50,17 +61,15 @@ public final class GoalPaceView: BaseView {
 
   private lazy var slider = UISlider().then {
     $0.tintColor = .black
-    $0.minimumValue = 0
-    $0.maximumValue = 2
-    $0.value = 1
-    $0.isContinuous = false
     $0.minimumValue = steps.first!
     $0.maximumValue = steps.last!
+    $0.value = 1
     $0.isContinuous = true
   }
 
   private lazy var difficultyStack = UIStackView(
-    arrangedSubviews: [warmupLabel, routineLabel, challengerLabel]).then {
+    arrangedSubviews: [warmupLabel, routineLabel, challengerLabel]
+  ).then {
     $0.axis = .horizontal
     $0.distribution = .equalSpacing
   }
@@ -82,23 +91,22 @@ public final class GoalPaceView: BaseView {
     $0.font = .systemFont(ofSize: 14, weight: .medium)
     $0.textColor = UIColor(hex: "#868B94")
   }
-  
+
+  // MARK: - Layout
+
   public override func initUI() {
-    
     addSubview(weekLabel)
     weekLabel.snp.makeConstraints {
       $0.top.equalToSuperview().offset(20)
       $0.centerX.equalToSuperview()
-      $0.height.equalTo(24)
     }
 
     addSubview(paceLabel)
     paceLabel.snp.makeConstraints {
       $0.top.equalTo(weekLabel.snp.bottom).offset(12)
       $0.centerX.equalToSuperview()
-      $0.height.equalTo(68)
     }
-    
+
     addSubview(paceLabelBottomLineView)
     paceLabelBottomLineView.snp.makeConstraints {
       $0.bottom.equalTo(paceLabel.snp.bottom)
@@ -110,13 +118,13 @@ public final class GoalPaceView: BaseView {
     hiddenTextField.snp.makeConstraints {
       $0.edges.equalTo(paceLabel)
     }
-    
+
     addSubview(slider)
     slider.snp.makeConstraints {
       $0.top.equalTo(paceLabel.snp.bottom).offset(32)
       $0.leading.trailing.equalToSuperview()
     }
-    
+
     addSubview(difficultyStack)
     difficultyStack.snp.makeConstraints {
       $0.top.equalTo(slider.snp.bottom).offset(12)
@@ -124,10 +132,12 @@ public final class GoalPaceView: BaseView {
     }
   }
 
+  // MARK: - Bindings
+
   public override func action() {
     super.action()
 
-    // 탭 시 키보드 호출 및 초기화
+    // 1) Label tap → begin manual input
     paceLabel.rx.tapGesture()
       .when(.recognized)
       .bind { [weak self] _ in
@@ -135,38 +145,44 @@ public final class GoalPaceView: BaseView {
       }
       .disposed(by: disposeBag)
 
-    // 텍스트 입력 처리
+    // 2) TextField input → update `currentPace`
     hiddenTextField.rx.text.orEmpty
       .distinctUntilChanged()
       .bind { [weak self] text in
         self?.handleTextChanged(text)
       }
       .disposed(by: disposeBag)
-    
+
+    // 3) Slider drag end → snap to nearest step
     Observable.merge(
       slider.rx.controlEvent(.touchUpInside).asObservable(),
       slider.rx.controlEvent(.touchUpOutside).asObservable()
     )
     .withLatestFrom(slider.rx.value)
     .subscribe(onNext: { [weak self] value in
-      guard let self else { return }
-
-      let nearest = steps.min(by: { abs($0 - value) < abs($1 - value) }) ?? value
+      guard let self = self else { return }
+      let nearest = self.steps.min(by: { abs($0 - value) < abs($1 - value) }) ?? value
       self.slider.setValue(nearest, animated: true)
       self.updateUIForStep(Int(nearest))
     })
     .disposed(by: disposeBag)
+
+    // 4) Set initial step look
+    updateUIForStep(Int(slider.value))
   }
-  
+
+  // MARK: - Helpers
+
   private func updateUIForStep(_ step: Int) {
-    let paceText = ["9'00\"", "7'30\"", "5'30\""]
-    paceLabel.text = paceText[step]
-    
-    [warmupLabel, routineLabel, challengerLabel].enumerated().forEach { i, label in
-      label.textColor = (i == step) ? .black : UIColor(hex: "#868B94")
+    // 4단계 중 [0..2] 범위
+    let text = paceOptions[step]
+    currentPace = text
+
+    [warmupLabel, routineLabel, challengerLabel].enumerated().forEach { i, lbl in
+      lbl.textColor = (i == step) ? .black : UIColor(hex: "#868B94")
     }
   }
-  
+
   private func handleLabelTapped() {
     hiddenTextField.text = ""
     paceLabel.text = "0'00\""
@@ -176,11 +192,11 @@ public final class GoalPaceView: BaseView {
 
   private func handleTextChanged(_ raw: String) {
     let digits = raw.filter { $0.isNumber }
-
     if digits.count >= 3 {
       let trimmed = String(digits.prefix(3))
       hiddenTextField.text = trimmed
-      paceLabel.text = formatPaceInput(trimmed)
+      let formatted = formatPaceInput(trimmed)
+      currentPace = formatted
       hiddenTextField.resignFirstResponder()
       paceLabelBottomLineView.isHidden = true
     } else {
@@ -191,11 +207,18 @@ public final class GoalPaceView: BaseView {
   private func formatPaceInput(_ raw: String) -> String {
     let digits = raw.filter { $0.isNumber }
     guard !digits.isEmpty else { return "0'00\"" }
-
     let padded = digits.paddingRight(toLength: 3, withPad: "0")
     let minutes = String(padded.prefix(1))
     let seconds = String(padded.suffix(2))
-
     return "\(minutes)'\(seconds)\""
+  }
+}
+
+// MARK: - String Padding Extension
+
+private extension String {
+  func paddingRight(toLength: Int, withPad character: Character) -> String {
+    let padCount = max(0, toLength - count)
+    return self + String(repeating: character, count: padCount)
   }
 }
