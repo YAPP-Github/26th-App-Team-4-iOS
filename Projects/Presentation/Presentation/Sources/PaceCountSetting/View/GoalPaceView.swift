@@ -17,6 +17,8 @@ import Core
 
 public final class GoalPaceView: BaseView {
   
+  let steps: [Float] = [0, 1, 2]
+  
   private let weekLabel = UILabel().then {
     $0.text = "일주일에"
     $0.font = .systemFont(ofSize: 16, weight: .semibold)
@@ -46,12 +48,15 @@ public final class GoalPaceView: BaseView {
     $0.isHidden = true
   }
 
-  private let slider = UISlider().then {
+  private lazy var slider = UISlider().then {
     $0.tintColor = .black
     $0.minimumValue = 0
     $0.maximumValue = 2
     $0.value = 1
     $0.isContinuous = false
+    $0.minimumValue = steps.first!
+    $0.maximumValue = steps.last!
+    $0.isContinuous = true
   }
 
   private lazy var difficultyStack = UIStackView(
@@ -137,6 +142,29 @@ public final class GoalPaceView: BaseView {
         self?.handleTextChanged(text)
       }
       .disposed(by: disposeBag)
+    
+    Observable.merge(
+      slider.rx.controlEvent(.touchUpInside).asObservable(),
+      slider.rx.controlEvent(.touchUpOutside).asObservable()
+    )
+    .withLatestFrom(slider.rx.value)
+    .subscribe(onNext: { [weak self] value in
+      guard let self else { return }
+
+      let nearest = steps.min(by: { abs($0 - value) < abs($1 - value) }) ?? value
+      self.slider.setValue(nearest, animated: true)
+      self.updateUIForStep(Int(nearest))
+    })
+    .disposed(by: disposeBag)
+  }
+  
+  private func updateUIForStep(_ step: Int) {
+    let paceText = ["9'00\"", "7'30\"", "5'30\""]
+    paceLabel.text = paceText[step]
+    
+    [warmupLabel, routineLabel, challengerLabel].enumerated().forEach { i, label in
+      label.textColor = (i == step) ? .black : UIColor(hex: "#868B94")
+    }
   }
   
   private func handleLabelTapped() {
