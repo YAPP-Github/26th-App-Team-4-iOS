@@ -43,10 +43,21 @@ public final class GoalRunningCountView: BaseView {
     $0.textColor = UIColor(hex: "#868B94")
     $0.textAlignment = .center
   }
+  
+  private let hiddenTextField = UITextField().then {
+    $0.keyboardType = .numberPad
+    $0.textColor = .clear
+    $0.tintColor = .clear
+    $0.autocorrectionType = .no
+    $0.spellCheckingType = .no
+    $0.autocapitalizationType = .none
+    $0.isHidden = true
+  }
 
   private let underlineView = UIView().then {
     $0.backgroundColor = UIColor(hex: "#FF6600")
     $0.layer.cornerRadius = 1
+    $0.isHidden = true
   }
 
   private let reminderBox = UIView().then {
@@ -92,7 +103,11 @@ public final class GoalRunningCountView: BaseView {
       $0.top.equalTo(weekLabel.snp.bottom).offset(12)
       $0.centerX.equalToSuperview()
     }
-
+    
+    addSubview(hiddenTextField)
+    hiddenTextField.snp.makeConstraints {
+      $0.edges.equalTo(countLabel)
+    }
 
     addSubview(underlineView)
     underlineView.snp.makeConstraints {
@@ -119,5 +134,51 @@ public final class GoalRunningCountView: BaseView {
       $0.trailing.equalToSuperview().inset(20)
       $0.centerY.equalToSuperview()
     }
+  }
+  
+  public override func action() {
+    super.action()
+
+    // 라벨 탭 시 텍스트필드 포커싱 및 초기화
+    countLabel.rx.tapGesture()
+      .when(.recognized)
+      .bind { [weak self] _ in
+        self?.beginEditingCount()
+        self?.underlineView.isHidden = false
+      }
+      .disposed(by: disposeBag)
+
+    // 텍스트 입력 시 라벨 업데이트
+    hiddenTextField.rx.text.orEmpty
+      .observe(on: MainScheduler.asyncInstance)
+      .distinctUntilChanged()
+      .bind { [weak self] text in
+        self?.updateCountLabelSafely(with: text)
+      }
+      .disposed(by: disposeBag)
+  }
+  
+  private func updateCountLabelSafely(with raw: String) {
+    if raw.isEmpty {
+      countLabel.text = "3"
+      return
+    }
+    let digits = raw.filter { $0.isNumber }
+    guard digits != countLabel.text else { return } // ✅ 재진입 방지
+
+    if digits.count >= 1 {
+      let trimmed = String(digits.prefix(1))
+      hiddenTextField.text = trimmed
+      countLabel.text = trimmed
+      hiddenTextField.resignFirstResponder()
+    } else {
+      countLabel.text = digits
+    }
+  }
+
+  private func beginEditingCount() {
+    hiddenTextField.text = ""
+    countLabel.text = "0"
+    hiddenTextField.becomeFirstResponder()
   }
 }
