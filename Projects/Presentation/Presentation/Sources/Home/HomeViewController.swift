@@ -1,6 +1,17 @@
-import UIKit
+//
+//  HomeViewController.swift
+//  Presentation
+//
+//  Created by JDeoks on 7/18/25.
+//
 
-class HomeViewController: BaseViewController {
+
+import UIKit
+import Core
+import ReactorKit
+import NMapsMap
+
+public final class HomeViewController: BaseViewController {
   
   private let cardContainerView = UIView().then {
     $0.backgroundColor = UIColor(hex: "#F5F5F9")
@@ -30,9 +41,23 @@ class HomeViewController: BaseViewController {
   
   let cardView = WeeklyRunningGoalCardView()
   
-  override func initUI() {
+  let mapView = NMFMapView(frame: .zero).then {
+    $0.positionMode = .direction
+    $0.locationOverlay.hidden = false
+  }
+  
+  public override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    FRLocationManager.shared.requestAuthorization()
+  }
+  
+  public override func initUI() {
     super.initUI()
+    self.navigationController?.navigationBar.isHidden = true
+    
     view.backgroundColor = .white
+    
+    view.addSubview(mapView)
     
     view.addSubview(cardContainerView)
     cardContainerView.snp.makeConstraints {
@@ -58,5 +83,33 @@ class HomeViewController: BaseViewController {
       $0.centerX.equalToSuperview()
       $0.width.height.equalTo(100)
     }
+    mapView.moveCamera(.withZoomIn())
+    mapView.snp.makeConstraints {
+      $0.top.equalTo(cardContainerView.snp.bottom).offset(-12)
+      $0.leading.trailing.bottom.equalToSuperview()
+    }
+  }
+  
+  public override func action() {
+    super.action()
+    
+    FRLocationManager.shared.location
+      .observe(on: MainScheduler.instance)
+      .subscribe(onNext: { [weak self] location in
+        print("Current Location: \(location.coordinate.latitude), \(location.coordinate.longitude)")
+        guard let self = self else { return }
+
+        let latLng = NMGLatLng(lat: location.coordinate.latitude,
+                               lng: location.coordinate.longitude)
+
+        self.mapView.positionMode = .direction
+        self.mapView.locationOverlay.hidden = false
+        self.mapView.locationOverlay.location = latLng
+
+        let cameraUpdate = NMFCameraUpdate(scrollTo: latLng)
+        cameraUpdate.animation = .easeIn
+        self.mapView.moveCamera(cameraUpdate)
+      })
+      .disposed(by: disposeBag)
   }
 }

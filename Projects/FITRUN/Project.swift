@@ -33,6 +33,8 @@ let appTargetInfoPlist: InfoPlist = .extendingDefault(
     "NSAppTransportSecurity": [
       "NSAllowsArbitraryLoads": true
     ],
+    "NSLocationAlwaysUsageDescription": "사용자의 위치를 받습니다.",
+    "NSLocationWhenInUseUsageDescription": "앱 사용 중 위치를 받습니다."
   ]
 )
 
@@ -43,9 +45,9 @@ let dependencies: [TargetDependency] = [
   .project(target: "Domain", path: "../Domain"),
   .project(target: "Presentation", path: "../Presentation"),
 
-    .external(name: "RxMoya"),
-  .external(name: "Swinject")
-
+  .external(name: "RxMoya"),
+  .external(name: "Swinject"),
+  .external(name: "NMapsMap")
   // MARK: External
   //  .external(name: "Kingfisher"),
   //  .external(name: "Moya"),
