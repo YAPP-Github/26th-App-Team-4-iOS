@@ -8,6 +8,7 @@
 import UIKit
 
 import KakaoSDKCommon
+import NMapsMap
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
