@@ -12,8 +12,12 @@ import RxCocoa
 import Core
 
 public final class GoalRunningCountView: BaseView {
-  
-  // MARK: - UI Components
+
+  public private(set) var currentCount: Int = 3 {
+    didSet {
+      countLabel.text = "\(currentCount)"
+    }
+  }
 
   private let weekLabel = UILabel().then {
     $0.text = "일주일에"
@@ -21,7 +25,7 @@ public final class GoalRunningCountView: BaseView {
     $0.textColor = UIColor(hex: "#555D6D")
     $0.textAlignment = .center
   }
-  
+
   private lazy var countLabelStack = UIStackView(
     arrangedSubviews: [countLabel, countDescLabel]
   ).then {
@@ -30,20 +34,20 @@ public final class GoalRunningCountView: BaseView {
     $0.alignment = .center
   }
 
-  private let countLabel = UILabel().then {
-    $0.text = "3"
+  private lazy var countLabel = UILabel().then {
+    $0.text = "\(currentCount)"
     $0.font = .systemFont(ofSize: 52, weight: .bold)
     $0.textColor = UIColor(hex: "#1A1C20")
     $0.textAlignment = .center
   }
-  
+
   private let countDescLabel = UILabel().then {
     $0.text = "회"
     $0.font = .systemFont(ofSize: 32, weight: .semibold)
     $0.textColor = UIColor(hex: "#868B94")
     $0.textAlignment = .center
   }
-  
+
   private let hiddenTextField = UITextField().then {
     $0.keyboardType = .numberPad
     $0.textColor = .clear
@@ -88,10 +92,7 @@ public final class GoalRunningCountView: BaseView {
     $0.spacing = 4
   }
 
-  // MARK: - Layout
-
   public override func initUI() {
-    
     addSubview(weekLabel)
     weekLabel.snp.makeConstraints {
       $0.top.equalToSuperview().offset(20)
@@ -103,7 +104,7 @@ public final class GoalRunningCountView: BaseView {
       $0.top.equalTo(weekLabel.snp.bottom).offset(12)
       $0.centerX.equalToSuperview()
     }
-    
+
     addSubview(hiddenTextField)
     hiddenTextField.snp.makeConstraints {
       $0.edges.equalTo(countLabel)
@@ -122,24 +123,23 @@ public final class GoalRunningCountView: BaseView {
       $0.leading.trailing.equalToSuperview()
       $0.height.equalTo(88)
     }
-    
+
     reminderBox.addSubview(reminderLabelStack)
     reminderLabelStack.snp.makeConstraints {
       $0.leading.equalToSuperview().offset(20)
       $0.centerY.equalToSuperview()
     }
-    
+
     reminderBox.addSubview(reminderToggle)
     reminderToggle.snp.makeConstraints {
       $0.trailing.equalToSuperview().inset(20)
       $0.centerY.equalToSuperview()
     }
   }
-  
+
   public override func action() {
     super.action()
 
-    // 라벨 탭 시 텍스트필드 포커싱 및 초기화
     countLabel.rx.tapGesture()
       .when(.recognized)
       .bind { [weak self] _ in
@@ -148,7 +148,6 @@ public final class GoalRunningCountView: BaseView {
       }
       .disposed(by: disposeBag)
 
-    // 텍스트 입력 시 라벨 업데이트
     hiddenTextField.rx.text.orEmpty
       .observe(on: MainScheduler.asyncInstance)
       .distinctUntilChanged()
@@ -157,22 +156,17 @@ public final class GoalRunningCountView: BaseView {
       }
       .disposed(by: disposeBag)
   }
-  
+
   private func updateCountLabelSafely(with raw: String) {
-    if raw.isEmpty {
-      countLabel.text = "3"
-      return
-    }
     let digits = raw.filter { $0.isNumber }
-    guard digits != countLabel.text else { return } // ✅ 재진입 방지
+    guard digits != "\(currentCount)" else { return }
 
     if digits.count >= 1 {
       let trimmed = String(digits.prefix(1))
+      currentCount = Int(trimmed) ?? currentCount
       hiddenTextField.text = trimmed
-      countLabel.text = trimmed
       hiddenTextField.resignFirstResponder()
-    } else {
-      countLabel.text = digits
+      underlineView.isHidden = true
     }
   }
 
