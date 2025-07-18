@@ -1,4 +1,17 @@
-class WeeklyRunningGoalCardView: BaseView {
+//
+//  WeeklyRunningGoalCardView.swift
+//  Presentation
+//
+//  Created by JDeoks on 7/18/25.
+//
+
+
+import UIKit
+import ReactorKit
+
+import Core
+
+public class WeeklyRunningGoalCardView: BaseView {
   
   private lazy var titleStackView = UIStackView(
     arrangedSubviews: [titleLabel, UIView(), editButton]
@@ -87,7 +100,7 @@ class WeeklyRunningGoalCardView: BaseView {
     $0.textAlignment = .right
   }
   
-  override func initUI() {
+  public override func initUI() {
     super.initUI()
     backgroundColor = FRColor.BG.primary
     layer.cornerRadius = 12
