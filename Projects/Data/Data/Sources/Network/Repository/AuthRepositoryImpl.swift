@@ -11,7 +11,6 @@ import Domain
 
 public final class AuthRepositoryImpl: AuthRepository {
   private let kakaoLoginService: SocialLoginService
-//  private let appleLoginService: SocialLoginService
   private let networkService: AuthNetworkService
   private let tokenStorage: AuthTokenStorage
 
@@ -44,8 +43,4 @@ public final class AuthRepositoryImpl: AuthRepository {
   public func performKakaoSocialLogin() -> Single<String> {
     return kakaoLoginService.login()
   }
-
-//  public func performAppleSocialLogin() -> Single<String> {
-//
-//  }
 }
