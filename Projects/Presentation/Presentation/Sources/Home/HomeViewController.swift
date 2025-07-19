@@ -11,6 +11,7 @@ import Core
 import ReactorKit
 import NMapsMap
 import Domain
+import Data
 
 public final class HomeViewController: BaseViewController, View {
   
@@ -93,7 +94,7 @@ public final class HomeViewController: BaseViewController, View {
   }
   
   public func bind(reactor: HomeReactor) {
-    self.rx.viewDidLoad
+    self.rx.viewDidAppear
       .map { _ in Reactor.Action.initialize }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
@@ -131,7 +132,9 @@ public final class HomeViewController: BaseViewController, View {
     
     cardView.editButton.rx.tap
       .subscribe(with: self) { object, _ in
-        let vc = PaceCountSettingViewController()
+        let vc = PaceCountSettingViewController().then {
+          $0.reactor = PaceCountSettingReactor(goalUseCase: GoalUseCaseImpl(goalRepository: GoalRepositoryImpl()))
+        }
         vc.hidesBottomBarWhenPushed = true
         object.navigationController?.pushViewController(vc, animated: true)
       }
