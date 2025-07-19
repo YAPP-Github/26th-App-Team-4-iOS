@@ -10,12 +10,12 @@ import Moya
 import RxSwift
 import Domain
 
-public protocol AuthNetworkServiceType {
+public protocol AuthNetworkService {
   func requestAppleLogin(idToken: String) -> Single<LoginResultDTO>
   func requestKakaoLogin(idToken: String) -> Single<LoginResultDTO>
 }
 
-public final class AuthNetworkService: AuthNetworkServiceType {
+public final class AuthNetworkServiceImpl: AuthNetworkService {
   private let provider: MoyaProvider<AuthAPI>
 
   public init(provider: MoyaProvider<AuthAPI> = MoyaProvider<AuthAPI>()) {
@@ -36,7 +36,7 @@ public final class AuthNetworkService: AuthNetworkServiceType {
   }
 
   public func requestKakaoLogin(idToken: String) -> Single<LoginResultDTO> {
-    return provider.rx.request(.kakaoLogin(accessToken: idToken))
+    return provider.rx.request(.kakaoLogin(idToken: idToken))
       .filterSuccessfulStatusCodes()
       .map(APIResponse<LoginResultDTO>.self)
       .flatMap { response in

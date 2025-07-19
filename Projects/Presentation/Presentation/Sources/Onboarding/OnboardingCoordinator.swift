@@ -8,32 +8,35 @@
 import UIKit
 import Swinject
 import Core
-import Domain
 import Data
 
 public protocol OnboardingCoordinator: Coordinator {
   func showMainTab()
 }
 
-public final class OnboardingCoordinatorImpl {
+public final class OnboardingCoordinatorImpl: OnboardingCoordinator {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: CoordinatorType = .onboarding
-  public var finishDelegate: CoordinatorFinishDelegate?
-  
-  public init(navigationController: UINavigationController) {
+  public weak var finishDelegate: CoordinatorFinishDelegate?
+  private let resolver: Resolver
+
+  public init(navigationController: UINavigationController, resolver: Resolver) {
     self.navigationController = navigationController
+    self.resolver = resolver
   }
-  
+
   public func start() {
-    let viewController = OnboardingViewController()
+    guard let viewController = resolver.resolve(OnboardingViewController.self) else {
+      fatalError("Failed to resolve OnboardingViewController. Ensure it is registered correctly in Swinject.")
+    }
     viewController.coordinator = self
-    viewController.reactor = OnboardingReactor(saveOnboardingUseCase: OnboardingUseCaseImpl(repository: OnboardingRepositoryImpl()))
+
     navigationController.pushViewController(viewController, animated: false)
   }
 }
 
-extension OnboardingCoordinatorImpl: OnboardingCoordinator {
+extension OnboardingCoordinatorImpl {
   public func showMainTab() {
     finishDelegate?.coordinatorDidFinish(childCoordinator: self)
   }

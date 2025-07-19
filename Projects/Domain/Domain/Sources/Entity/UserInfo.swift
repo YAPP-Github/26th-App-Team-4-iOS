@@ -8,13 +8,13 @@
 import Foundation
 
 public struct UserInfo {
-  public let id: Int
+  public let userId: Int
   public let nickname: String
   public let email: String?
   public let provider: String
   
-  public init(id: Int, nickname: String, email: String?, provider: String) {
-    self.id = id
+  public init(userId: Int, nickname: String, email: String?, provider: String) {
+    self.userId = userId
     self.nickname = nickname
     self.email = email
     self.provider = provider

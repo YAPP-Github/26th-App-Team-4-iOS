@@ -16,7 +16,7 @@ public struct UserInfoDTO: Codable {
 extension UserInfoDTO {
   public func toDomain() -> UserInfo {
     return UserInfo(
-      id: userId,
+      userId: userId,
       nickname: nickname,
       email: email,
       provider: provider

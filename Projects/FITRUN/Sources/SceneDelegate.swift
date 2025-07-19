@@ -23,11 +23,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     self.window = window
     
     let navigationController = UINavigationController()
-    
-    appCoordinator = AppCoordinatorImpl(navigationController: navigationController)
+    let resolver = AppAssembler.shared.resolver
+
+    appCoordinator = AppCoordinatorImpl(navigationController: navigationController, resolver: resolver)
     appCoordinator?.start()
 
-    window.rootViewController = MainTabBarController()//navigationController
+    window.rootViewController = navigationController
     window.makeKeyAndVisible()
   }
 

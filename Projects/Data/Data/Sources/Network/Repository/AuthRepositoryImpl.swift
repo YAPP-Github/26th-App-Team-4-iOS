@@ -10,10 +10,12 @@ import RxSwift
 import Domain
 
 public final class AuthRepositoryImpl: AuthRepository {
-  private let networkService: AuthNetworkServiceType
-  private let tokenStorage: AuthTokenStorageType
-  
-  public init(networkService: AuthNetworkServiceType, tokenStorage: AuthTokenStorageType) {
+  private let kakaoLoginService: SocialLoginService
+  private let networkService: AuthNetworkService
+  private let tokenStorage: AuthTokenStorage
+
+  public init(kakaoLoginService: SocialLoginService, networkService: AuthNetworkService, tokenStorage: AuthTokenStorage) {
+    self.kakaoLoginService = kakaoLoginService
     self.networkService = networkService
     self.tokenStorage = tokenStorage
   }
@@ -36,5 +38,9 @@ public final class AuthRepositoryImpl: AuthRepository {
         self.tokenStorage.saveRefreshToken(domainResult.tokenResponse.refreshToken)
         return domainResult
       }
+  }
+
+  public func performKakaoSocialLogin() -> Single<String> {
+    return kakaoLoginService.login()
   }
 }

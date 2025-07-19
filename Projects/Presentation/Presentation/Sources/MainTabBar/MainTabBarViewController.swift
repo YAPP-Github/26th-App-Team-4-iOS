@@ -1,5 +1,5 @@
 //
-//  MainTabBarViewController.swift
+//  MainTabBarController.swift
 //  Presentation
 //
 //  Created by dong eun shin on 7/3/25.

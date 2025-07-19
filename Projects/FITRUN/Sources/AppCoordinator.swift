@@ -9,7 +9,6 @@
 import UIKit
 import Swinject
 import RxSwift
-import Domain
 import Presentation
 import Core
 
@@ -17,10 +16,12 @@ final class AppCoordinatorImpl {
   var navigationController: UINavigationController
   var childCoordinators: [Coordinator] = []
   var type: CoordinatorType = .app
-  var finishDelegate: CoordinatorFinishDelegate?
+  weak var finishDelegate: CoordinatorFinishDelegate?
+  private let resolver: Resolver
 
-  init(navigationController: UINavigationController) {
+  public init(navigationController: UINavigationController, resolver: Resolver) {
     self.navigationController = navigationController
+    self.resolver = resolver
 
     navigationController.setNavigationBarHidden(true, animated: false)
   }
@@ -32,7 +33,9 @@ final class AppCoordinatorImpl {
 
 extension AppCoordinatorImpl: AppCoordinator {
   func showLaunch() {
-    let coordinator = LaunchCoordinatorImpl(navigationController: navigationController)
+    guard let coordinator = resolver.resolve(LaunchCoordinatorImpl.self, argument: navigationController) else {
+      fatalError("Failed to resolve LaunchCoordinatorImpl. Ensure it is registered correctly in Swinject.")
+    }
     coordinator.finishDelegate = self
     childCoordinators.append(coordinator)
     coordinator.start()
@@ -41,16 +44,20 @@ extension AppCoordinatorImpl: AppCoordinator {
   func showWalkthrough() {
     self.navigationController.viewControllers.removeAll()
 
-    let coordinator = WalkthroughCoordinatorImpl(navigationController: navigationController)
+    guard let coordinator = resolver.resolve(WalkthroughCoordinatorImpl.self, argument: navigationController) else {
+      fatalError("Failed to resolve WalkthroughCoordinatorImpl. Ensure it is registered correctly in Swinject.")
+    }
     coordinator.finishDelegate = self
     childCoordinators.append(coordinator)
     coordinator.start()
   }
 
-  func showSignUp() {
+  func showLogin() {
     self.navigationController.viewControllers.removeAll()
 
-    let coordinator = LoginCoordinatorImpl(navigationController: navigationController)
+    guard let coordinator = resolver.resolve(LoginCoordinatorImpl.self, argument: navigationController) else {
+      fatalError("Failed to resolve LoginCoordinatorImpl. Ensure it is registered correctly in Swinject.")
+    }
     coordinator.finishDelegate = self
     childCoordinators.append(coordinator)
     coordinator.start()
@@ -59,7 +66,9 @@ extension AppCoordinatorImpl: AppCoordinator {
   func showOnboarding() {
     self.navigationController.viewControllers.removeAll()
 
-    let coordinator = OnboardingCoordinatorImpl(navigationController: navigationController)
+    guard let coordinator = resolver.resolve(OnboardingCoordinatorImpl.self, argument: navigationController) else {
+      fatalError("Failed to resolve OnboardingCoordinatorImpl. Ensure it is registered correctly in Swinject.")
+    }
     coordinator.finishDelegate = self
     childCoordinators.append(coordinator)
     coordinator.start()
@@ -68,7 +77,9 @@ extension AppCoordinatorImpl: AppCoordinator {
   func showMainTab() {
     self.navigationController.viewControllers.removeAll()
 
-    let coordinator = MainTabBarCoordinator(navigationController: navigationController)
+    guard let coordinator = resolver.resolve(MainTabBarCoordinatorImpl.self, argument: navigationController) else {
+      fatalError("Failed to resolve MainTabBarCoordinatorImpl. Ensure it is registered correctly in Swinject.")
+    }
     coordinator.finishDelegate = self
     childCoordinators.append(coordinator)
     coordinator.start()
@@ -86,7 +97,7 @@ extension AppCoordinatorImpl: CoordinatorFinishDelegate {
     case .launchScreen:
       showWalkthrough()
     case .walkthrough:
-      showSignUp()
+      showLogin()
     case .login:
       showOnboarding()
     case .onboarding:

@@ -12,7 +12,10 @@ let project = Project(
       infoPlist: .default,
       sources: ["Domain/Sources/**"],
       resources: ["Domain/Resources/**"],
-      dependencies: []
+      dependencies: [
+        .external(name: "Swinject"),
+        .external(name: "SwinjectAutoregistration")
+      ]
     ),
     .target(
       name: "DomainTests",

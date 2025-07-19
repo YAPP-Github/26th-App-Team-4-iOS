@@ -9,73 +9,82 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
-import KakaoSDKAuth
-import KakaoSDKUser
 import AuthenticationServices
-import Moya
-import RxMoya
 import ReactorKit
+import Core
 
-public class LoginViewController: UIViewController, View {
+public class LoginViewController: BaseViewController, View {
   public typealias Reactor = LoginReactor
-
-  public var disposeBag = DisposeBag()
 
   weak var coordinator: LoginCoordinator?
 
   // MARK: - UI Components
-  private let logoStackView: UIStackView = {
-    let stack = UIStackView()
+  private let logoStackView = UIStackView().then { stack in
     stack.axis = .horizontal
     stack.spacing = 10.84
     stack.alignment = .center
-    stack.distribution = .fillEqually
-    stack.backgroundColor = .blue
-    return stack
-  }()
+    stack.distribution = .fill
+  }
 
   private let logoImageView = UIImageView().then { imageView in
     imageView.contentMode = .scaleAspectFit
-    if let logoImage = UIImage(named: "logo") {
+    if let logoImage = UIImage(named: "logo", in: Bundle.module, compatibleWith: nil) {
       imageView.image = logoImage
     }
-    imageView.backgroundColor = .blue
+    imageView.backgroundColor = .yellow
   }
 
-  private let logolabel = UILabel().then { label in
+  private let logoLabel = UILabel().then { label in
     label.text = "fitrun"
     label.textColor = .orange
+    label.setContentCompressionResistancePriority(.required, for: .horizontal)
+    label.setContentHuggingPriority(.defaultLow, for: .horizontal)
   }
 
   private let loginButtonStackView = UIStackView().then { stack in
     stack.axis = .vertical
     stack.spacing = 12
     stack.alignment = .fill
-    stack.distribution = .fillEqually
+    stack.distribution = .fill
   }
 
-  private let kakaoLoginButton = UIButton().then {
-    $0.setTitle("카카오로 시작하기", for: .normal)
-    $0.setImage( UIImage(named: "kakao_icon", in: Bundle.module, compatibleWith: nil)
-                 , for: .normal)
-    $0.backgroundColor = UIColor(red: 254/255, green: 229/255, blue: 0/255, alpha: 1.0)
-    $0.layer.cornerRadius = 10
-    $0.clipsToBounds = true
-    $0.setTitleColor(.black, for: .normal)
-    $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-  }
+  private let kakaoLoginButton: UIButton = {
+    var config = UIButton.Configuration.filled()
 
-  private let appleLoginButton = UIButton().then {
-    $0.setTitle("애플로 시작하기", for: .normal)
-    $0.setImage(UIImage(systemName: "applelogo"), for: .normal)
-    $0.backgroundColor = .black
-    $0.layer.cornerRadius = 10
-    $0.clipsToBounds = true
-    $0.setTitleColor(.white, for: .normal)
-    $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-    $0.layer.borderWidth = 1
-    $0.layer.borderColor = UIColor.white.cgColor
-  }
+    if let originalImage = UIImage(named: "kakao_icon", in: Bundle.module, compatibleWith: nil) {
+      let resizedImage = originalImage.resized(to: CGSize(width: 26, height: 26))
+      config.image = resizedImage
+    }
+
+    config.title = "카카오로 시작하기"
+    config.imagePlacement = .leading
+    config.imagePadding = 6
+    config.baseForegroundColor = .black
+    config.baseBackgroundColor = .yellow
+
+    let button = UIButton(configuration: config, primaryAction: nil)
+    button.layer.cornerRadius = 10
+    button.clipsToBounds = true
+
+    return button
+  }()
+
+  private let appleLoginButton: UIButton = {
+    var config = UIButton.Configuration.filled()
+    config.title = "애플로 시작하기"
+    config.image = UIImage(systemName: "applelogo")
+    config.imagePlacement = .leading
+    config.imagePadding = 8.5
+    config.baseBackgroundColor = .black
+
+    let button = UIButton(configuration: config, primaryAction: nil)
+    button.layer.cornerRadius = 10
+    button.clipsToBounds = true
+    button.layer.borderWidth = 1
+    button.layer.borderColor = UIColor.white.cgColor
+
+    return button
+  }()
 
   private let appleIDButton = ASAuthorizationAppleIDButton(authorizationButtonType: .signIn, authorizationButtonStyle: .black).then {
     $0.layer.cornerRadius = 10
@@ -91,35 +100,33 @@ public class LoginViewController: UIViewController, View {
   // MARK: - Life Cycle
   public override func viewDidLoad() {
     super.viewDidLoad()
+
     setupUI()
-    bindViewModel()
   }
 
   // MARK: - Setup UI
   private func setupUI() {
-    view.backgroundColor = .white
+    view.addSubview(logoStackView)
     view.addSubview(loginButtonStackView)
     view.addSubview(appleIDButton)
-    //    view.addSubview(logoStackView)
     view.addSubview(activityIndicator)
-    //
-    //    logoStackView.addArrangedSubview(logoImageView)
-    //    logoStackView.addArrangedSubview(logolabel)
-    //    logoStackView.snp.makeConstraints { make in
-    //      make.leading.trailing.equalToSuperview().inset(40)
-    //      make.height.equalTo(77)
-    //      make.center.equalToSuperview()
-    //    }
-    //
-    //    logoImageView.snp.makeConstraints { make in
-    //      make.width.equalTo(41.19)
-    //      make.height.equalTo(54.74)
-    //    }
-
+    logoStackView.addArrangedSubview(logoImageView)
+    logoStackView.addArrangedSubview(logoLabel)
     loginButtonStackView.addArrangedSubview(kakaoLoginButton)
+    loginButtonStackView.addArrangedSubview(appleLoginButton)
+
+    logoImageView.snp.makeConstraints { make in
+      make.height.equalTo(54.74)
+      make.width.equalTo(41.19)
+    }
+
+    logoStackView.snp.makeConstraints { make in
+      make.height.equalTo(77)
+      make.center.equalToSuperview()
+    }
+
     loginButtonStackView.snp.makeConstraints { make in
       make.leading.trailing.equalToSuperview().inset(40)
-      make.height.equalTo(120)
       make.bottom.equalToSuperview().inset(78)
     }
 
@@ -127,7 +134,6 @@ public class LoginViewController: UIViewController, View {
       make.height.equalTo(50)
     }
 
-    loginButtonStackView.addArrangedSubview(appleLoginButton)
     appleLoginButton.snp.makeConstraints { make in
       make.height.equalTo(50)
     }
@@ -142,88 +148,39 @@ public class LoginViewController: UIViewController, View {
   }
 
   public func bind(reactor: LoginReactor) {
-    // Action
-    //    kakaoLoginButton.rx.tap
-    //      .map { Reactor.Action.kakaoLoginTapped }
-    //      .bind(to: reactor.action)
-    //      .disposed(by: disposeBag)
+    kakaoLoginButton.rx.tap
+      .map { Reactor.Action.kakaoLoginTapped }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
 
-    //    appleLoginButton.rx.tap
-    //      .map { Reactor.Action.appleLoginTapped }
-    //      .bind(to: reactor.action)
-    //      .disposed(by: disposeBag)
+    appleLoginButton.rx.tap
+      .subscribe(onNext: { [weak self] in
+        self?.appleLoginButtonTapped()
+      })
+      .disposed(by: disposeBag)
 
-    // State
     reactor.state.map { $0.isLoading }
       .distinctUntilChanged()
       .bind(to: activityIndicator.rx.isAnimating)
       .disposed(by: disposeBag)
 
     reactor.state.compactMap { $0.socialLoginResult }
-      .distinctUntilChanged { $0.user.id == $1.user.id }
+      .distinctUntilChanged { $0.user.userId == $1.user.userId }
       .subscribe(onNext: { [weak self] result in
         print("로그인 성공! 사용자: \(result.user.nickname), 신규 여부: \(result.isNew)")
-        self?.navigateToNextScreen(isNew: result.isNew)
+        self?.navigateToNextScreen()
       })
       .disposed(by: disposeBag)
 
     reactor.state.compactMap { $0.error }
       .subscribe(onNext: { [weak self] error in
-        self?.showAlert(title: "로그인 실패", message: error.localizedDescription)
+        self?.showAlert(title: "로그인 실패", message: error)
       })
       .disposed(by: disposeBag)
-  }
-
-  // MARK: - Bind ViewModel (Login Logic)
-  private func bindViewModel() {
-    kakaoLoginButton.rx.tap
-      .subscribe(onNext: { [weak self] in
-        self?.handleKakaoLogin()
-      })
-      .disposed(by: disposeBag)
-
-    appleLoginButton.addTarget(self, action: #selector(appleLoginButtonTapped), for: .touchUpInside)
-  }
-
-  // MARK: - Kakao Login
-  private func handleKakaoLogin() {
-    activityIndicator.startAnimating()
-    if UserApi.isKakaoTalkLoginAvailable() {
-      UserApi.shared.loginWithKakaoTalk { [weak self] (oauthToken, error) in
-        guard let self = self else { return }
-        self.activityIndicator.stopAnimating()
-        if let error = error {
-          print("카카오톡 로그인 에러: \(error.localizedDescription)")
-          self.showAlert(title: "로그인 실패", message: "카카오톡 로그인에 실패했습니다: \(error.localizedDescription)")
-        } else if let idToken = oauthToken?.idToken {
-          print("카카오톡 로그인 성공: \(idToken)")
-          reactor?.action.onNext(.kakaoLoginCompleted(idToken))
-        }
-      }
-    } else {
-      UserApi.shared.loginWithKakaoAccount { [weak self] (oauthToken, error) in
-        guard let self = self else { return }
-        self.activityIndicator.stopAnimating()
-
-        if let error = error {
-          print("카카오 계정 로그인 에러: \(error.localizedDescription)")
-          self.showAlert(title: "로그인 실패", message: "카카오 계정 로그인에 실패했습니다: \(error.localizedDescription)")
-        } else if let idToken = oauthToken?.idToken {
-          print("카카오 계정 로그인 성공: \(idToken)")
-          reactor?.action.onNext(.kakaoLoginCompleted(idToken))
-        }
-      }
-    }
   }
 
   // MARK: - Apple Login Action
   @objc private func appleLoginButtonTapped() {
-    handleAppleLogin()
-  }
-
-  // MARK: - Apple Login
-  private func handleAppleLogin() {
-    activityIndicator.startAnimating()
     let appleIDProvider = ASAuthorizationAppleIDProvider()
     let request = appleIDProvider.createRequest()
     request.requestedScopes = [.fullName, .email]
@@ -232,23 +189,20 @@ public class LoginViewController: UIViewController, View {
     authorizationController.delegate = self
     authorizationController.presentationContextProvider = self
     authorizationController.performRequests()
+
+    activityIndicator.startAnimating()
   }
 
   // MARK: - Navigation
-  private func navigateToNextScreen(isNew: Bool) {
-    if isNew {
-      coordinator?.showOnboarding()
-    } else {
-      // TODO: -
-      coordinator?.showOnboarding()
-    }
+  private func navigateToNextScreen() {
+    coordinator?.showOnboarding()
   }
 
   // MARK: - Helper
   private func showAlert(title: String, message: String) {
     let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
-    present(alert, animated: true, completion: nil)
+    alert.addAction(UIAlertAction(title: "확인", style: .default))
+    present(alert, animated: true)
   }
 }
 
@@ -257,49 +211,25 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
   public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
     activityIndicator.stopAnimating()
 
-    if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-      guard let appleIDTokenData = appleIDCredential.identityToken else {
-        print("Apple ID Token을 가져올 수 없습니다.")
-        showAlert(title: "로그인 실패", message: "Apple ID Token을 가져올 수 없습니다.")
-        return
-      }
-
-      guard let idToken = String(data: appleIDTokenData, encoding: .utf8) else {
-        print("Apple ID Token 디코딩 실패")
-        showAlert(title: "로그인 실패", message: "Apple ID Token 디코딩에 실패했습니다.")
-        return
-      }
-
-      print("애플 로그인 성공!")
-      print("ID Token: \(idToken)")
-
+    if let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+       let tokenData = credential.identityToken,
+       let idToken = String(data: tokenData, encoding: .utf8) {
+      print("애플 로그인 성공! >> ID Token: \(idToken)")
       reactor?.action.onNext(.appleLoginCompleted(idToken))
-
-    } else if let passwordCredential = authorization.credential as? ASPasswordCredential {
-      let username = passwordCredential.user
-      let password = passwordCredential.password
-      print("기존 패스워드 크리덴셜 사용: \(username), \(password)")
+    } else {
+      showAlert(title: "로그인 실패", message: "애플 로그인 토큰을 가져올 수 없습니다.")
     }
   }
 
   public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
     activityIndicator.stopAnimating()
-    print("애플 로그인 에러: \(error.localizedDescription)")
-    if let authorizationError = error as? ASAuthorizationError {
-      if authorizationError.code == .canceled {
-        print("애플 로그인 취소")
-      } else {
-        showAlert(title: "로그인 실패", message: "애플 로그인에 실패했습니다: \(error.localizedDescription)")
-      }
-    } else {
-      showAlert(title: "로그인 실패", message: "애플 로그인에 실패했습니다: \(error.localizedDescription)")
-    }
+    showAlert(title: "로그인 실패", message: error.localizedDescription)
   }
 }
 
 // MARK: - ASAuthorizationControllerPresentationContextProviding
 extension LoginViewController: ASAuthorizationControllerPresentationContextProviding {
   public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-    return self.view.window!
+    return self.view.window ?? UIWindow()
   }
 }
