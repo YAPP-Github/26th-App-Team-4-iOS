@@ -168,7 +168,7 @@ public class LoginViewController: BaseViewController, View {
       .distinctUntilChanged { $0.user.userId == $1.user.userId }
       .subscribe(onNext: { [weak self] result in
         print("로그인 성공! 사용자: \(result.user.nickname), 신규 여부: \(result.isNew)")
-        self?.navigateToNextScreen(isNew: result.isNew)
+        self?.navigateToNextScreen()
       })
       .disposed(by: disposeBag)
 
@@ -194,13 +194,8 @@ public class LoginViewController: BaseViewController, View {
   }
 
   // MARK: - Navigation
-  private func navigateToNextScreen(isNew: Bool) {
-    if isNew {
-      coordinator?.showOnboarding()
-    } else {
-      // TODO: -
-      coordinator?.showOnboarding()
-    }
+  private func navigateToNextScreen() {
+    coordinator?.showOnboarding()
   }
 
   // MARK: - Helper

@@ -18,12 +18,9 @@ public final class MainTabBarAssembly: Assembly {
     container.register(MainTabBarCoordinatorImpl.self) { (r, navigationController: UINavigationController) in
       return MainTabBarCoordinatorImpl(navigationController: navigationController, resolver: r)
     }
-    container.register(MainTabBarViewController.self) { r in
-      guard let reactor = r.resolve(MainTabBarReactor.self) else {
-        fatalError("Failed to resolve MainTabBarReactor.")
-      }
-      let viewController = MainTabBarViewController()
-      viewController.reactor = reactor
+    
+    container.register(MainTabBarController.self) { r in
+      let viewController = MainTabBarController()
       return viewController
     }
   }

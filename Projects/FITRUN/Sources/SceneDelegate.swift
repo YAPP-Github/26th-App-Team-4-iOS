@@ -28,7 +28,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     appCoordinator = AppCoordinatorImpl(navigationController: navigationController, resolver: resolver)
     appCoordinator?.start()
 
-    window.rootViewController = MainTabBarController()//navigationController
+    window.rootViewController = navigationController
     window.makeKeyAndVisible()
   }
 

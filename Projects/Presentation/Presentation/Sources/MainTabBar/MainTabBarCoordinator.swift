@@ -26,10 +26,9 @@ public final class MainTabBarCoordinatorImpl: MainTabBarCoordinator {
   }
 
   public func start() {
-    guard let viewController = resolver.resolve(MainTabBarViewController.self) else {
+    guard let viewController = resolver.resolve(MainTabBarController.self) else {
       fatalError("Failed to resolve MainTabBarViewController. Ensure it is registered correctly in Swinject.")
     }
-    viewController.coordinator = self
     navigationController.setViewControllers([viewController], animated: true)
   }
 }

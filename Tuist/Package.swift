@@ -19,7 +19,6 @@ enum FRDependency: CaseIterable {
   case swinjectAutoregistration
   case nMapsMap
 
-  
   var packageName: String {
     switch self {
     case .kingfisher: "Kingfisher"

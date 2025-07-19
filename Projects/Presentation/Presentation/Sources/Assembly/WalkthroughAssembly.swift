@@ -18,6 +18,7 @@ public final class WalkthroughAssembly: Assembly {
     container.register(WalkthroughCoordinatorImpl.self) { (r, navigationController: UINavigationController) in
       return WalkthroughCoordinatorImpl(navigationController: navigationController, resolver: r)
     }
+    
     container.register(WalkthroughViewController.self) { r in
       guard let reactor = r.resolve(WalkthroughReactor.self) else {
         fatalError("Failed to resolve WalkthroughReactor.")

@@ -18,6 +18,7 @@ public final class LaunchAssembly: Assembly {
     container.register(LaunchCoordinatorImpl.self) { (r, navigationController: UINavigationController) in
       return LaunchCoordinatorImpl(navigationController: navigationController, resolver: r)
     }
+    
     container.register(LaunchViewController.self) { r in
       guard let reactor = r.resolve(LaunchReactor.self) else {
         fatalError("Failed to resolve LaunchReactor. Ensure LaunchReactor is registered correctly.")

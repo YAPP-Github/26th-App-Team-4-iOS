@@ -18,6 +18,7 @@ public final class OnboardingAssembly: Assembly {
     container.register(OnboardingCoordinatorImpl.self) { (r, navigationController: UINavigationController) in
       return OnboardingCoordinatorImpl(navigationController: navigationController, resolver: r)
     }
+    
     container.register(OnboardingViewController.self) { r in
       guard let reactor = r.resolve(OnboardingReactor.self) else {
         fatalError("Failed to resolve OnboardingReactor.")
