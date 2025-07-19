@@ -10,6 +10,11 @@ import Swinject
 import RxSwift
 import Core
 
+public protocol LaunchScreenCoordinatorDelegate: AnyObject {
+  func showWalkthroughFlow()
+  func showMainTabBarFlow()
+}
+
 public protocol LaunchScreenCoordinator: Coordinator {
   func showWalkthrough()
   func showMainTabBar()
@@ -20,6 +25,7 @@ public final class LaunchCoordinatorImpl: LaunchScreenCoordinator {
   public var childCoordinators: [Coordinator] = []
   public var type: CoordinatorType = .launchScreen
   public weak var finishDelegate: CoordinatorFinishDelegate?
+  public weak var launchScreenCoordinatorDelegate: LaunchScreenCoordinatorDelegate?
   private let resolver: Resolver
 
   public init(navigationController: UINavigationController, resolver: Resolver) {
@@ -32,17 +38,17 @@ public final class LaunchCoordinatorImpl: LaunchScreenCoordinator {
       fatalError("Failed to resolve LaunchViewController. Ensure it is registered correctly in Swinject.")
     }
     viewController.coordinator = self
-    
+
     navigationController.setViewControllers([viewController], animated: false)
   }
 }
 
 extension LaunchCoordinatorImpl {
   public func showWalkthrough() {
-    finishDelegate?.coordinatorDidFinish(childCoordinator: self)
+    launchScreenCoordinatorDelegate?.showWalkthroughFlow()
   }
 
   public func showMainTabBar() {
-    finishDelegate?.coordinatorDidFinish(childCoordinator: self)
+    launchScreenCoordinatorDelegate?.showMainTabBarFlow()
   }
 }

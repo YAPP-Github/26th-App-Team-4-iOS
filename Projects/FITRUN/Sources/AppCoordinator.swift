@@ -37,13 +37,12 @@ extension AppCoordinatorImpl: AppCoordinator {
       fatalError("Failed to resolve LaunchCoordinatorImpl. Ensure it is registered correctly in Swinject.")
     }
     coordinator.finishDelegate = self
+    coordinator.launchScreenCoordinatorDelegate = self
     childCoordinators.append(coordinator)
     coordinator.start()
   }
 
   func showWalkthrough() {
-    self.navigationController.viewControllers.removeAll()
-
     guard let coordinator = resolver.resolve(WalkthroughCoordinatorImpl.self, argument: navigationController) else {
       fatalError("Failed to resolve WalkthroughCoordinatorImpl. Ensure it is registered correctly in Swinject.")
     }
@@ -53,8 +52,6 @@ extension AppCoordinatorImpl: AppCoordinator {
   }
 
   func showLogin() {
-    self.navigationController.viewControllers.removeAll()
-
     guard let coordinator = resolver.resolve(LoginCoordinatorImpl.self, argument: navigationController) else {
       fatalError("Failed to resolve LoginCoordinatorImpl. Ensure it is registered correctly in Swinject.")
     }
@@ -64,8 +61,6 @@ extension AppCoordinatorImpl: AppCoordinator {
   }
 
   func showOnboarding() {
-    self.navigationController.viewControllers.removeAll()
-
     guard let coordinator = resolver.resolve(OnboardingCoordinatorImpl.self, argument: navigationController) else {
       fatalError("Failed to resolve OnboardingCoordinatorImpl. Ensure it is registered correctly in Swinject.")
     }
@@ -74,9 +69,7 @@ extension AppCoordinatorImpl: AppCoordinator {
     coordinator.start()
   }
 
-  func showMainTab() {
-    self.navigationController.viewControllers.removeAll()
-
+  func showMainTabBar() {
     guard let coordinator = resolver.resolve(MainTabBarCoordinatorImpl.self, argument: navigationController) else {
       fatalError("Failed to resolve MainTabBarCoordinatorImpl. Ensure it is registered correctly in Swinject.")
     }
@@ -101,9 +94,22 @@ extension AppCoordinatorImpl: CoordinatorFinishDelegate {
     case .login:
       showOnboarding()
     case .onboarding:
-      showMainTab()
+      showMainTabBar()
     default:
       break
     }
+  }
+}
+
+// MARK: - LaunchScreenCoordinatorDelegate
+extension AppCoordinatorImpl: LaunchScreenCoordinatorDelegate {
+  func showWalkthroughFlow() {
+    childCoordinators = childCoordinators.filter({ $0.type != .launchScreen})
+    showWalkthrough()
+  }
+  
+  func showMainTabBarFlow() {
+    childCoordinators = childCoordinators.filter({ $0.type != .launchScreen})
+    showMainTabBar()
   }
 }

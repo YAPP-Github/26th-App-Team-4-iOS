@@ -29,6 +29,6 @@ public final class MainTabBarCoordinatorImpl: MainTabBarCoordinator {
     guard let viewController = resolver.resolve(MainTabBarController.self) else {
       fatalError("Failed to resolve MainTabBarViewController. Ensure it is registered correctly in Swinject.")
     }
-    navigationController.setViewControllers([viewController], animated: true)
+    navigationController.setViewControllers([viewController], animated: false)
   }
 }

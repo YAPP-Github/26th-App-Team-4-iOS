@@ -25,5 +25,12 @@ public class DomainAssembly: Assembly {
       }
       return OnboardingUseCaseImpl(repository: repository)
     }
+
+    container.register(CheckLoginStatusUseCase.self) { r in
+      guard let repository = r.resolve(AuthRepository.self) else {
+        fatalError("Failed to resolve AuthRepository for CheckLoginStatusUseCase.")
+      }
+      return CheckLoginStatusUseCaseImpl(authRepository: repository)
+    }
   }
 }
