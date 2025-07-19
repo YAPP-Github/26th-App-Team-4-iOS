@@ -75,4 +75,17 @@ public final class RunnerTypeViewController: BaseViewController {
       make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-12)
     }
   }
+  
+  public override func action() {
+    super.action()
+    
+    goToHomeButton.rx.tap
+      .subscribe(with: self) { object, _ in
+        let vc = MainTabBarController()
+        vc.modalTransitionStyle = .crossDissolve
+        vc.modalPresentationStyle = .overFullScreen
+        object.present(vc, animated: true, completion: nil)
+      }
+      .disposed(by: disposeBag)
+  }
 }

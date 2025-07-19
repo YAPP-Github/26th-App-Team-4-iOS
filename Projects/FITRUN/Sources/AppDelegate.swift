@@ -8,6 +8,7 @@
 import UIKit
 
 import KakaoSDKCommon
+import NMapsMap
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,6 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     if let kakaoAppKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_NATIVE_APP_KEY") as? String {
       KakaoSDK.initSDK(appKey: kakaoAppKey)
     }
+    NMFAuthManager.shared().ncpKeyId = "mtx7hyzg95"
     return true
   }
 

@@ -9,6 +9,7 @@ import UIKit
 
 import Core
 import KakaoSDKAuth
+import Presentation
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -26,7 +27,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     appCoordinator = AppCoordinatorImpl(navigationController: navigationController)
     appCoordinator?.start()
 
-    window.rootViewController = navigationController
+    window.rootViewController = MainTabBarController()//navigationController
     window.makeKeyAndVisible()
   }
 
