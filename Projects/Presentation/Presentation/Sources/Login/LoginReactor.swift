@@ -24,8 +24,8 @@ public final class LoginReactor: Reactor {
 
   public struct State {
     var isLoading: Bool = false
-    var socialLoginResult: LoginResult? = nil
-    var error: String? = nil
+    var socialLoginResult: LoginResult?
+    var error: String?
   }
 
   public let initialState = State()

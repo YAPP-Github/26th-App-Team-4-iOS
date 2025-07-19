@@ -22,7 +22,7 @@ public final class KakaoLoginServiceImpl: SocialLoginService {
     return Single.create { single in
       let loginHandler: (OAuthToken?, Error?) -> Void = { (oauthToken, error) in
         if let error = error {
-          single(.failure(SocialLoginError.authenticationFailed(error)))
+          return single(.failure(SocialLoginError.authenticationFailed(error)))
         }
 
         guard let idToken = oauthToken?.idToken else {
