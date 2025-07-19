@@ -9,6 +9,8 @@ let dependencies: [TargetDependency] = [
   .external(name: "RxKeyboard"),
   .external(name: "SnapKit"),
   .external(name: "Then"),
+  .external(name: "Swinject"),
+  .external(name: "SwinjectAutoregistration")
 ]
 
 let project = Project(

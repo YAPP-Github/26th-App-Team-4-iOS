@@ -174,7 +174,7 @@ public class LoginViewController: UIViewController, View {
       .disposed(by: disposeBag)
 
     reactor.state.compactMap { $0.socialLoginResult }
-      .distinctUntilChanged { $0.user.id == $1.user.id }
+      .distinctUntilChanged { $0.user.userId == $1.user.userId }
       .subscribe(onNext: { [weak self] result in
         print("로그인 성공! 사용자: \(result.user.nickname), 신규 여부: \(result.isNew)")
         self?.navigateToNextScreen(isNew: result.isNew)

@@ -9,22 +9,27 @@ import UIKit
 import Swinject
 import Core
 
-public protocol MainTabBarCoordinatorDelegate: AnyObject {
-  
+public protocol MainTabBarCoordinator: Coordinator {
+
 }
 
-public final class MainTabBarCoordinator: Coordinator {
+public final class MainTabBarCoordinatorImpl: MainTabBarCoordinator {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: CoordinatorType = .mainTabBar
   public weak var finishDelegate: CoordinatorFinishDelegate?
+  private let resolver: Resolver
 
-  public init(navigationController: UINavigationController) {
+  public init(navigationController: UINavigationController, resolver: Resolver) {
     self.navigationController = navigationController
+    self.resolver = resolver
   }
 
   public func start() {
-    let mainTabBarController = MainTabBarController()
-    navigationController.setViewControllers([mainTabBarController], animated: true)
+    guard let viewController = resolver.resolve(MainTabBarViewController.self) else {
+      fatalError("Failed to resolve MainTabBarViewController. Ensure it is registered correctly in Swinject.")
+    }
+    viewController.coordinator = self
+    navigationController.setViewControllers([viewController], animated: true)
   }
 }

@@ -34,9 +34,9 @@ public final class LoginReactor: Reactor {
   }
 
   public let initialState = State()
-  private let authUseCase: AuthUseCaseType
+  private let authUseCase: AuthUseCase
 
-  public init(authUseCase: AuthUseCaseType) {
+  public init(authUseCase: AuthUseCase) {
     self.authUseCase = authUseCase
   }
 

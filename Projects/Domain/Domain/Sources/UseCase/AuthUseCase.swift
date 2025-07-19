@@ -9,12 +9,12 @@ import Foundation
 import AuthenticationServices
 import RxSwift
 
-public protocol AuthUseCaseType {
+public protocol AuthUseCase {
   func kakaoLogin(idToken: String) -> Single<LoginResult>
   func appleLogin(idToken: String) -> Single<LoginResult>
 }
 
-public final class AuthUseCaseImpl: AuthUseCaseType {
+public final class AuthUseCaseImpl: AuthUseCase {
   private let authRepository: AuthRepository
   
   public init(authRepository: AuthRepository) {

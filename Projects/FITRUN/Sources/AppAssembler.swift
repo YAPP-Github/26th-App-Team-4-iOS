@@ -2,25 +2,27 @@
 //  AppAssembler.swift
 //  FITRUN
 //
-//  Created by dong eun shin on 7/3/25.
-//  Copyright © 2025 com.yapp. All rights reserved.
+//  Created by dong eun shin on 7/18/25.
 //
 
 import Swinject
-
-import Data
 import Presentation
 import Domain
+import Data
 
-final class AppAssembler {
+public final class AppAssembler {
   public static let shared = AppAssembler()
-  public let resolver: Resolver
-  private let assembler: Assembler
+  public let assembler: Assembler
 
-  private init() {
+  public init() {
     assembler = Assembler([
-      LaunchAssembler(),
+      DataAssembly(),
+      DomainAssembly(),
+      PresentationAssembly()
     ])
-    resolver = assembler.resolver
+  }
+
+  public var resolver: Resolver {
+    return assembler.resolver
   }
 }

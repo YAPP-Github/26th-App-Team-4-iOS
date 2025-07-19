@@ -8,36 +8,35 @@
 import UIKit
 import Swinject
 import Core
-import Domain
 import Data
 
 public protocol LoginCoordinator: Coordinator {
   func showOnboarding()
 }
 
-public final class LoginCoordinatorImpl {
+public final class LoginCoordinatorImpl: LoginCoordinator {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: CoordinatorType = .login
   public weak var finishDelegate: CoordinatorFinishDelegate?
+  private let resolver: Resolver
 
-
-  public init(navigationController: UINavigationController) {
+  public init(navigationController: UINavigationController, resolver: Resolver) {
     self.navigationController = navigationController
+    self.resolver = resolver
   }
 
   public func start() {
-    let viewController = LoginViewController()
+    guard let viewController = resolver.resolve(LoginViewController.self) else {
+      fatalError("Failed to resolve LoginViewController. Ensure it is registered correctly in Swinject.")
+    }
     viewController.coordinator = self
-    viewController.reactor = LoginReactor(authUseCase: AuthUseCaseImpl(authRepository: AuthRepositoryImpl(networkService: AuthNetworkServiceImpl(), tokenStorage: AuthTokenStorageImpl())))
-    // TODO: - resolve
-    //container.resolve(LoginReactor.self)
-
+    
     navigationController.pushViewController(viewController, animated: false)
   }
 }
 
-extension LoginCoordinatorImpl: LoginCoordinator {
+extension LoginCoordinatorImpl {
   public func showOnboarding() {
     finishDelegate?.coordinatorDidFinish(childCoordinator: self)
   }

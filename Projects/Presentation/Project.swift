@@ -26,7 +26,9 @@ let project = Project(
         .external(name: "Then"),
         .external(name: "KakaoSDKCommon"),
         .external(name: "KakaoSDKAuth"),
-        .external(name: "KakaoSDKUser")
+        .external(name: "KakaoSDKUser"),
+        .external(name: "Swinject"),
+        .external(name: "SwinjectAutoregistration")
       ]
     ),
     .target(

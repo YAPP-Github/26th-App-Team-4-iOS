@@ -13,16 +13,18 @@ public protocol WalkthroughCoordinator: Coordinator {
   func showLogin()
 }
 
-public final class WalkthroughCoordinatorImpl {
+public final class WalkthroughCoordinatorImpl: WalkthroughCoordinator {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: Core.CoordinatorType = .walkthrough
   public weak var finishDelegate: CoordinatorFinishDelegate?
-  
-  public init(navigationController: UINavigationController) {
+  private let resolver: Resolver
+
+  public init(navigationController: UINavigationController, resolver: Resolver) {
     self.navigationController = navigationController
+    self.resolver = resolver
   }
-  
+
   public func start() {
     let viewController = WalkthroughViewController()
     viewController.coordinator = self
@@ -31,7 +33,7 @@ public final class WalkthroughCoordinatorImpl {
   }
 }
 
-extension WalkthroughCoordinatorImpl: WalkthroughCoordinator {
+extension WalkthroughCoordinatorImpl {
   public func showLogin() {
     finishDelegate?.coordinatorDidFinish(childCoordinator: self)
   }

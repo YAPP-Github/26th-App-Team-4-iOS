@@ -8,34 +8,34 @@
 import ReactorKit
 import Foundation
 
-final class MainTabBarReactor: Reactor {
+public final class MainTabBarReactor: Reactor {
 
   // MARK: - Tab enum
-  enum Tab: Int {
+  public enum Tab: Int {
     case home
     case running
     case profile
   }
 
   // MARK: - Action
-  enum Action {
+  public enum Action {
     case selectTab(Int)
   }
 
   // MARK: - Mutation
-  enum Mutation {
+  public enum Mutation {
     case setSelectedTab(Tab)
   }
 
   // MARK: - State
-  struct State {
+  public struct State {
     var selectedTab: Tab = .home
   }
 
-  let initialState: State = State()
+  public let initialState: State = State()
 
   // MARK: - Mutate
-  func mutate(action: Action) -> Observable<Mutation> {
+  public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .selectTab(let index):
       guard let tab = Tab(rawValue: index) else { return .empty() }
@@ -44,7 +44,7 @@ final class MainTabBarReactor: Reactor {
   }
 
   // MARK: - Reduce
-  func reduce(state: State, mutation: Mutation) -> State {
+  public func reduce(state: State, mutation: Mutation) -> State {
     var newState = state
     switch mutation {
     case .setSelectedTab(let tab):
