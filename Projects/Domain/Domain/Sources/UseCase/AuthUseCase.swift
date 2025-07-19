@@ -10,21 +10,24 @@ import AuthenticationServices
 import RxSwift
 
 public protocol AuthUseCase {
-  func kakaoLogin(idToken: String) -> Single<LoginResult>
+  func kakaoLogin() -> Single<LoginResult>
   func appleLogin(idToken: String) -> Single<LoginResult>
 }
 
 public final class AuthUseCaseImpl: AuthUseCase {
   private let authRepository: AuthRepository
-  
+
   public init(authRepository: AuthRepository) {
     self.authRepository = authRepository
   }
-  
-  public func kakaoLogin(idToken: String) -> Single<LoginResult> {
-    return self.authRepository.kakaoLogin(idToken: idToken)
+
+  public func kakaoLogin() -> Single<LoginResult> {
+    return authRepository.performKakaoSocialLogin()
+      .flatMap { idToken in
+        self.authRepository.kakaoLogin(idToken: idToken)
+      }
   }
-  
+
   public func appleLogin(idToken: String) -> Single<LoginResult> {
     return authRepository.appleLogin(idToken: idToken)
   }

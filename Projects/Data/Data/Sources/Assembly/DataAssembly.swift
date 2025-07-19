@@ -25,14 +25,21 @@ public class DataAssembly: Assembly {
       return AuthNetworkServiceImpl(provider: provider)
     }
 
+    container.register(KakaoLoginServiceImpl.self) { r in
+      return KakaoLoginServiceImpl()
+    }
+
     container.autoregister(AuthTokenStorageImpl.self, initializer: AuthTokenStorageImpl.init)
 
     container.register(AuthRepository.self) { r in
-      guard let networkService = r.resolve(AuthNetworkServiceImpl.self),
-            let tokenStorage = r.resolve(AuthTokenStorageImpl.self) else {
-        fatalError("Failed to resolve dependencies for AuthRepository. Make sure AuthNetworkServiceImpl and AuthTokenStorageImpl are registered.")
+      guard
+        let kakaoLoginService = r.resolve(KakaoLoginServiceImpl.self),
+        let networkService = r.resolve(AuthNetworkServiceImpl.self),
+        let tokenStorage = r.resolve(AuthTokenStorageImpl.self)
+      else {
+        fatalError("Failed to resolve dependencies for AuthRepository.")
       }
-      return AuthRepositoryImpl(networkService: networkService, tokenStorage: tokenStorage)
+      return AuthRepositoryImpl(kakaoLoginService: kakaoLoginService, networkService: networkService, tokenStorage: tokenStorage)
     }
 
     // Onboarding
