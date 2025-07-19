@@ -5,14 +5,16 @@
 //  Created by JDeoks on 7/18/25.
 //
 
-
 import UIKit
+import SnapKit
 import ReactorKit
 
 import Core
 import Domain
 
 public class WeeklyRunningGoalCardView: BaseView {
+  
+  // MARK: - UI
   
   private lazy var titleStackView = UIStackView(
     arrangedSubviews: [titleLabel, UIView(), editButton]
@@ -33,12 +35,13 @@ public class WeeklyRunningGoalCardView: BaseView {
     $0.tintColor = .gray
   }
 
-  private let progressView = UIProgressView(progressViewStyle: .bar).then {
-    $0.trackTintColor = UIColor.systemGray3
-    $0.progressTintColor = UIColor.systemGray5
+  /// 기존 progressView 대신 사용할 스택뷰
+  private let progressStackView = UIStackView().then {
+    $0.axis = .horizontal
+    $0.distribution = .fillEqually
+    $0.spacing = 2
     $0.layer.cornerRadius = 1
     $0.clipsToBounds = true
-    $0.progress = 0.5
   }
   
   private lazy var recordContainerStackView = UIStackView(
@@ -47,7 +50,6 @@ public class WeeklyRunningGoalCardView: BaseView {
     $0.axis = .horizontal
     $0.alignment = .fill
     $0.distribution = .fillEqually
-    $0.clipsToBounds = true
     $0.spacing = 9
   }
 
@@ -58,7 +60,6 @@ public class WeeklyRunningGoalCardView: BaseView {
     $0.alignment = .center
     $0.backgroundColor = UIColor(red: 0.99, green: 0.95, blue: 0.92, alpha: 1)
     $0.layer.cornerRadius = 8
-    $0.clipsToBounds = true
     $0.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
     $0.isLayoutMarginsRelativeArrangement = true
   }
@@ -83,7 +84,6 @@ public class WeeklyRunningGoalCardView: BaseView {
     $0.alignment = .center
     $0.backgroundColor = UIColor(red: 1, green: 0.97, blue: 0.97, alpha: 1)
     $0.layer.cornerRadius = 8
-    $0.clipsToBounds = true
     $0.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
     $0.isLayoutMarginsRelativeArrangement = true
   }
@@ -101,38 +101,8 @@ public class WeeklyRunningGoalCardView: BaseView {
     $0.textAlignment = .right
   }
   
-  public func setData(_ homeInfo: HomeInfo) {
-    // 목표 페이스
-    if let paceGoal = homeInfo.paceGoal {
-      let paceSec = Int(paceGoal)
-      let minutesT = paceSec / 60
-      let secondsT = paceSec % 60
-      targetValueLabel.text = "\(minutesT)'\(String(format: "%02d", secondsT))\""
-    } else {
-      targetValueLabel.text = "-’--”"
-    }
+  // MARK: - Layout
 
-    // 최근 페이스
-    if let recentPace = homeInfo.recentPace {
-      let paceSec = Int(recentPace)
-      let minutesR = paceSec / 60
-      let secondsR = paceSec % 60
-      recentValueLabel.text = "\(minutesR)'\(String(format: "%02d", secondsR))\""
-    } else {
-      recentValueLabel.text = "-’--”"
-    }
-
-    // 진행도 계산 (옵셔널 처리)
-    let weekly = homeInfo.weeklyRunningCount ?? 0
-    let thisCount = homeInfo.thisWeekRunningCount ?? 0
-    let progress: Float = weekly > 0
-      ? Float(thisCount) / Float(weekly)
-      : 0
-
-    progressView.progress = min(max(progress, 0), 1)
-  }
-
-  
   public override func initUI() {
     super.initUI()
     backgroundColor = FRColor.BG.primary
@@ -146,8 +116,8 @@ public class WeeklyRunningGoalCardView: BaseView {
       $0.height.equalTo(24)
     }
     
-    addSubview(progressView)
-    progressView.snp.makeConstraints {
+    addSubview(progressStackView)
+    progressStackView.snp.makeConstraints {
       $0.top.equalTo(titleStackView.snp.bottom).offset(11)
       $0.leading.trailing.equalToSuperview().inset(20)
       $0.height.equalTo(4)
@@ -155,10 +125,48 @@ public class WeeklyRunningGoalCardView: BaseView {
     
     addSubview(recordContainerStackView)
     recordContainerStackView.snp.makeConstraints {
-      $0.top.equalTo(progressView.snp.bottom).offset(17)
+      $0.top.equalTo(progressStackView.snp.bottom).offset(17)
       $0.leading.trailing.equalToSuperview().inset(20)
       $0.height.equalTo(38)
       $0.bottom.equalToSuperview().inset(18)
+    }
+  }
+  
+  // MARK: - Data Binding
+  
+  /// 홈 정보로 카드에 표시될 내용을 업데이트합니다.
+  public func setData(_ homeInfo: HomeInfo) {
+    // 1) 목표/최근 페이스 포맷(기존과 동일)
+    if let paceGoal = homeInfo.paceGoal {
+      let sec = Int(paceGoal)
+      let m = sec / 60, s = sec % 60
+      targetValueLabel.text = "\(m)'\(String(format: "%02d", s))\""
+    } else {
+      targetValueLabel.text = "-’--”"
+    }
+    if let recentP = homeInfo.recentPace {
+      let sec = Int(recentP)
+      let m = sec / 60, s = sec % 60
+      recentValueLabel.text = "\(m)'\(String(format: "%02d", s))\""
+    } else {
+      recentValueLabel.text = "-’--”"
+    }
+
+    // 2) 진행도 스택뷰로 그리기
+    let total = homeInfo.weeklyRunningCount ?? 0
+    let done  = homeInfo.thisWeekRunningCount ?? 0
+
+    // 기존 뷰 모두 제거
+    progressStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+
+    // segment 수만큼 추가
+    for i in 0..<total {
+      let v = UIView()
+      v.layer.cornerRadius = 1
+      v.backgroundColor = i < done
+        ? UIColor(hex: "#FF6600")
+        : UIColor.systemGray5
+      progressStackView.addArrangedSubview(v)
     }
   }
 }
