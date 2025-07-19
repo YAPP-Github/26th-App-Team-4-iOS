@@ -9,18 +9,12 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
-import KakaoSDKAuth
-import KakaoSDKUser
 import AuthenticationServices
-import Moya
-import RxMoya
 import ReactorKit
 import Core
 
-public class LoginViewController: UIViewController, View {
+public class LoginViewController: BaseViewController, View {
   public typealias Reactor = LoginReactor
-
-  public var disposeBag = DisposeBag()
 
   weak var coordinator: LoginCoordinator?
 
@@ -41,7 +35,7 @@ public class LoginViewController: UIViewController, View {
     imageView.backgroundColor = .yellow
   }
 
-  private let logolabel = UILabel().then { label in
+  private let logoLabel = UILabel().then { label in
     label.text = "fitrun"
     label.textColor = .orange
     label.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -107,19 +101,18 @@ public class LoginViewController: UIViewController, View {
   // MARK: - Life Cycle
   public override func viewDidLoad() {
     super.viewDidLoad()
+
     setupUI()
-    appleLoginButton.addTarget(self, action: #selector(appleLoginButtonTapped), for: .touchUpInside)
   }
 
   // MARK: - Setup UI
   private func setupUI() {
-    view.backgroundColor = .white
+    view.addSubview(logoStackView)
     view.addSubview(loginButtonStackView)
     view.addSubview(appleIDButton)
-    view.addSubview(logoStackView)
     view.addSubview(activityIndicator)
     logoStackView.addArrangedSubview(logoImageView)
-    logoStackView.addArrangedSubview(logolabel)
+    logoStackView.addArrangedSubview(logoLabel)
     loginButtonStackView.addArrangedSubview(kakaoLoginButton)
     loginButtonStackView.addArrangedSubview(appleLoginButton)
 
@@ -156,13 +149,17 @@ public class LoginViewController: UIViewController, View {
   }
 
   public func bind(reactor: LoginReactor) {
-    // Action
     kakaoLoginButton.rx.tap
       .map { Reactor.Action.kakaoLoginTapped }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
 
-    // State
+    appleLoginButton.rx.tap
+      .subscribe(onNext: { [weak self] in
+        self?.appleLoginButtonTapped()
+      })
+      .disposed(by: disposeBag)
+
     reactor.state.map { $0.isLoading }
       .distinctUntilChanged()
       .bind(to: activityIndicator.rx.isAnimating)
@@ -193,6 +190,8 @@ public class LoginViewController: UIViewController, View {
     authorizationController.delegate = self
     authorizationController.presentationContextProvider = self
     authorizationController.performRequests()
+
+    activityIndicator.startAnimating()
   }
 
   // MARK: - Navigation
@@ -208,8 +207,8 @@ public class LoginViewController: UIViewController, View {
   // MARK: - Helper
   private func showAlert(title: String, message: String) {
     let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
-    present(alert, animated: true, completion: nil)
+    alert.addAction(UIAlertAction(title: "확인", style: .default))
+    present(alert, animated: true)
   }
 }
 
@@ -218,39 +217,19 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
   public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
     activityIndicator.stopAnimating()
 
-    if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-      guard let appleIDTokenData = appleIDCredential.identityToken else {
-        showAlert(title: "로그인 실패", message: "Apple ID Token을 가져올 수 없습니다.")
-        return
-      }
-
-      guard let idToken = String(data: appleIDTokenData, encoding: .utf8) else {
-        showAlert(title: "로그인 실패", message: "Apple ID Token 디코딩에 실패했습니다.")
-        return
-      }
-
-      print("애플 로그인 성공!")
-      print("ID Token: \(idToken)")
-
+    if let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+       let tokenData = credential.identityToken,
+       let idToken = String(data: tokenData, encoding: .utf8) {
+      print("애플 로그인 성공! >> ID Token: \(idToken)")
       reactor?.action.onNext(.appleLoginCompleted(idToken))
-
-    } else if let passwordCredential = authorization.credential as? ASPasswordCredential {
-      let username = passwordCredential.user
-      let password = passwordCredential.password
-      print("기존 패스워드 크리덴셜 사용: \(username), \(password)")
+    } else {
+      showAlert(title: "로그인 실패", message: "애플 로그인 토큰을 가져올 수 없습니다.")
     }
   }
 
   public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
     activityIndicator.stopAnimating()
-    if let authorizationError = error as? ASAuthorizationError {
-      if authorizationError.code == .canceled {
-      } else {
-        showAlert(title: "로그인 실패", message: "애플 로그인에 실패했습니다: \(error.localizedDescription)")
-      }
-    } else {
-      showAlert(title: "로그인 실패", message: "애플 로그인에 실패했습니다: \(error.localizedDescription)")
-    }
+    showAlert(title: "로그인 실패", message: error.localizedDescription)
   }
 }
 

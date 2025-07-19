@@ -95,12 +95,12 @@ public final class LoginReactor: Reactor {
 
         guard let idToken = token?.idToken else {
           // TODO: - 에러처리
-//          observer.onNext(.setLoginError())
+//          observer.onNext(.setLoginError(""))
           observer.onCompleted()
           return
         }
 
-        self.authUseCase.kakaoLogin(idToken: idToken)
+        _ = self.authUseCase.kakaoLogin(idToken: idToken)
           .subscribe(
             onSuccess: { result in
               observer.onNext(.setSocialLoginResult(result))
@@ -111,7 +111,6 @@ public final class LoginReactor: Reactor {
               observer.onCompleted()
             }
           )
-          .disposed(by: self.disposeBag)
       }
 
       if UserApi.isKakaoTalkLoginAvailable() {
@@ -123,6 +122,4 @@ public final class LoginReactor: Reactor {
       return Disposables.create()
     }
   }
-
-  private let disposeBag = DisposeBag()
 }
