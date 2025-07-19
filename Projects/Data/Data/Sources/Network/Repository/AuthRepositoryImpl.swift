@@ -19,7 +19,7 @@ public final class AuthRepositoryImpl: AuthRepository {
     self.networkService = networkService
     self.tokenStorage = tokenStorage
   }
-  
+
   public func kakaoLogin(idToken: String) -> Single<LoginResult> {
     return networkService.requestKakaoLogin(idToken: idToken)
       .map { remoteLoginResult in
@@ -29,7 +29,7 @@ public final class AuthRepositoryImpl: AuthRepository {
         return domainResult
       }
   }
-  
+
   public func appleLogin(idToken: String) -> Single<LoginResult> {
     return networkService.requestAppleLogin(idToken: idToken)
       .map { remoteLoginResult in
@@ -42,5 +42,13 @@ public final class AuthRepositoryImpl: AuthRepository {
 
   public func performKakaoSocialLogin() -> Single<String> {
     return kakaoLoginService.login()
+  }
+
+  public func hasValidAuthSession() -> Single<Bool> {
+    guard let accessToken = tokenStorage.getAccessToken(), !accessToken.isEmpty else {
+      return .just(false)
+    }
+
+    return .just(true)
   }
 }

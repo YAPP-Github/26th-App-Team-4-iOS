@@ -40,5 +40,5 @@ public protocol AppCoordinator: Coordinator {
   func showWalkthrough()
   func showLogin()
   func showOnboarding()
-  func showMainTab()
+  func showMainTabBar()
 }

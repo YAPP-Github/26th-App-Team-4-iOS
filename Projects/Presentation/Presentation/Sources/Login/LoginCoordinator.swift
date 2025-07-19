@@ -32,7 +32,7 @@ public final class LoginCoordinatorImpl: LoginCoordinator {
     }
     viewController.coordinator = self
     
-    navigationController.pushViewController(viewController, animated: false)
+    navigationController.setViewControllers([viewController], animated: false)
   }
 }
 

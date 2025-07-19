@@ -13,4 +13,6 @@ public protocol AuthRepository {
   func appleLogin(idToken: String) -> Single<LoginResult>
 
   func performKakaoSocialLogin() -> Single<String>
+
+  func hasValidAuthSession() -> Single<Bool>
 }
