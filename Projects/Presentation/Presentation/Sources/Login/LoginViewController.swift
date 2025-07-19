@@ -108,7 +108,7 @@ public class LoginViewController: UIViewController, View {
   public override func viewDidLoad() {
     super.viewDidLoad()
     setupUI()
-    bindViewModel()
+    appleLoginButton.addTarget(self, action: #selector(appleLoginButtonTapped), for: .touchUpInside)
   }
 
   // MARK: - Setup UI
@@ -157,15 +157,10 @@ public class LoginViewController: UIViewController, View {
 
   public func bind(reactor: LoginReactor) {
     // Action
-    //    kakaoLoginButton.rx.tap
-    //      .map { Reactor.Action.kakaoLoginTapped }
-    //      .bind(to: reactor.action)
-    //      .disposed(by: disposeBag)
-
-    //    appleLoginButton.rx.tap
-    //      .map { Reactor.Action.appleLoginTapped }
-    //      .bind(to: reactor.action)
-    //      .disposed(by: disposeBag)
+    kakaoLoginButton.rx.tap
+      .map { Reactor.Action.kakaoLoginTapped }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
 
     // State
     reactor.state.map { $0.isLoading }
@@ -183,61 +178,13 @@ public class LoginViewController: UIViewController, View {
 
     reactor.state.compactMap { $0.error }
       .subscribe(onNext: { [weak self] error in
-        self?.showAlert(title: "로그인 실패", message: error.localizedDescription)
+        self?.showAlert(title: "로그인 실패", message: error)
       })
       .disposed(by: disposeBag)
-  }
-
-  // MARK: - Bind ViewModel (Login Logic)
-  private func bindViewModel() {
-    kakaoLoginButton.rx.tap
-      .subscribe(onNext: { [weak self] in
-        self?.handleKakaoLogin()
-      })
-      .disposed(by: disposeBag)
-
-    appleLoginButton.addTarget(self, action: #selector(appleLoginButtonTapped), for: .touchUpInside)
-  }
-
-  // MARK: - Kakao Login
-  private func handleKakaoLogin() {
-    activityIndicator.startAnimating()
-    if UserApi.isKakaoTalkLoginAvailable() {
-      UserApi.shared.loginWithKakaoTalk { [weak self] (oauthToken, error) in
-        guard let self = self else { return }
-        self.activityIndicator.stopAnimating()
-        if let error = error {
-          print("카카오톡 로그인 에러: \(error.localizedDescription)")
-          self.showAlert(title: "로그인 실패", message: "카카오톡 로그인에 실패했습니다: \(error.localizedDescription)")
-        } else if let idToken = oauthToken?.idToken {
-          print("카카오톡 로그인 성공: \(idToken)")
-          reactor?.action.onNext(.kakaoLoginCompleted(idToken))
-        }
-      }
-    } else {
-      UserApi.shared.loginWithKakaoAccount { [weak self] (oauthToken, error) in
-        guard let self = self else { return }
-        self.activityIndicator.stopAnimating()
-
-        if let error = error {
-          print("카카오 계정 로그인 에러: \(error.localizedDescription)")
-          self.showAlert(title: "로그인 실패", message: "카카오 계정 로그인에 실패했습니다: \(error.localizedDescription)")
-        } else if let idToken = oauthToken?.idToken {
-          print("카카오 계정 로그인 성공: \(idToken)")
-          reactor?.action.onNext(.kakaoLoginCompleted(idToken))
-        }
-      }
-    }
   }
 
   // MARK: - Apple Login Action
   @objc private func appleLoginButtonTapped() {
-    handleAppleLogin()
-  }
-
-  // MARK: - Apple Login
-  private func handleAppleLogin() {
-    activityIndicator.startAnimating()
     let appleIDProvider = ASAuthorizationAppleIDProvider()
     let request = appleIDProvider.createRequest()
     request.requestedScopes = [.fullName, .email]
@@ -273,13 +220,11 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
 
     if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
       guard let appleIDTokenData = appleIDCredential.identityToken else {
-        print("Apple ID Token을 가져올 수 없습니다.")
         showAlert(title: "로그인 실패", message: "Apple ID Token을 가져올 수 없습니다.")
         return
       }
 
       guard let idToken = String(data: appleIDTokenData, encoding: .utf8) else {
-        print("Apple ID Token 디코딩 실패")
         showAlert(title: "로그인 실패", message: "Apple ID Token 디코딩에 실패했습니다.")
         return
       }
@@ -298,10 +243,8 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
 
   public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
     activityIndicator.stopAnimating()
-    print("애플 로그인 에러: \(error.localizedDescription)")
     if let authorizationError = error as? ASAuthorizationError {
       if authorizationError.code == .canceled {
-        print("애플 로그인 취소")
       } else {
         showAlert(title: "로그인 실패", message: "애플 로그인에 실패했습니다: \(error.localizedDescription)")
       }

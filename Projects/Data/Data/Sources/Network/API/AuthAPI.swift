@@ -9,28 +9,19 @@ import Foundation
 import Moya
 import Domain
 
-public enum AuthAPI {
+public enum AuthAPI: BaseAPI {
   case appleLogin(idToken: String)
   case kakaoLogin(idToken: String)
   case refreshToken(refreshToken: String)
-}
-
-extension AuthAPI: TargetType {
-  public var baseURL: URL {
-    guard let url = URL(string: "http://fitrun.p-e.kr/api/v1/auth") else {
-      fatalError("Invalid Base URL: Please set YOUR_BACKEND_SERVER_BASE_URL in AuthAPI.")
-    }
-    return url
-  }
 
   public var path: String {
     switch self {
     case .appleLogin:
-      return "/login/apple"
+      return "/auth/login/apple"
     case .kakaoLogin:
-      return "/login/kakao"
+      return "/auth/login/kakao"
     case .refreshToken:
-      return "refresh"
+      return "/auth/refresh"
     }
   }
 
@@ -47,9 +38,5 @@ extension AuthAPI: TargetType {
     case .refreshToken(refreshToken: let refreshToken):
       return .requestParameters(parameters: ["Authorization": refreshToken], encoding: JSONEncoding.default)
     }
-  }
-
-  public var headers: [String : String]? {
-    return ["Content-Type": "application/json"]
   }
 }
