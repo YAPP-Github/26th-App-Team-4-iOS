@@ -10,6 +10,7 @@ import UIKit
 import ReactorKit
 
 import Core
+import Domain
 
 public class WeeklyRunningGoalCardView: BaseView {
   
@@ -27,17 +28,17 @@ public class WeeklyRunningGoalCardView: BaseView {
     $0.textColor = .black
   }
 
-  private let editButton = UIButton(type: .system).then {
+  let editButton = UIButton(type: .system).then {
     $0.setImage(UIImage(systemName: "pencil"), for: .normal)
     $0.tintColor = .gray
   }
 
   private let progressView = UIProgressView(progressViewStyle: .bar).then {
-    $0.trackTintColor = UIColor.systemGray5
+    $0.trackTintColor = UIColor.systemGray3
     $0.progressTintColor = UIColor.systemGray5
     $0.layer.cornerRadius = 1
     $0.clipsToBounds = true
-    $0.progress = 0
+    $0.progress = 0.5
   }
   
   private lazy var recordContainerStackView = UIStackView(
@@ -99,6 +100,38 @@ public class WeeklyRunningGoalCardView: BaseView {
     $0.textColor = .black
     $0.textAlignment = .right
   }
+  
+  public func setData(_ homeInfo: HomeInfo) {
+    // 목표 페이스
+    if let paceGoal = homeInfo.paceGoal {
+      let paceSec = Int(paceGoal)
+      let minutesT = paceSec / 60
+      let secondsT = paceSec % 60
+      targetValueLabel.text = "\(minutesT)'\(String(format: "%02d", secondsT))\""
+    } else {
+      targetValueLabel.text = "-’--”"
+    }
+
+    // 최근 페이스
+    if let recentPace = homeInfo.recentPace {
+      let paceSec = Int(recentPace)
+      let minutesR = paceSec / 60
+      let secondsR = paceSec % 60
+      recentValueLabel.text = "\(minutesR)'\(String(format: "%02d", secondsR))\""
+    } else {
+      recentValueLabel.text = "-’--”"
+    }
+
+    // 진행도 계산 (옵셔널 처리)
+    let weekly = homeInfo.weeklyRunningCount ?? 0
+    let thisCount = homeInfo.thisWeekRunningCount ?? 0
+    let progress: Float = weekly > 0
+      ? Float(thisCount) / Float(weekly)
+      : 0
+
+    progressView.progress = min(max(progress, 0), 1)
+  }
+
   
   public override func initUI() {
     super.initUI()

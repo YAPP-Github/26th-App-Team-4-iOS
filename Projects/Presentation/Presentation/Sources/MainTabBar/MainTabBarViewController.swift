@@ -7,6 +7,8 @@
 
 import UIKit
 import Core
+import Domain
+import Data
 
 public final class MainTabBarController: UITabBarController {
   
@@ -16,7 +18,12 @@ public final class MainTabBarController: UITabBarController {
   }
   
   private func setupTabs() {
-    let homeVC = HomeViewController()
+    let homeVC = HomeViewController().then {
+      $0.reactor = HomeReactor(
+        homeUseCase: HomeUseCaseImpl(homeRepository: HomeRepositoryImpl())
+      )
+    }
+    
     let homeNav = UINavigationController(rootViewController: homeVC)
     
     homeNav.tabBarItem = UITabBarItem(
