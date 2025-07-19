@@ -7,19 +7,19 @@
 
 import RxSwift
 
-protocol HomeUseCase {
-  func fetchHomeData() async throws -> Single<HomeInfo>
+public protocol HomeUseCase {
+  func fetchHomeData() -> Single<HomeInfo>
 }
 
-class HomeUseCaseImpl: HomeUseCase {
+public class HomeUseCaseImpl: HomeUseCase {
   
   private let homeRepository: HomeRepository
   
-  init(homeRepository: HomeRepository) {
+  public init(homeRepository: HomeRepository) {
     self.homeRepository = homeRepository
   }
   
-  func fetchHomeData() async throws -> Single<HomeInfo> {
+  public func fetchHomeData() -> Single<HomeInfo> {
     return homeRepository.fetchHomeData()
   }
 }

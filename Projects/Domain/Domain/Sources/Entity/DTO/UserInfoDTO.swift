@@ -7,7 +7,7 @@
 
 
 public struct UserInfoDTO: Codable {
-  public let id: Int
+  public let userId: Int
   public let nickname: String
   public let email: String?
   public let provider: String
@@ -16,7 +16,7 @@ public struct UserInfoDTO: Codable {
 extension UserInfoDTO {
   public func toDomain() -> UserInfo {
     return UserInfo(
-      id: id,
+      id: userId,
       nickname: nickname,
       email: email,
       provider: provider

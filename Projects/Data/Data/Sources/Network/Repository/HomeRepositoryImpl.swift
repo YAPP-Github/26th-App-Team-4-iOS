@@ -27,16 +27,10 @@ public final class HomeRepositoryImpl: HomeRepository {
       .map(APIResponse<HomeDTO>.self)
       .map { response in
         guard let result = response.result else {
-          throw RepositoryError.emptyData
+          throw NSError(domain: "HomeRepositoryImpl", code: -1, userInfo: [NSLocalizedDescriptionKey: "No result found in response"])
         }
         return result.toDomain()
       }
       .asSingle()
   }
-}
-
-/// Repository 수준에서 발생할 수 있는 에러
-public enum RepositoryError: Error {
-  /// 서버 응답은 왔으나 `result`가 `nil`인 경우
-  case emptyData
 }

@@ -23,24 +23,24 @@ public struct HomeInfo {
   public let nickname: String
 
   /// 누적 총 달린 거리 (미터)
-  public let totalDistance: Double
+  public let totalDistance: Double?
   /// 이번 주 달린 횟수
-  public let thisWeekRunningCount: Int
+  public let thisWeekRunningCount: Int?
   /// 최근 달리기 평균 페이스 (초 단위)
-  public let recentPace: TimeInterval
+  public let recentPace: TimeInterval?
   /// 최근 달린 거리 (미터)
-  public let recentDistanceMeter: Double
+  public let recentDistanceMeter: Double?
   /// 최근 달린 시간 (초 단위)
-  public let recentTime: TimeInterval
+  public let recentTime: TimeInterval?
 
   /// 달리기 목적
   public let runningPurpose: RunningPurpose
   /// 주간 러닝 횟수 목표
-  public let weeklyRunningCount: Int
+  public let weeklyRunningCount: Int?
   /// 목표 페이스 (초 단위)
-  public let paceGoal: TimeInterval
+  public let paceGoal: TimeInterval?
   /// 거리 목표 (미터)
-  public let distanceMeterGoal: Double
+  public let distanceMeterGoal: Double?
   /// 시간 목표 (초 단위)
-  public let timeGoal: TimeInterval
+  public let timeGoal: TimeInterval?
 }
