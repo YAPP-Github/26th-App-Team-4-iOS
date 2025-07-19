@@ -5,7 +5,6 @@
 //  Created by dong eun shin on 7/8/25.
 //
 
-
 import Foundation
 
 public struct CommonNetworkHeaders {
@@ -15,7 +14,7 @@ public struct CommonNetworkHeaders {
       "Content-Type": "application/json"
     ]
 
-    // AuthTokenStorageType 을 구현한 싱글톤 또는 DI 컨테이너에서 가져오세요.
+    // TODO: - AuthTokenStorageType 을 구현한 싱글톤 또는 DI 컨테이너에서 가져오세요.
     if let token = AuthTokenStorageImpl().getAccessToken() {
       headers["Authorization"] = "Bearer \(token)"
     }

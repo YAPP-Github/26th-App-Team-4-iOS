@@ -24,7 +24,6 @@ public class LoginViewController: BaseViewController, View {
     stack.spacing = 10.84
     stack.alignment = .center
     stack.distribution = .fill
-    stack.backgroundColor = .blue
   }
 
   private let logoImageView = UIImageView().then { imageView in
@@ -236,9 +235,6 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
 // MARK: - ASAuthorizationControllerPresentationContextProviding
 extension LoginViewController: ASAuthorizationControllerPresentationContextProviding {
   public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-    guard let window = self.view.window else {
-      fatalError("Window is not available for presenting authorization controller")
-    }
-    return window
+    return self.view.window ?? UIWindow()
   }
 }

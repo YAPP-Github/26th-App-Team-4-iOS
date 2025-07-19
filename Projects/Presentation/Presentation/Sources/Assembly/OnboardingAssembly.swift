@@ -20,7 +20,7 @@ public final class OnboardingAssembly: Assembly {
     }
     container.register(OnboardingViewController.self) { r in
       guard let reactor = r.resolve(OnboardingReactor.self) else {
-        fatalError("Failed to resolve LaunchReactor. Ensure LaunchReactor is registered correctly.")
+        fatalError("Failed to resolve OnboardingReactor.")
       }
       let viewController = OnboardingViewController()
       viewController.reactor = reactor

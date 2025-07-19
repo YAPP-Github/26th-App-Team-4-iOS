@@ -8,8 +8,6 @@
 import ReactorKit
 import RxSwift
 import Domain
-import KakaoSDKAuth
-import KakaoSDKUser
 import AuthenticationServices
 
 public final class LoginReactor: Reactor {

@@ -20,7 +20,7 @@ public final class MainTabBarAssembly: Assembly {
     }
     container.register(MainTabBarViewController.self) { r in
       guard let reactor = r.resolve(MainTabBarReactor.self) else {
-        fatalError("Failed to resolve MainTabBarReactor. Ensure LaunchReactor is registered correctly.")
+        fatalError("Failed to resolve MainTabBarReactor.")
       }
       let viewController = MainTabBarViewController()
       viewController.reactor = reactor

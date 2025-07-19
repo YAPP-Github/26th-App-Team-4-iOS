@@ -64,9 +64,9 @@ enum FRDependency: CaseIterable {
     case .then: "3.0.0"
     case .kakaoSDK: "2.24.4"
     case .swinject: "2.8.0"
-    case .swinjectAutoregistration: "2.8.0"
     case .rxSwift: "6.6.0"
     case .rxCocoa: "6.6.0"
+    case .swinjectAutoregistration: "2.9.1"
     }
   }
 }

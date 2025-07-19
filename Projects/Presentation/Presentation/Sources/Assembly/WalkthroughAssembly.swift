@@ -20,7 +20,7 @@ public final class WalkthroughAssembly: Assembly {
     }
     container.register(WalkthroughViewController.self) { r in
       guard let reactor = r.resolve(WalkthroughReactor.self) else {
-        fatalError("Failed to resolve WalkthroughReactor. Ensure LaunchReactor is registered correctly.")
+        fatalError("Failed to resolve WalkthroughReactor.")
       }
       let viewController = WalkthroughViewController()
       viewController.reactor = reactor

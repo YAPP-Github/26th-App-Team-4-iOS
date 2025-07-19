@@ -26,9 +26,11 @@ public final class WalkthroughCoordinatorImpl: WalkthroughCoordinator {
   }
 
   public func start() {
-    let viewController = WalkthroughViewController()
+    guard let viewController = resolver.resolve(WalkthroughViewController.self) else {
+      fatalError("Failed to resolve WalkthroughViewController. Ensure it is registered correctly in Swinject.")
+    }
     viewController.coordinator = self
-    viewController.reactor = WalkthroughReactor()
+
     navigationController.setViewControllers([viewController], animated: true)
   }
 }
