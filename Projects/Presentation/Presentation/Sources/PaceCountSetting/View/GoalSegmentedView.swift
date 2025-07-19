@@ -63,11 +63,11 @@ public final class GoalSegmentedView: BaseView {
 
   // MARK: - Output
 
-  public let selectedSegment = PublishRelay<Segment>()
+  public let selectedSegment = BehaviorRelay<Segment>(value: .pace)
 
   // MARK: - State
 
-  private var currentSegment: Segment = .pace
+//  private var currentSegment: Segment = .pace
 
   // MARK: - Init
 
@@ -116,8 +116,7 @@ public final class GoalSegmentedView: BaseView {
   }
 
   private func switchTo(segment: Segment) {
-    guard segment != currentSegment else { return }
-    currentSegment = segment
+    guard segment != selectedSegment.value else { return }
     selectedSegment.accept(segment)
 
     let targetLabel = segment == .pace ? paceLabel : countLabel

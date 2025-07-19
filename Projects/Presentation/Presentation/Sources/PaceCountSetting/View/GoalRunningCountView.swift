@@ -136,6 +136,10 @@ public final class GoalRunningCountView: BaseView {
       $0.centerY.equalToSuperview()
     }
   }
+  
+  func setCount(_ count: Int) {
+    currentCount = count
+  }
 
   public override func action() {
     super.action()

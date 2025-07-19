@@ -16,15 +16,20 @@ public final class GoalPaceView: BaseView {
 
   // MARK: - Properties
 
-  /// Discrete slider steps
+  /// 슬라이더의 스텝 인덱스
   private let steps: [Float] = [0, 1, 2]
-  /// Publicly readable current pace string
+  /// 각 스텝에 대응하는 페이스(초)
+  private let stepValues: [Int] = [9 * 60, 7 * 60 + 30, 5 * 60 + 30]
+
+  /// 외부에서 읽어 쓸 수 있는 선택된 페이스(초)
+  public private(set) var selectedPaceSeconds: Int = 7 * 60 + 30
+
+  /// 현재 화면에 표시 중인 페이스 문자열
   public private(set) var currentPace: String = "7'30\"" {
-    didSet {
-      paceLabel.text = currentPace
-    }
+    didSet { paceLabel.text = currentPace }
   }
-  
+
+  /// 스텝별 표시할 페이스 텍스트
   private let paceOptions = ["9'00\"", "7'30\"", "5'30\""]
 
   // MARK: - UI Components
@@ -130,6 +135,9 @@ public final class GoalPaceView: BaseView {
       $0.top.equalTo(slider.snp.bottom).offset(12)
       $0.leading.trailing.equalTo(slider)
     }
+
+    // 초기 스텝 반영
+    updateUIForStep(Int(slider.value))
   }
 
   // MARK: - Bindings
@@ -137,23 +145,19 @@ public final class GoalPaceView: BaseView {
   public override func action() {
     super.action()
 
-    // 1) Label tap → begin manual input
+    // 1) 라벨 탭 → 수동 입력 모드
     paceLabel.rx.tapGesture()
       .when(.recognized)
-      .bind { [weak self] _ in
-        self?.handleLabelTapped()
-      }
+      .bind { [weak self] _ in self?.handleLabelTapped() }
       .disposed(by: disposeBag)
 
-    // 2) TextField input → update `currentPace`
+    // 2) 텍스트 입력 → 포맷 후 selectedPaceSeconds 업데이트
     hiddenTextField.rx.text.orEmpty
       .distinctUntilChanged()
-      .bind { [weak self] text in
-        self?.handleTextChanged(text)
-      }
+      .bind { [weak self] in self?.handleTextChanged($0) }
       .disposed(by: disposeBag)
 
-    // 3) Slider drag end → snap to nearest step
+    // 3) 슬라이더 터치 종료 시 → 가장 가까운 스텝으로 스냅
     Observable.merge(
       slider.rx.controlEvent(.touchUpInside).asObservable(),
       slider.rx.controlEvent(.touchUpOutside).asObservable()
@@ -166,21 +170,22 @@ public final class GoalPaceView: BaseView {
       self.updateUIForStep(Int(nearest))
     })
     .disposed(by: disposeBag)
-
-    // 4) Set initial step look
-    updateUIForStep(Int(slider.value))
   }
 
   // MARK: - Helpers
 
   private func updateUIForStep(_ step: Int) {
-    // 4단계 중 [0..2] 범위
-    let text = paceOptions[step]
-    currentPace = text
-
-    [warmupLabel, routineLabel, challengerLabel].enumerated().forEach { i, lbl in
-      lbl.textColor = (i == step) ? .black : UIColor(hex: "#868B94")
-    }
+    // 1) 텍스트와 내부 초 단위 값 동시 갱신
+    currentPace = paceOptions[step]
+    selectedPaceSeconds = stepValues[step]
+    // 2) 하단 탭 라벨 색상 변경
+    [warmupLabel, routineLabel, challengerLabel]
+      .enumerated()
+      .forEach { i, lbl in
+        lbl.textColor = (i == step)
+          ? .black
+          : UIColor(hex: "#868B94")
+      }
   }
 
   private func handleLabelTapped() {
@@ -192,11 +197,21 @@ public final class GoalPaceView: BaseView {
 
   private func handleTextChanged(_ raw: String) {
     let digits = raw.filter { $0.isNumber }
+    guard !digits.isEmpty else {
+      paceLabel.text = "0'00\""
+      return
+    }
+
     if digits.count >= 3 {
-      let trimmed = String(digits.prefix(3))
-      hiddenTextField.text = trimmed
-      let formatted = formatPaceInput(trimmed)
-      currentPace = formatted
+      // "MSS" 형태 → 초 단위 변환
+      let padded = digits.paddingRight(toLength: 3, withPad: "0")
+      let minutes = Int(padded.prefix(1)) ?? 0
+      let seconds = Int(padded.suffix(2)) ?? 0
+      let total = minutes * 60 + seconds
+
+      selectedPaceSeconds = total
+      currentPace = formatPaceInput(padded)
+
       hiddenTextField.resignFirstResponder()
       paceLabelBottomLineView.isHidden = true
     } else {
@@ -206,11 +221,28 @@ public final class GoalPaceView: BaseView {
 
   private func formatPaceInput(_ raw: String) -> String {
     let digits = raw.filter { $0.isNumber }
-    guard !digits.isEmpty else { return "0'00\"" }
     let padded = digits.paddingRight(toLength: 3, withPad: "0")
     let minutes = String(padded.prefix(1))
     let seconds = String(padded.suffix(2))
     return "\(minutes)'\(seconds)\""
+  }
+}
+
+public extension GoalPaceView {
+  /// 외부에서 초 단위 페이스를 받아서 슬라이더와 라벨 동기화
+  func setPace(seconds: Int) {
+    // 1) 미리 정의된 stepValues에 해당하는 값이면 스냅
+    if let idx = stepValues.firstIndex(of: seconds) {
+      slider.setValue(steps[idx], animated: false)
+      updateUIForStep(idx)
+    } else {
+      // 2) 수동 입력 페이스로 처리
+      selectedPaceSeconds = seconds
+      // 분/초 문자열 포맷
+      let m = seconds / 60
+      let s = seconds % 60
+      currentPace = "\(m)'\(String(format: "%02d", s))\""
+    }
   }
 }
 
