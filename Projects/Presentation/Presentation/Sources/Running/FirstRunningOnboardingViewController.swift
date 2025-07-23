@@ -10,7 +10,10 @@ import SnapKit
 import Then
 import Lottie
 
-class FirstRunningOnboardingViewController: UIViewController {
+final class FirstRunningOnboardingViewController: UIViewController {
+
+  weak var coordinator: RunningCoordinator?
+
   // MARK: - UI Elements
 
   let animationView = LottieAnimationView().then {
@@ -27,7 +30,7 @@ class FirstRunningOnboardingViewController: UIViewController {
     $0.clipsToBounds = true
     $0.setTitleColor(.white, for: .normal)
     $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-//    $0.isHidden = true
+    //    $0.isHidden = true
   }
 
   let doLaterButton = UIButton().then {
@@ -35,7 +38,7 @@ class FirstRunningOnboardingViewController: UIViewController {
     $0.backgroundColor = .clear
     $0.setTitleColor(.white, for: .normal)
     $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-//    $0.isHidden = true
+    //    $0.isHidden = true
   }
 
   // MARK: - Lifecycle
@@ -100,11 +103,11 @@ class FirstRunningOnboardingViewController: UIViewController {
   }
 
   @objc private func setGoalButtonTapped() {
-    print("목표 설정하기 button tapped!")
+    coordinator?.showFirstRunningGoalSettingIntro()
   }
 
   @objc private func doLaterButtonTapped() {
-    print("다음에 하기 button tapped!")
+    coordinator?.showRunning()
   }
 }
 
@@ -116,7 +119,7 @@ class FirstRunningOnboardingViewController: UIViewController {
 //    // Instantiate your UIKit ViewController
 //    return FirstRunningOnboardingViewController()
 //  }
-//  
+//
 //  func updateUIViewController(_ uiViewController: FirstRunningOnboardingViewController, context: Context) {
 //    // No updates needed for this simple preview
 //  }

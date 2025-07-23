@@ -151,7 +151,7 @@ public final class OnboardingViewController: BaseViewController, View {
       .distinctUntilChanged()
       .compactMap { $0 }
       .subscribe(with: self) { object, runnerType in
-        object.showRunnerTypeVC(runnerType: runnerType)
+        object.coordinator?.showRunnerType()
       }
       .disposed(by: disposeBag)
   }
@@ -173,14 +173,6 @@ public final class OnboardingViewController: BaseViewController, View {
       Float(stepIdx + 1) / total,
       animated: true
     )
-  }
-  
-  private func showRunnerTypeVC(runnerType: String) {
-    let vc = RunnerTypeViewController()
-    vc.runnerType = runnerType
-    vc.modalTransitionStyle = .crossDissolve
-    vc.modalPresentationStyle = .overFullScreen
-    self.present(vc, animated: true)
   }
 }
 

@@ -14,7 +14,9 @@ import SnapKit
 import Core
 
 public final class RunnerTypeViewController: BaseViewController {
-  
+
+  weak var coordinator: OnboardingCoordinator?
+
   public var runnerType: String = "워밍업"
   
   private let typeTitleLabel = UILabel().then {
@@ -81,10 +83,7 @@ public final class RunnerTypeViewController: BaseViewController {
     
     goToHomeButton.rx.tap
       .subscribe(with: self) { object, _ in
-        let vc = MainTabBarController()
-        vc.modalTransitionStyle = .crossDissolve
-        vc.modalPresentationStyle = .overFullScreen
-        object.present(vc, animated: true, completion: nil)
+        object.coordinator?.showMainTab()
       }
       .disposed(by: disposeBag)
   }

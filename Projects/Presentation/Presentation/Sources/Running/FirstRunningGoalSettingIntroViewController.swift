@@ -10,7 +10,9 @@ import Core
 import SnapKit
 import Then
 
-class FirstRunningGoalSettingIntroViewController: BaseViewController {
+final class FirstRunningGoalSettingIntroViewController: BaseViewController {
+
+  weak var coordinator: RunningCoordinator?
 
   // MARK: - UI Elements
 
@@ -224,7 +226,7 @@ class FirstRunningGoalSettingIntroViewController: BaseViewController {
   }
 
   @objc private func distanceGoalButtonTapped() {
-    print("목표 거리 button tapped!")
+    coordinator?.showFirstRunningGoalSetting()
   }
 }
 

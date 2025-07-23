@@ -13,14 +13,23 @@ public final class MainTabBarAssembly: Assembly {
   public init() {}
 
   public func assemble(container: Container) {
-    container.autoregister(MainTabBarReactor.self, initializer: MainTabBarReactor.init)
-    
     container.register(MainTabBarCoordinatorImpl.self) { (r, navigationController: UINavigationController) in
       return MainTabBarCoordinatorImpl(navigationController: navigationController, resolver: r)
     }
-    
-    container.register(MainTabBarController.self) { r in
-      let viewController = MainTabBarController()
+
+    // Home
+    container.autoregister(HomeReactor.self, initializer: HomeReactor.init)
+
+    container.register(HomeCoordinatorImpl.self) { (r, navigationController: UINavigationController) in
+      return HomeCoordinatorImpl(navigationController: navigationController, resolver: r)
+    }
+
+    container.register(HomeViewController.self) { r in
+      guard let reactor = r.resolve(HomeReactor.self) else {
+        fatalError("Failed to resolve HomeReactor.")
+      }
+      let viewController = HomeViewController()
+      viewController.reactor = reactor
       return viewController
     }
   }

@@ -16,5 +16,6 @@ public class PresentationAssembly: Assembly {
     OnboardingAssembly().assemble(container: container)
     WalkthroughAssembly().assemble(container: container)
     MainTabBarAssembly().assemble(container: container)
+    RunningAssembly().assemble(container: container)
   }
 }

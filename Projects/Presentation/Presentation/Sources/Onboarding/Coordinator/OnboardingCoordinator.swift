@@ -8,13 +8,14 @@
 import UIKit
 import Swinject
 import Core
-import Data
 
 public protocol OnboardingCoordinator: Coordinator {
   func showMainTab()
+  func showRunnerType()
 }
 
 public final class OnboardingCoordinatorImpl: OnboardingCoordinator {
+  
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: CoordinatorType = .onboarding
@@ -39,5 +40,14 @@ public final class OnboardingCoordinatorImpl: OnboardingCoordinator {
 extension OnboardingCoordinatorImpl {
   public func showMainTab() {
     finishDelegate?.coordinatorDidFinish(childCoordinator: self)
+  }
+
+  public func showRunnerType() {
+    guard let viewController = resolver.resolve(RunnerTypeViewController.self) else {
+      fatalError("Failed to resolve OnboardingViewController. Ensure it is registered correctly in Swinject.")
+    }
+    viewController.coordinator = self
+
+    navigationController.pushViewController(viewController, animated: false)
   }
 }

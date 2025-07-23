@@ -68,6 +68,8 @@ final class FirstRunningGoalSettingViewController: UIViewController {
     }
   }
 
+  weak var coordinator: RunningCoordinator?
+
   private let disposeBag = DisposeBag()
   private var inputType: GoalInputType
   private let keyboardHeight = BehaviorRelay<CGFloat>(value: 0)
@@ -294,10 +296,30 @@ final class FirstRunningGoalSettingViewController: UIViewController {
         }
         self.setAndRunButtonBottomConstraint?.update(offset: offset)
 
-        UIView.animate(withDuration: 0.3) {
-          self.view.layoutIfNeeded()
-        }
+        self.view.layoutIfNeeded()
       })
+      .disposed(by: disposeBag)
+
+    setAndRunButton.rx.tap
+      .subscribe(with: self) { object, _ in
+        object.view.endEditing(true)
+
+        object.view.isUserInteractionEnabled = false
+
+//        object.animationView.isHidden = false
+//        object.animationView.play { [weak self] finished in
+//          guard let self = self else { return }
+//
+//          if finished {
+//            object.animationView.isHidden = true
+//
+//            object.view.isUserInteractionEnabled = true
+//
+//            object.coordinator?.showRunning()
+//          }
+//        }
+        object.coordinator?.showRunning()
+      }
       .disposed(by: disposeBag)
   }
 
@@ -307,10 +329,8 @@ final class FirstRunningGoalSettingViewController: UIViewController {
     if isVisible {
       self.goalValueUnderline.transform = CGAffineTransform(scaleX: 0.01, y: 1.0)
       self.goalValueUnderline.isHidden = false
-      UIView.animate(withDuration: 0.25, animations: {
-        self.goalValueUnderline.transform = .identity
-        self.view.layoutIfNeeded()
-      })
+      self.goalValueUnderline.transform = .identity
+//      self.view.layoutIfNeeded()
     } else {
       UIView.animate(withDuration: 0.25, animations: {
         self.goalValueUnderline.transform = CGAffineTransform(scaleX: 0.01, y: 1.0)
@@ -326,7 +346,6 @@ final class FirstRunningGoalSettingViewController: UIViewController {
   private func addTargets() {
     backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
     skipButton.addTarget(self, action: #selector(skipButtonTapped), for: .touchUpInside)
-    setAndRunButton.addTarget(self, action: #selector(setAndRunButtonTapped), for: .touchUpInside)
   }
 
   @objc private func backButtonTapped() {
@@ -335,25 +354,6 @@ final class FirstRunningGoalSettingViewController: UIViewController {
 
   @objc private func skipButtonTapped() {
 
-  }
-
-  @objc private func setAndRunButtonTapped() {
-    self.view.endEditing(true)
-
-    view.isUserInteractionEnabled = false
-
-    animationView.isHidden = false
-    animationView.play { [weak self] finished in
-      guard let self = self else { return }
-
-      if finished {
-        self.animationView.isHidden = true
-
-        self.view.isUserInteractionEnabled = true
-
-        // TODO: - 달리기 중 화면으로 이동
-      }
-    }
   }
 
   // MARK: - Keyboard Handling
