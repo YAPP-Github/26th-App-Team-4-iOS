@@ -40,7 +40,7 @@ public class SummaryTableViewCell: BaseTableViewCell {
   }
   
   private lazy var distanceStack = UIStackView(
-    arrangedSubviews: [distanceLabel, kmLabel]
+    arrangedSubviews: [distanceLabel, kmLabel, UIView()]
   ).then {
     $0.axis = .horizontal
     $0.spacing = 4
@@ -48,6 +48,7 @@ public class SummaryTableViewCell: BaseTableViewCell {
   private let distanceLabel = UILabel().then { // 30
     $0.font = .systemFont(ofSize: 28, weight: .bold)
     $0.textColor = .black
+    $0.text = "86.3"
   }
   private let kmLabel = UILabel().then { //30
     $0.font = .systemFont(ofSize: 28, weight: .semibold)
@@ -57,9 +58,9 @@ public class SummaryTableViewCell: BaseTableViewCell {
   
   private lazy var statsStack = UIStackView(
     arrangedSubviews: [
-      runCountStack,
-      runPaceStack,
-      runTimeStack,
+      runCountStatView,
+      runPaceStatView,
+      runTimeStatView,
       UIView()
     ]
   ).then {
@@ -67,82 +68,9 @@ public class SummaryTableViewCell: BaseTableViewCell {
     $0.spacing = 24
   }
   
-  // MARK: - 러닝 횟수
-  private lazy var runCountStack = UIStackView(
-    arrangedSubviews: [runCountTitleLabel, runCountNumStack]
-  ).then {
-    $0.axis = .vertical
-    $0.alignment = .leading
-  }
-  
-  private let runCountTitleLabel = UILabel().then { // 20
-    $0.text = "러닝 횟수"
-    $0.font = .systemFont(ofSize: 12)
-    $0.textColor = FRColor.FG.Text.tertiary
-  }
-  
-  private lazy var runCountNumStack = UIStackView(
-    arrangedSubviews: [runCountLabel, runCountCountLabel, UIView()]
-  ).then {
-    $0.axis = .horizontal
-    $0.alignment = .bottom
-  }
-  
-  private let runCountLabel = UILabel().then { //24
-    $0.font = .systemFont(ofSize: 20, weight: .semibold)
-    $0.textColor = .black
-    $0.textAlignment = .center
-    $0.text = "0"
-  }
-  
-  private let runCountCountLabel = UILabel().then { //20
-    $0.font = .systemFont(ofSize: 13, weight: .semibold)
-    $0.textColor = FRColor.FG.Text.primary
-    $0.textAlignment = .center
-    $0.text = "회"
-  }
-  
-  // MARK: - 평균 페이스
-  private lazy var runPaceStack = UIStackView(
-    arrangedSubviews: [runPaceTitleLabel, runPaceLabel]
-  ).then {
-    $0.axis = .vertical
-    $0.alignment = .leading
-  }
-  
-  private let runPaceTitleLabel = UILabel().then { // 20
-    $0.text = "평균 페이스"
-    $0.font = .systemFont(ofSize: 12)
-    $0.textColor = FRColor.FG.Text.tertiary
-  }
-
-  private let runPaceLabel = UILabel().then { //24
-    $0.font = .systemFont(ofSize: 20, weight: .semibold)
-    $0.textColor = .black
-    $0.textAlignment = .center
-    $0.text = "7'18"
-  }
-  
-  // MARK: - 러닝 시간
-  private lazy var runTimeStack = UIStackView(
-    arrangedSubviews: [runTimeTitleLabel, runTimeLabel]
-  ).then {
-    $0.axis = .vertical
-    $0.alignment = .leading
-  }
-  
-  private let runTimeTitleLabel = UILabel().then { // 20
-    $0.text = "러닝 시간"
-    $0.font = .systemFont(ofSize: 12)
-    $0.textColor = FRColor.FG.Text.tertiary
-  }
-
-  private let runTimeLabel = UILabel().then { //24
-    $0.font = .systemFont(ofSize: 20, weight: .semibold)
-    $0.textColor = .black
-    $0.textAlignment = .center
-    $0.text = "4:10:40"
-  }
+  private let runCountStatView = StatItemView()
+  private let runPaceStatView = StatItemView()
+  private let runTimeStatView = StatItemView()
   
   // MARK: - 목표 달성 횟수
   private lazy var goalAchieveContainerStack = UIStackView(
@@ -268,7 +196,7 @@ public class SummaryTableViewCell: BaseTableViewCell {
     rootContainerStackView.snp.makeConstraints {
       $0.top.equalToSuperview().offset(20)
       $0.leading.trailing.equalToSuperview().inset(20)
-      $0.bottom.equalToSuperview().inset(26)
+//      $0.bottom.equalToSuperview().inset(26)
     }
     
     // MARK: - 총 러닝 거리
@@ -280,33 +208,6 @@ public class SummaryTableViewCell: BaseTableViewCell {
     }
     kmLabel.snp.makeConstraints {
       $0.height.equalTo(30)
-    }
-    
-    // MARK: - 러닝 횟수
-    runCountTitleLabel.snp.makeConstraints {
-      $0.height.equalTo(20)
-    }
-    runCountLabel.snp.makeConstraints {
-      $0.height.equalTo(24)
-    }
-    runCountCountLabel.snp.makeConstraints {
-      $0.height.equalTo(20)
-    }
-    
-    // MARK: - 평균 페이스
-    runPaceTitleLabel.snp.makeConstraints {
-      $0.height.equalTo(20)
-    }
-    runPaceLabel.snp.makeConstraints {
-      $0.height.equalTo(24)
-    }
-    
-    // MARK: - 러닝 시간
-    runTimeTitleLabel.snp.makeConstraints {
-      $0.height.equalTo(20)
-    }
-    runTimeLabel.snp.makeConstraints {
-      $0.height.equalTo(24)
     }
     
     // MARK: - 목표 달성 횟수 거리 컨테이너 스택

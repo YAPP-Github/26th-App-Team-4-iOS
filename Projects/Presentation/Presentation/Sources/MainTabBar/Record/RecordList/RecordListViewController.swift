@@ -24,6 +24,7 @@ public final class RecordListViewController: BaseViewController {
     cellView.snp.makeConstraints {
       $0.top.equalTo(view.safeAreaLayoutGuide).offset(20)
       $0.leading.trailing.equalToSuperview()
+      $0.bottom.equalToSuperview().inset(20)
     }
   }
 }
