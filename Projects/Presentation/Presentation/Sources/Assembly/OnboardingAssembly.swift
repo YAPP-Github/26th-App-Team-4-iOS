@@ -27,5 +27,14 @@ public final class OnboardingAssembly: Assembly {
       viewController.reactor = reactor
       return viewController
     }
+
+    container.register(RunnerTypeViewController.self) { r in
+//      guard let reactor = r.resolve(.self) else {
+//        fatalError("Failed to resolve .")
+//      }
+      let viewController = RunnerTypeViewController()
+//      viewController.reactor = reactor
+      return viewController
+    }
   }
 }

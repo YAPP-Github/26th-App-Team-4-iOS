@@ -8,7 +8,6 @@
 import UIKit
 import Swinject
 import Core
-import Data
 
 public protocol LoginCoordinator: Coordinator {
   func showOnboarding()

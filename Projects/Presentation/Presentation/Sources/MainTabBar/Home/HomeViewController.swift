@@ -11,10 +11,12 @@ import Core
 import ReactorKit
 import NMapsMap
 import Domain
-import Data
+//import Data
 
 public final class HomeViewController: BaseViewController, View {
-  
+
+  weak var coordinator: HomeCoordinator?
+
   private let cardContainerView = UIView().then {
     $0.backgroundColor = UIColor(hex: "#F5F5F9")
     $0.layer.cornerRadius = 20
@@ -132,11 +134,17 @@ public final class HomeViewController: BaseViewController, View {
     
     cardView.editButton.rx.tap
       .subscribe(with: self) { object, _ in
-        let vc = PaceCountSettingViewController().then {
-          $0.reactor = PaceCountSettingReactor(goalUseCase: GoalUseCaseImpl(goalRepository: GoalRepositoryImpl()))
-        }
-        vc.hidesBottomBarWhenPushed = true
-        object.navigationController?.pushViewController(vc, animated: true)
+//        let vc = PaceCountSettingViewController().then {
+//          $0.reactor = PaceCountSettingReactor(goalUseCase: GoalUseCaseImpl(goalRepository: GoalRepositoryImpl()))
+//        }
+//        vc.hidesBottomBarWhenPushed = true
+//        object.navigationController?.pushViewController(vc, animated: true)
+      }
+      .disposed(by: disposeBag)
+
+    runButton.rx.tap
+      .subscribe(with: self) { object, _ in
+        object.coordinator?.showRunngingFlow()
       }
       .disposed(by: disposeBag)
   }

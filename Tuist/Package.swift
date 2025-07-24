@@ -18,6 +18,7 @@ enum FRDependency: CaseIterable {
   case swinject
   case swinjectAutoregistration
   case nMapsMap
+  case lottie
 
   var packageName: String {
     switch self {
@@ -34,6 +35,7 @@ enum FRDependency: CaseIterable {
     case .rxCocoa: "RxCocoa"
     case .swinjectAutoregistration: "SwinjectAutoregistration"
     case .nMapsMap: "NMapsMap"
+    case .lottie: "Lottie"
     }
   }
   
@@ -52,6 +54,7 @@ enum FRDependency: CaseIterable {
     case .rxCocoa: "https://github.com/ReactiveX/RxSwift.git"
     case .swinjectAutoregistration: "https://github.com/Swinject/SwinjectAutoregistration.git"
     case .nMapsMap: "https://github.com/navermaps/SPM-NMapsMap.git"
+    case .lottie: "https://github.com/airbnb/lottie-ios.git"
     }
   }
   
@@ -70,6 +73,7 @@ enum FRDependency: CaseIterable {
     case .rxCocoa: "6.6.0"
     case .swinjectAutoregistration: "2.9.1"
     case .nMapsMap: "3.22.0"
+    case .lottie: "4.4.0"
     }
   }
 }

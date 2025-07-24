@@ -29,7 +29,8 @@ let project = Project(
         .external(name: "KakaoSDKUser"),
         .external(name: "Swinject"),
         .external(name: "SwinjectAutoregistration"),
-        .external(name: "NMapsMap")
+        .external(name: "NMapsMap"),
+        .external(name: "Lottie")
       ]
     ),
     .target(

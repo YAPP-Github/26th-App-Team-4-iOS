@@ -46,5 +46,10 @@ public class DataAssembly: Assembly {
     container.register(OnboardingRepository.self) { r in
       return OnboardingRepositoryImpl()
     }
+
+    // Home
+    container.register(HomeRepository.self) { r in
+      return HomeRepositoryImpl()
+    }
   }
 }

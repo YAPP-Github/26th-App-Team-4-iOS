@@ -34,11 +34,13 @@ public enum CoordinatorType {
   case login
   case onboarding
   case mainTabBar
+  case home
+  case running
 }
 
 public protocol AppCoordinator: Coordinator {
   func showWalkthrough()
   func showLogin()
   func showOnboarding()
-  func showMainTabBar()
+  func showMainTab()
 }

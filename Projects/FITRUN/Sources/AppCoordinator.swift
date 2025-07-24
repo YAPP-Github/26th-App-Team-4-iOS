@@ -69,7 +69,20 @@ extension AppCoordinatorImpl: AppCoordinator {
     coordinator.start()
   }
 
-  func showMainTabBar() {
+  func showRunnerType() {
+    self.navigationController.viewControllers.removeAll()
+
+    guard let coordinator = resolver.resolve(RunningCoordinatorImpl.self, argument: navigationController) else {
+      fatalError("Failed to resolve OnboardingCoordinatorImpl. Ensure it is registered correctly in Swinject.")
+    }
+    coordinator.finishDelegate = self
+    childCoordinators.append(coordinator)
+    coordinator.start()
+  }
+
+  func showMainTab() {
+    self.navigationController.viewControllers.removeAll()
+
     guard let coordinator = resolver.resolve(MainTabBarCoordinatorImpl.self, argument: navigationController) else {
       fatalError("Failed to resolve MainTabBarCoordinatorImpl. Ensure it is registered correctly in Swinject.")
     }
@@ -94,7 +107,7 @@ extension AppCoordinatorImpl: CoordinatorFinishDelegate {
     case .login:
       showOnboarding()
     case .onboarding:
-      showMainTabBar()
+      showMainTab()
     default:
       break
     }
@@ -110,6 +123,6 @@ extension AppCoordinatorImpl: LaunchScreenCoordinatorDelegate {
   
   func showMainTabBarFlow() {
     childCoordinators = childCoordinators.filter({ $0.type != .launchScreen})
-    showMainTabBar()
+    showMainTab()
   }
 }

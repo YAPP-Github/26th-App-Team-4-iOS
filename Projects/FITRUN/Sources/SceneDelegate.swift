@@ -8,8 +8,9 @@
 import UIKit
 
 import Core
-import KakaoSDKAuth
 import Presentation
+
+import KakaoSDKAuth
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
