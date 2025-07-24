@@ -28,6 +28,7 @@ public enum FRColor {
     public enum Text {
       public static let primary: UIColor = UIColor(hex: "#1A1C20")
       public static let secondary: UIColor = UIColor(hex: "#555D6D")
+      public static let tertiary: UIColor = UIColor(hex: "#868B94")
       
       public enum Interactive {
         public static let inverse: UIColor = UIColor(hex: "#FFFFFF")
