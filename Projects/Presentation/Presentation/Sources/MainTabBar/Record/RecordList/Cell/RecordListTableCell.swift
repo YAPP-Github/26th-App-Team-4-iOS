@@ -11,7 +11,7 @@ import ReactorKit
 import NMapsMap
 import Domain
 
-public class SummaryTableViewCell: BaseTableViewCell {
+public class RecordListTableCell: BaseTableViewCell {
   
   private lazy var rootContainerStackView = UIStackView(
     arrangedSubviews: [
@@ -72,9 +72,9 @@ public class SummaryTableViewCell: BaseTableViewCell {
   private let runPaceStatView = StatItemView()
   private let runTimeStatView = StatItemView()
   
-  // MARK: - 목표 달성 횟수
+  // MARK: - 목표 달성 횟수 타이틀 + 컨테이너 뷰
   private lazy var goalAchieveContainerStack = UIStackView(
-    arrangedSubviews: [goalAchieveLabel, goalAchieveStatContainerStack]
+    arrangedSubviews: [goalAchieveLabel, goalAchieveStatContainerView]
   ).then {
     $0.axis = .vertical
     $0.spacing = 8
@@ -87,23 +87,16 @@ public class SummaryTableViewCell: BaseTableViewCell {
     $0.textColor = FRColor.FG.Text.tertiary
   }
   
-  // MARK: - 목표 달성 전체 스택
-  private lazy var goalAchieveStatContainerStack = UIStackView(
-    arrangedSubviews: [goalDistanceTitleStack, separatorView, goalAchieveTimeStack]
-  ).then {
-    $0.axis = .horizontal
-    $0.spacing = 12
-    $0.distribution = .fillEqually
+  // MARK: - 목표 달성 내용 컨테이너
+  private lazy var goalAchieveStatContainerView = UIView().then {
+    $0.backgroundColor = FRColor.BG.secondary
+    $0.layer.cornerRadius = 16
   }
   
-  /// 거리 컨테이너 스택
-  private lazy var goalAchieveDistanceStack = UIStackView(
-    arrangedSubviews: [goalDistanceTitleStack, UIView(), goalDistanceCountStack]
-  ).then {
-    $0.axis = .horizontal
-    $0.alignment = .bottom
+  private let separatorView = UIView().then {
+    $0.backgroundColor = UIColor(hex: "#D1D3D8")
   }
-
+  
   /// 거리 타이틀 스택
   private lazy var goalDistanceTitleStack = UIStackView(
     arrangedSubviews: [goalDistanceImageView, goalDistanceTitleLabel]
@@ -131,7 +124,7 @@ public class SummaryTableViewCell: BaseTableViewCell {
   }
   private let goalDistanceLabel = UILabel().then { // 20
     $0.text = "N"
-    $0.font = .systemFont(ofSize: 13, weight: .bold)
+    $0.font = .systemFont(ofSize: 16, weight: .bold)
     $0.textColor = FRColor.FG.Text.tertiary
   }
   private let goalDistanceCountLabel = UILabel().then { // 20
@@ -139,22 +132,10 @@ public class SummaryTableViewCell: BaseTableViewCell {
     $0.font = .systemFont(ofSize: 13, weight: .bold)
     $0.textColor = FRColor.FG.Text.tertiary.withAlphaComponent(0.8)
   }
-  
-  private let separatorView = UIView().then {
-    $0.backgroundColor = UIColor(hex: "#EDEFF2")
-  }
-  
-  /// 시간 컨테이너 스택
-  private lazy var goalAchieveTimeStack = UIStackView(
-    arrangedSubviews: [goalDistanceTitleStack, UIView(), goalDistanceCountStack]
-  ).then {
-    $0.axis = .horizontal
-    $0.alignment = .bottom
-  }
 
   /// 시간 타이틀 스택
   private lazy var goalTimeTitleStack = UIStackView(
-    arrangedSubviews: [goalDistanceImageView, goalDistanceTitleLabel]
+    arrangedSubviews: [goalTimeImageView, goalTimeTitleLabel]
   ).then {
     $0.axis = .horizontal
     $0.spacing = 4
@@ -171,7 +152,7 @@ public class SummaryTableViewCell: BaseTableViewCell {
   
   /// 목표달성 시간 카운트 스택
   private lazy var goalTimeCountStack = UIStackView(
-    arrangedSubviews: [goalDistanceLabel, goalDistanceCountLabel]
+    arrangedSubviews: [goalTimeLabel, goalTimeCountLabel]
   ).then {
     $0.axis = .horizontal
     $0.spacing = 4
@@ -179,7 +160,7 @@ public class SummaryTableViewCell: BaseTableViewCell {
   }
   private let goalTimeLabel = UILabel().then { // 20
     $0.text = "N"
-    $0.font = .systemFont(ofSize: 13, weight: .bold)
+    $0.font = .systemFont(ofSize: 16, weight: .bold)
     $0.textColor = FRColor.FG.Text.tertiary
   }
   private let goalTimeCountLabel = UILabel().then { // 20
@@ -196,7 +177,7 @@ public class SummaryTableViewCell: BaseTableViewCell {
     rootContainerStackView.snp.makeConstraints {
       $0.top.equalToSuperview().offset(20)
       $0.leading.trailing.equalToSuperview().inset(20)
-//      $0.bottom.equalToSuperview().inset(26)
+      $0.bottom.equalToSuperview().inset(26)
     }
     
     // MARK: - 총 러닝 거리
@@ -233,6 +214,42 @@ public class SummaryTableViewCell: BaseTableViewCell {
     }
     goalTimeCountLabel.snp.makeConstraints {
       $0.height.equalTo(20)
+    }
+    
+    // MARK: - 목표 달성 내용 컨테이너
+    goalAchieveStatContainerView.snp.makeConstraints {
+      $0.height.equalTo(50)
+    }
+    
+    goalAchieveStatContainerView.addSubview(separatorView)
+    separatorView.snp.makeConstraints {
+      $0.center.equalToSuperview()
+      $0.height.equalTo(22)
+      $0.width.equalTo(1)
+    }
+    
+    goalAchieveStatContainerView.addSubview(goalDistanceTitleStack)
+    goalDistanceTitleStack.snp.makeConstraints {
+      $0.leading.equalToSuperview().offset(20)
+      $0.centerY.equalToSuperview()
+    }
+    
+    goalAchieveStatContainerView.addSubview(goalDistanceCountStack)
+    goalDistanceCountStack.snp.makeConstraints {
+      $0.trailing.equalTo(separatorView.snp.leading).offset(-12)
+      $0.centerY.equalToSuperview()
+    }
+    
+    goalAchieveStatContainerView.addSubview(goalTimeTitleStack)
+    goalTimeTitleStack.snp.makeConstraints {
+      $0.leading.equalTo(separatorView.snp.trailing).offset(12)
+      $0.centerY.equalToSuperview()
+    }
+    
+    goalAchieveStatContainerView.addSubview(goalTimeCountStack)
+    goalTimeCountStack.snp.makeConstraints {
+      $0.trailing.equalToSuperview().offset(-20)
+      $0.centerY.equalToSuperview()
     }
   }
 }

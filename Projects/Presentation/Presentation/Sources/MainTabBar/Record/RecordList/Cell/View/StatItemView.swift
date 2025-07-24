@@ -58,12 +58,12 @@ public class StatItemView: BaseView {
       $0.height.equalTo(20)
     }
     
-    valueStack.snp.makeConstraints {
+    valueLabel.snp.makeConstraints {
       $0.height.equalTo(24)
     }
     
     unitLabel.snp.makeConstraints {
-      $0.width.equalTo(20)
+      $0.height.equalTo(20)
     }
   }
 }
