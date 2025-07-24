@@ -24,10 +24,12 @@ public final class RecordListViewController: BaseViewController {
     $0.textColor = FRColor.FG.Text.primary
   }
   
-  private lazy var tableView = UITableView().then {
+  private lazy var tableView = UITableView(frame: .zero, style: .grouped).then {
     $0.backgroundColor = FRColor.BG.primary
     $0.separatorStyle = .none
     $0.showsVerticalScrollIndicator = false
+    $0.sectionHeaderTopPadding = 0
+
     $0.registerCell(ofType: RecordListHeaderTableCell.self)
     $0.registerCell(ofType: RecordListTableCell.self)
     
@@ -62,13 +64,33 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
   
   public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     switch Section(rawValue: section) {
-    case .header:
-      return 1
-    case .recordList:
-      return 10
-    case .none:
-      return 0
+    case .header: return 1
+    case .recordList: return 10
+    case .none: return 0
     }
+  }
+  
+  public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    guard Section(rawValue: section) == .recordList else { return nil }
+    return UIView().then {
+      $0.backgroundColor = FRColor.BG.secondary
+    }
+  }
+  
+  public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    switch Section(rawValue: section) {
+    case .recordList: return 32
+    default: return .zero
+    }
+  }
+  
+  // 모든 섹션 푸터 없애기
+  public func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+    return UIView()
+  }
+  
+  public func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+    return 0
   }
   
   public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -91,7 +113,6 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
   }
   
   private func dequeueRecordCell(for indexPath: IndexPath) -> UITableViewCell {
-    print("dequeueRecordCell: \(indexPath.row)")
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordListTableCell.identifier, for: indexPath
     ) as! RecordListTableCell
