@@ -13,6 +13,11 @@ import Domain
 
 public final class RecordListViewController: BaseViewController {
   
+  enum Section: Int, CaseIterable {
+    case header
+    case recordList
+  }
+  
   private let navTitleLabel = UILabel().then {
     $0.text = "기록"
     $0.font = .systemFont(ofSize: 20, weight: .bold)
@@ -23,6 +28,7 @@ public final class RecordListViewController: BaseViewController {
     $0.backgroundColor = FRColor.BG.primary
     $0.separatorStyle = .none
     $0.showsVerticalScrollIndicator = false
+    $0.registerCell(ofType: RecordListHeaderTableCell.self)
     $0.registerCell(ofType: RecordListTableCell.self)
     
     $0.delegate = self
@@ -49,19 +55,47 @@ public final class RecordListViewController: BaseViewController {
 }
 
 extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
-  public func tableView(_ tableView: UITableView, numberOfSections section: Int) -> Int {
-    return 1
+  
+  public func numberOfSections(in tableView: UITableView) -> Int {
+    return Section.allCases.count
   }
   
   public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return 1
+    switch Section(rawValue: section) {
+    case .header:
+      return 1
+    case .recordList:
+      return 10
+    case .none:
+      return 0
+    }
   }
   
   public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    switch Section(rawValue: indexPath.section) {
+    case .header:
+      return dequeueHeaderCell(for: indexPath)
+    case .recordList:
+      return dequeueRecordCell(for: indexPath)
+    case .none:
+      return UITableViewCell()
+    }
+  }
+  
+  private func dequeueHeaderCell(for indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(
-      withIdentifier: RecordListTableCell.identifier,
-      for: indexPath
-    )
+      withIdentifier: RecordListHeaderTableCell.identifier, for: indexPath
+    ) as! RecordListHeaderTableCell
+    cell.selectionStyle = .none
+    return cell
+  }
+  
+  private func dequeueRecordCell(for indexPath: IndexPath) -> UITableViewCell {
+    print("dequeueRecordCell: \(indexPath.row)")
+    let cell = tableView.dequeueReusableCell(
+      withIdentifier: RecordListTableCell.identifier, for: indexPath
+    ) as! RecordListTableCell
+    cell.selectionStyle = .none
     return cell
   }
 }

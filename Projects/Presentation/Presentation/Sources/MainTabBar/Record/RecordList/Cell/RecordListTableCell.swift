@@ -5,6 +5,7 @@
 //  Created by JDeoks on 7/25/25.
 //
 
+
 import UIKit
 import Core
 import ReactorKit
@@ -15,241 +16,154 @@ public class RecordListTableCell: BaseTableViewCell {
   
   private lazy var rootContainerStackView = UIStackView(
     arrangedSubviews: [
-      distanceWithTitleStack,
-      statsStack,
-      goalAchieveContainerStack
+      titleWithImageStack,
+      paceTimeStack
     ]
   ).then {
     $0.axis = .vertical
     $0.alignment = .fill
     $0.spacing = 16
+    $0.layoutMargins = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+    $0.isLayoutMarginsRelativeArrangement = true
+    $0.backgroundColor = .white
+    $0.layer.cornerRadius = 16
   }
   
-  private lazy var distanceWithTitleStack = UIStackView(
-    arrangedSubviews: [distanceTitleLabel, distanceStack]
+  private lazy var titleWithImageStack = UIStackView(
+    arrangedSubviews: [titleWithDistanceStack, UIView(), CourseImageView]
   ).then {
-    $0.axis = .vertical
-    $0.spacing = 4
+    $0.axis = .horizontal
+    $0.spacing = 12
     $0.alignment = .fill
   }
   
-  private let distanceTitleLabel = UILabel().then { // 20
-    $0.text = "총 러닝 거리"
-    $0.font = .systemFont(ofSize: 14)
-    $0.textColor = FRColor.FG.Text.tertiary
+  private lazy var titleWithDistanceStack = UIStackView(
+    arrangedSubviews: [titleLabel, distanceStack]
+  ).then {
+    $0.axis = .vertical
+    $0.spacing = 2
+    $0.alignment = .leading
+  }
+  
+  private let titleLabel = UILabel().then { // 20
+    $0.text = "m월 dd일 시간 러닝"
+    $0.font = .systemFont(ofSize: 16, weight: .bold)
+    $0.textColor = FRColor.FG.Text.secondary
   }
   
   private lazy var distanceStack = UIStackView(
     arrangedSubviews: [distanceLabel, kmLabel, UIView()]
   ).then {
     $0.axis = .horizontal
-    $0.spacing = 4
-  }
-  private let distanceLabel = UILabel().then { // 30
-    $0.font = .systemFont(ofSize: 28, weight: .bold)
-    $0.textColor = .black
-    $0.text = "86.3"
-  }
-  private let kmLabel = UILabel().then { //30
-    $0.font = .systemFont(ofSize: 28, weight: .semibold)
-    $0.textColor = .black
-    $0.text = "km"
+    $0.spacing = 2
+    $0.alignment = .center
   }
   
-  private lazy var statsStack = UIStackView(
-    arrangedSubviews: [
-      runCountStatView,
-      runPaceStatView,
-      runTimeStatView,
-      UIView()
-    ]
+  private let distanceLabel = UILabel().then { // 36
+    $0.text = "86.3"
+    $0.font = .systemFont(ofSize: 28, weight: .bold)
+    $0.textColor = FRColor.FG.Text.primary
+  }
+  
+  private let kmLabel = UILabel().then { // 28
+    $0.text = "km"
+    $0.font = .systemFont(ofSize: 18, weight: .semibold)
+    $0.textColor = FRColor.FG.Text.primary
+  }
+  
+  private let CourseImageView = UIImageView().then {
+    $0.backgroundColor = UIColor(hex: "#D9D9D9")
+    $0.contentMode = .scaleAspectFit
+  }
+  
+  private lazy var paceTimeStack = UIStackView(
+    arrangedSubviews: [paceStack, timeStack]
   ).then {
     $0.axis = .horizontal
-    $0.spacing = 24
+    $0.distribution = .fillEqually
   }
   
-  private let runCountStatView = StatItemView()
-  private let runPaceStatView = StatItemView()
-  private let runTimeStatView = StatItemView()
-  
-  // MARK: - 목표 달성 횟수 타이틀 + 컨테이너 뷰
-  private lazy var goalAchieveContainerStack = UIStackView(
-    arrangedSubviews: [goalAchieveLabel, goalAchieveStatContainerView]
+  private lazy var paceStack = UIStackView(
+    arrangedSubviews: [paceTitleLabel, paceValueLabel]
   ).then {
     $0.axis = .vertical
-    $0.spacing = 8
+    $0.spacing = 4
     $0.alignment = .fill
   }
   
-  private let goalAchieveLabel = UILabel().then { // 20
-    $0.text = "목표 달성 횟수"
-    $0.font = .systemFont(ofSize: 14)
+  private let paceTitleLabel = UILabel().then {
+    $0.text = "평균 페이스"
+    $0.font = .systemFont(ofSize: 14, weight: .medium)
     $0.textColor = FRColor.FG.Text.tertiary
   }
   
-  // MARK: - 목표 달성 내용 컨테이너
-  private lazy var goalAchieveStatContainerView = UIView().then {
-    $0.backgroundColor = FRColor.BG.secondary
-    $0.layer.cornerRadius = 16
+  private let paceValueLabel = UILabel().then { // 24
+    $0.text = "n'nn\""
+    $0.font = .systemFont(ofSize: 20, weight: .bold)
+    $0.textColor = FRColor.FG.Text.tertiary
   }
   
-  private let separatorView = UIView().then {
-    $0.backgroundColor = UIColor(hex: "#D1D3D8")
-  }
-  
-  /// 거리 타이틀 스택
-  private lazy var goalDistanceTitleStack = UIStackView(
-    arrangedSubviews: [goalDistanceImageView, goalDistanceTitleLabel]
+  private lazy var timeStack = UIStackView(
+    arrangedSubviews: [timeTitleLabel, timeValueLabel]
   ).then {
-    $0.axis = .horizontal
+    $0.axis = .vertical
     $0.spacing = 4
-    $0.alignment = .center
+    $0.alignment = .fill
   }
-  private let goalDistanceImageView = UIImageView().then { // 34
-    $0.image = UIImage(named: "TrackIcon", in: Bundle.module, compatibleWith: nil)
-  }
-  private let goalDistanceTitleLabel = UILabel().then { // 20
-    $0.text = "거리"
-    $0.font = .systemFont(ofSize: 14)
+  
+  private let timeTitleLabel = UILabel().then {
+    $0.text = "러닝 시간"
+    $0.font = .systemFont(ofSize: 14, weight: .medium)
     $0.textColor = FRColor.FG.Text.tertiary
   }
   
-  /// 목표달성 거리 카운트 스택
-  private lazy var goalDistanceCountStack = UIStackView(
-    arrangedSubviews: [goalDistanceLabel, goalDistanceCountLabel]
-  ).then {
-    $0.axis = .horizontal
-    $0.spacing = 4
-    $0.alignment = .center
-  }
-  private let goalDistanceLabel = UILabel().then { // 20
-    $0.text = "N"
-    $0.font = .systemFont(ofSize: 16, weight: .bold)
+  private let timeValueLabel = UILabel().then { // 24
+    $0.text = "hh:mm:ss"
+    $0.font = .systemFont(ofSize: 20, weight: .bold)
     $0.textColor = FRColor.FG.Text.tertiary
-  }
-  private let goalDistanceCountLabel = UILabel().then { // 20
-    $0.text = "회"
-    $0.font = .systemFont(ofSize: 13, weight: .bold)
-    $0.textColor = FRColor.FG.Text.tertiary.withAlphaComponent(0.8)
-  }
-
-  /// 시간 타이틀 스택
-  private lazy var goalTimeTitleStack = UIStackView(
-    arrangedSubviews: [goalTimeImageView, goalTimeTitleLabel]
-  ).then {
-    $0.axis = .horizontal
-    $0.spacing = 4
-    $0.alignment = .center
-  }
-  private let goalTimeImageView = UIImageView().then { // 34
-    $0.image = UIImage(named: "ClockIcon", in: Bundle.module, compatibleWith: nil)
-  }
-  private let goalTimeTitleLabel = UILabel().then { // 20
-    $0.text = "시간"
-    $0.font = .systemFont(ofSize: 14)
-    $0.textColor = FRColor.FG.Text.tertiary
-  }
-  
-  /// 목표달성 시간 카운트 스택
-  private lazy var goalTimeCountStack = UIStackView(
-    arrangedSubviews: [goalTimeLabel, goalTimeCountLabel]
-  ).then {
-    $0.axis = .horizontal
-    $0.spacing = 4
-    $0.alignment = .center
-  }
-  private let goalTimeLabel = UILabel().then { // 20
-    $0.text = "N"
-    $0.font = .systemFont(ofSize: 16, weight: .bold)
-    $0.textColor = FRColor.FG.Text.tertiary
-  }
-  private let goalTimeCountLabel = UILabel().then { // 20
-    $0.text = "회"
-    $0.font = .systemFont(ofSize: 13, weight: .bold)
-    $0.textColor = FRColor.FG.Text.tertiary.withAlphaComponent(0.8)
   }
   
   public override func initUI() {
     super.initUI()
-    contentView.backgroundColor = .white
+    contentView.backgroundColor = FRColor.BG.secondary
     
     contentView.addSubview(rootContainerStackView)
     rootContainerStackView.snp.makeConstraints {
-      $0.top.equalToSuperview().offset(20)
+      $0.top.equalToSuperview()
+      $0.bottom.equalToSuperview().inset(16)
       $0.leading.trailing.equalToSuperview().inset(20)
-      $0.bottom.equalToSuperview().inset(26)
     }
     
-    // MARK: - 총 러닝 거리
-    distanceTitleLabel.snp.makeConstraints {
+    titleLabel.snp.makeConstraints {
       $0.height.equalTo(20)
     }
+    
     distanceLabel.snp.makeConstraints {
-      $0.height.equalTo(30)
+      $0.height.equalTo(36)
     }
+    
     kmLabel.snp.makeConstraints {
-      $0.height.equalTo(30)
+      $0.height.equalTo(28)
+    }
+
+    CourseImageView.snp.makeConstraints {
+      $0.width.equalTo(CourseImageView.snp.height).multipliedBy(1.33)
     }
     
-    // MARK: - 목표 달성 횟수 거리 컨테이너 스택
-    goalAchieveLabel.snp.makeConstraints {
-      $0.height.equalTo(20)
-    }
-    goalDistanceImageView.snp.makeConstraints {
-      $0.size.equalTo(34)
-    }
-    goalDistanceTitleLabel.snp.makeConstraints {
+    paceTitleLabel.snp.makeConstraints {
       $0.height.equalTo(20)
     }
     
-    // MARK: - 목표 달성 횟수 시간 컨테이너 스택
-    goalTimeImageView.snp.makeConstraints {
-      $0.size.equalTo(34)
+    paceValueLabel.snp.makeConstraints {
+      $0.height.equalTo(24)
     }
-    goalTimeTitleLabel.snp.makeConstraints {
-      $0.height.equalTo(20)
-    }
-    goalTimeLabel.snp.makeConstraints {
-      $0.height.equalTo(20)
-    }
-    goalTimeCountLabel.snp.makeConstraints {
+    
+    timeTitleLabel.snp.makeConstraints {
       $0.height.equalTo(20)
     }
     
-    // MARK: - 목표 달성 내용 컨테이너
-    goalAchieveStatContainerView.snp.makeConstraints {
-      $0.height.equalTo(50)
-    }
-    
-    goalAchieveStatContainerView.addSubview(separatorView)
-    separatorView.snp.makeConstraints {
-      $0.center.equalToSuperview()
-      $0.height.equalTo(22)
-      $0.width.equalTo(1)
-    }
-    
-    goalAchieveStatContainerView.addSubview(goalDistanceTitleStack)
-    goalDistanceTitleStack.snp.makeConstraints {
-      $0.leading.equalToSuperview().offset(20)
-      $0.centerY.equalToSuperview()
-    }
-    
-    goalAchieveStatContainerView.addSubview(goalDistanceCountStack)
-    goalDistanceCountStack.snp.makeConstraints {
-      $0.trailing.equalTo(separatorView.snp.leading).offset(-12)
-      $0.centerY.equalToSuperview()
-    }
-    
-    goalAchieveStatContainerView.addSubview(goalTimeTitleStack)
-    goalTimeTitleStack.snp.makeConstraints {
-      $0.leading.equalTo(separatorView.snp.trailing).offset(12)
-      $0.centerY.equalToSuperview()
-    }
-    
-    goalAchieveStatContainerView.addSubview(goalTimeCountStack)
-    goalTimeCountStack.snp.makeConstraints {
-      $0.trailing.equalToSuperview().offset(-20)
-      $0.centerY.equalToSuperview()
+    timeValueLabel.snp.makeConstraints {
+      $0.height.equalTo(24)
     }
   }
 }
