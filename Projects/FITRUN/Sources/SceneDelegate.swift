@@ -29,7 +29,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     appCoordinator = AppCoordinatorImpl(navigationController: navigationController, resolver: resolver)
     appCoordinator?.start()
 
-    window.rootViewController = RecordListViewController()// navigationController
+    window.rootViewController = RecordDetailViewController()// navigationController
     window.makeKeyAndVisible()
   }
 
