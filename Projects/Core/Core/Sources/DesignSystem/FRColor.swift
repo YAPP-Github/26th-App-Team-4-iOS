@@ -10,7 +10,7 @@ import UIKit
 
 public enum FRColor {
   public enum Base {
-    
+    public static let grey: UIColor = UIColor(hex: "#F3F4F6")
   }
   
   public enum Color {

@@ -26,12 +26,14 @@ public final class RecordDetailViewController: BaseViewController {
   }
   
   private lazy var tableView = UITableView(frame: .zero, style: .grouped).then {
-    $0.backgroundColor = FRColor.BG.primary
+    $0.backgroundColor = FRColor.Base.grey
     $0.separatorStyle = .none
     $0.showsVerticalScrollIndicator = false
     $0.sectionHeaderTopPadding = 0
 
     $0.registerCell(ofType: RecordDetailTitleTableCell.self)
+    $0.registerCell(ofType: RecordDetailRecordTableCell.self)
+    $0.registerCell(ofType: RecordDetailCourseTableCell.self)
     
     $0.delegate = self
     $0.dataSource = self
@@ -39,7 +41,7 @@ public final class RecordDetailViewController: BaseViewController {
   
   public override func initUI() {
     super.initUI()
-    self.view.backgroundColor = .white
+    self.view.backgroundColor = FRColor.Base.grey
 
     view.addSubview(backButton)
     backButton.snp.makeConstraints {
@@ -51,7 +53,7 @@ public final class RecordDetailViewController: BaseViewController {
     view.addSubview(tableView)
     tableView.snp.makeConstraints {
       $0.top.equalTo(backButton.snp.bottom).offset(16)
-      $0.leading.trailing.equalToSuperview().inset(20)
+      $0.leading.trailing.equalToSuperview()
       $0.bottom.equalToSuperview()
     }
   }
@@ -100,23 +102,22 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
   }
   
   public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//    switch Section(rawValue: indexPath.section) {
-//    case .title:
-//      return dequeueTitleCell(for: indexPath)
-//      
-//    case .runRecord:
-//      return dequeueRecordCell(for: indexPath)
-//      
-//    case .runningCourse:
-//      return dequeRueRunningCourseCell(for: indexPath)
-//      
-//    case .lapSegment:
-//      return dequeRueRunningCourseCell(for: indexPath)
-//      
-//    case .none:
-//      return UITableViewCell()
-//    }
-    return dequeueTitleCell(for: indexPath)
+    switch Section(rawValue: indexPath.section) {
+    case .title:
+      return dequeueTitleCell(for: indexPath)
+      
+    case .runRecord:
+      return dequeueRecordCell(for: indexPath)
+      
+    case .runningCourse:
+      return dequeRueRunningCourseCell(for: indexPath)
+      
+    case .lapSegment:
+      return dequeRueRunningCourseCell(for: indexPath)
+      
+    case .none:
+      return UITableViewCell()
+    }
   }
   
   private func dequeueTitleCell(for indexPath: IndexPath) -> UITableViewCell {
@@ -128,22 +129,22 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
   
   private func dequeueRecordCell(for indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(
-      withIdentifier: RecordListTableCell.identifier, for: indexPath
-    ) as! RecordListTableCell
+      withIdentifier: RecordDetailRecordTableCell.identifier, for: indexPath
+    ) as! RecordDetailRecordTableCell
     return cell
   }
   
   private func dequeRueRunningCourseCell(for indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(
-      withIdentifier: RecordListTableCell.identifier, for: indexPath
-    ) as! RecordListTableCell
+      withIdentifier: RecordDetailCourseTableCell.identifier, for: indexPath
+    ) as! RecordDetailCourseTableCell
     return cell
   }
   
   private func dequeueLapSegmentCell(for indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(
-      withIdentifier: RecordListTableCell.identifier, for: indexPath
-    ) as! RecordListTableCell
+      withIdentifier: RecordDetailRecordTableCell.identifier, for: indexPath
+    ) as! RecordDetailRecordTableCell
     return cell
   }
 }

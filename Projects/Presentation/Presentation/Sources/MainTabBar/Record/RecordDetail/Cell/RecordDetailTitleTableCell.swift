@@ -55,8 +55,8 @@ public class RecordDetailTitleTableCell: BaseTableViewCell {
   public override func initUI() {
     super.initUI()
     
-    self.backgroundColor = FRColor.BG.primary
-    
+    contentView.backgroundColor = FRColor.Base.grey
+
     contentView.addSubview(rootStack)
     rootStack.snp.makeConstraints {
       $0.edges.equalToSuperview()
