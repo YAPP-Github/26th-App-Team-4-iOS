@@ -15,6 +15,7 @@ public final class RecordDetailViewController: BaseViewController {
   
   enum Section: Int, CaseIterable {
     case title
+    case goalAchievement
     case runRecord
     case runningCourse
     case lapSegment
@@ -32,6 +33,7 @@ public final class RecordDetailViewController: BaseViewController {
     $0.sectionHeaderTopPadding = 0
 
     $0.registerCell(ofType: RecordDetailTitleTableCell.self)
+    $0.registerCell(ofType: RecordDetailAchievementTableCell.self)
     $0.registerCell(ofType: RecordDetailRecordTableCell.self)
     $0.registerCell(ofType: RecordDetailCourseTableCell.self)
     
@@ -69,6 +71,9 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     switch Section(rawValue: section) {
     case .title:
       return 1
+    
+    case .goalAchievement:
+      return 1
       
     case .runRecord:
       return 1
@@ -81,6 +86,7 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
       
     case .none:
       return 1
+
     }
   }
   
@@ -106,6 +112,9 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     case .title:
       return dequeueTitleCell(for: indexPath)
       
+    case .goalAchievement:
+      return dequeueGoalAchievementCell(for: indexPath)
+      
     case .runRecord:
       return dequeueRecordCell(for: indexPath)
       
@@ -124,6 +133,13 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailTitleTableCell.identifier, for: indexPath
     ) as! RecordDetailTitleTableCell
+    return cell
+  }
+  
+  private func dequeueGoalAchievementCell(for indexPath: IndexPath) -> UITableViewCell {
+    let cell = tableView.dequeueReusableCell(
+      withIdentifier: RecordDetailAchievementTableCell.identifier, for: indexPath
+    ) as! RecordDetailAchievementTableCell
     return cell
   }
   
