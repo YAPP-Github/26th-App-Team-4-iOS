@@ -36,6 +36,7 @@ public final class RecordDetailViewController: BaseViewController {
     $0.registerCell(ofType: RecordDetailAchievementTableCell.self)
     $0.registerCell(ofType: RecordDetailRecordTableCell.self)
     $0.registerCell(ofType: RecordDetailCourseTableCell.self)
+    $0.registerCell(ofType: RecordDetailLapTableCell.self)
     
     $0.delegate = self
     $0.dataSource = self
@@ -82,29 +83,49 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
       return 1
       
     case .lapSegment:
-      return 1
+      return 5
       
     case .none:
-      return 1
+      return 0
 
     }
   }
   
   public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-    return UIView()
+    switch Section(rawValue: section) {
+    case .lapSegment:
+      return RecordDetailLapTableHeaderView()
+    default:
+      return UIView()
+    }
   }
   
   public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-    return .zero
+    switch Section(rawValue: section) {
+    case .lapSegment:
+      return 94
+    default:
+      return .zero
+    }
   }
   
   // 모든 섹션 푸터 없애기
   public func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-    return UIView()
+    switch Section(rawValue: section) {
+    case .lapSegment:
+      return RecordDetailLapTableFooterView()
+    default:
+      return UIView()
+    }
   }
   
   public func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-    return 0
+    switch Section(rawValue: section) {
+    case .lapSegment:
+      return 62
+    default:
+      return .zero
+    }
   }
   
   public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -122,7 +143,7 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
       return dequeRueRunningCourseCell(for: indexPath)
       
     case .lapSegment:
-      return dequeRueRunningCourseCell(for: indexPath)
+      return dequeueLapSegmentCell(for: indexPath)
       
     case .none:
       return UITableViewCell()
@@ -159,8 +180,8 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
   
   private func dequeueLapSegmentCell(for indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(
-      withIdentifier: RecordDetailRecordTableCell.identifier, for: indexPath
-    ) as! RecordDetailRecordTableCell
+      withIdentifier: RecordDetailLapTableCell.identifier, for: indexPath
+    ) as! RecordDetailLapTableCell
     return cell
   }
 }
