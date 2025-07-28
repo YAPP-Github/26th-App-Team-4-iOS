@@ -49,7 +49,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     $0.clipsToBounds = true
 
     var config = UIButton.Configuration.plain()
-    config.image = UIImage(systemName: "clock.fill")
+    config.image = UIImage(named: "clock", in: .module, with: nil)?.resized(to: CGSize(width: 45.56, height: 47.56))
     config.imageColorTransformer = UIConfigurationColorTransformer { _ in .white }
 
     config.title = "목표 시간"
@@ -80,7 +80,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     $0.clipsToBounds = true
 
     var config = UIButton.Configuration.plain()
-    config.image = UIImage(systemName: "figure.run.circle.fill")
+    config.image = UIImage(named: "track", in: .module, with: nil)?.resizedToFill(to: CGSize(width: 70, height: 48))
     config.imageColorTransformer = UIConfigurationColorTransformer { _ in .white }
 
     config.title = "목표 거리"
@@ -130,7 +130,6 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     $0.addArrangedSubview(iconImageView)
     $0.addArrangedSubview(messageLabel)
   }
-
 
   // MARK: - Lifecycle
 
@@ -222,33 +221,10 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
   }
 
   @objc private func timeGoalButtonTapped() {
-    print("목표 시간 button tapped!")
+    coordinator?.showFirstRunningGoalSetting(goalInputType: .time)
   }
 
   @objc private func distanceGoalButtonTapped() {
-    coordinator?.showFirstRunningGoalSetting()
+    coordinator?.showFirstRunningGoalSetting(goalInputType: .distance)
   }
 }
-
-//import SwiftUI
-//
-//struct FirstRunningGoalSettingIntroRepresentable: UIViewControllerRepresentable {
-//  func makeUIViewController(context: Context) -> FirstRunningGoalSettingIntroViewController {
-//    // Instantiate your UIKit ViewController
-//    return FirstRunningGoalSettingIntroViewController()
-//  }
-//
-//  func updateUIViewController(_ uiViewController: FirstRunningGoalSettingIntroViewController, context: Context) {
-//    // No updates needed for this simple preview
-//  }
-//}
-//
-//struct FirstRunningGoalSettingIntroViewController_Previews: PreviewProvider {
-//  static var previews: some View {
-//    Group {
-//      FirstRunningGoalSettingIntroRepresentable()
-//        .previewDevice("iPhone 15 Pro")
-//        .edgesIgnoringSafeArea(.all)
-//    }
-//  }
-//}

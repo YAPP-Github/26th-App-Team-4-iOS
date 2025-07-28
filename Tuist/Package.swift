@@ -73,11 +73,10 @@ enum FRDependency: CaseIterable {
     case .rxCocoa: "6.6.0"
     case .swinjectAutoregistration: "2.9.1"
     case .nMapsMap: "3.22.0"
-    case .lottie: "4.4.0"
+    case .lottie: "4.5.0"
     }
   }
 }
-
 
 #if TUIST
 import struct ProjectDescription.PackageSettings
@@ -85,7 +84,10 @@ import struct ProjectDescription.PackageSettings
 let packageSettings = PackageSettings(
   productTypes: Dictionary(
     uniqueKeysWithValues: FRDependency.allCases.map {
-      ($0.packageName, .staticFramework)
+      (
+        $0.packageName,
+        $0.packageName == "Lottie" ? .framework : .staticFramework
+      )
     }
   )
 )
@@ -97,3 +99,26 @@ let package = Package(
     .package(url: $0.packageURL, .upToNextMajor(from: .init(stringLiteral: $0.version)))
   }
 )
+
+
+//enum FRDynamicDependecy: CaseIterable {
+//  case lottie
+//
+//  var packageName: String {
+//    switch self {
+//    case .lottie: "Lottie"
+//    }
+//  }
+//
+//  var packageURL: String {
+//    switch self {
+//    case .lottie: "https://github.com/airbnb/lottie-ios.git"
+//    }
+//  }
+//
+//  var version: String {
+//    switch self {
+//    case .lottie: "4.5.0"
+//    }
+//  }
+//}

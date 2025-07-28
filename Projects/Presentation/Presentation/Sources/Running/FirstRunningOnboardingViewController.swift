@@ -16,11 +16,11 @@ final class FirstRunningOnboardingViewController: UIViewController {
 
   // MARK: - UI Elements
 
-  let animationView = LottieAnimationView().then {
+  lazy var animationView = LottieAnimationView().then {
     $0.contentMode = .scaleAspectFit
     $0.loopMode = .playOnce
     $0.animationSpeed = 1.0
-    $0.animation = LottieAnimation.named("file_name")
+    $0.animation = LottieAnimation.named("running_onboarding", bundle: .module)
   }
 
   let setGoalButton = UIButton().then {
@@ -30,7 +30,7 @@ final class FirstRunningOnboardingViewController: UIViewController {
     $0.clipsToBounds = true
     $0.setTitleColor(.white, for: .normal)
     $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-    //    $0.isHidden = true
+    $0.isHidden = true
   }
 
   let doLaterButton = UIButton().then {
@@ -38,7 +38,7 @@ final class FirstRunningOnboardingViewController: UIViewController {
     $0.backgroundColor = .clear
     $0.setTitleColor(.white, for: .normal)
     $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-    //    $0.isHidden = true
+    $0.isHidden = true
   }
 
   // MARK: - Lifecycle
@@ -65,8 +65,8 @@ final class FirstRunningOnboardingViewController: UIViewController {
 
     animationView.snp.makeConstraints { make in
       make.center.equalToSuperview()
-      make.width.equalToSuperview().multipliedBy(0.8)
-      make.height.equalTo(animationView.snp.width)
+      make.width.equalTo(335)
+      make.height.equalTo(668)
     }
 
     setGoalButton.snp.makeConstraints { make in
@@ -110,33 +110,3 @@ final class FirstRunningOnboardingViewController: UIViewController {
     coordinator?.showRunning()
   }
 }
-
-
-//import SwiftUI
-//
-//struct GoalSelectionViewControllerRepresentable: UIViewControllerRepresentable {
-//  func makeUIViewController(context: Context) -> FirstRunningOnboardingViewController {
-//    // Instantiate your UIKit ViewController
-//    return FirstRunningOnboardingViewController()
-//  }
-//
-//  func updateUIViewController(_ uiViewController: FirstRunningOnboardingViewController, context: Context) {
-//    // No updates needed for this simple preview
-//  }
-//}
-//
-//struct GoalSelectionViewController_Previews: PreviewProvider {
-//  static var previews: some View {
-//    Group {
-//      GoalSelectionViewControllerRepresentable()
-//        .previewDisplayName("Goal Selection Screen - iPhone 15 Pro")
-//        .previewDevice("iPhone 15 Pro")
-//        .edgesIgnoringSafeArea(.all)
-//      GoalSelectionViewControllerRepresentable()
-//        .previewDisplayName("Goal Selection Screen - iPhone SE (3rd Gen)")
-//        .previewDevice("iPhone SE (3rd generation)")
-//        .edgesIgnoringSafeArea(.all)
-//        .preferredColorScheme(.dark)
-//    }
-//  }
-//}

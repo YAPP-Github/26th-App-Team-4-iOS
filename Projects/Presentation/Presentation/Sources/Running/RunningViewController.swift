@@ -12,6 +12,7 @@ import Then
 import RxSwift
 import RxCocoa
 import ReactorKit
+import CoreLocation
 
 final class RunningViewController: BaseViewController, View {
   typealias Reactor = RunningReactor

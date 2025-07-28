@@ -12,6 +12,46 @@ import RxSwift
 import RxCocoa
 import Lottie
 
+public enum GoalInputType {
+  case time // 시간 입력 화면
+  case distance // 거리 입력 화면
+
+  var title: String {
+    switch self {
+    case .time:
+      return "한 번에 몇 분을 달려볼까요?"
+    case .distance:
+      return "한 번에 몇 km를 달려볼까요?"
+    }
+  }
+
+  var subTitle: String {
+    switch self {
+    case .time:
+      return "러닝을 처음 시작할 땐 30분을 목표로\n걷기와 달리기를 번갈아 달려보는 걸 추천해요."
+    case .distance:
+      return "러닝을 처음 시작할 땐\n3km를 목표로 달리는 걸 추천해요."
+    }
+  }
+
+  var unit: String {
+    switch self {
+    case .time:
+      return "분"
+    case .distance:
+      return "km"
+    }
+  }
+
+  var initialGoalValue: Int {
+    switch self {
+    case .time:
+      return 30
+    case .distance:
+      return 3
+    }
+  }
+}
 
 final class ClearSelectionTextField: UITextField {
   override func selectionRects(for range: UITextRange) -> [UITextSelectionRect] {
@@ -26,47 +66,6 @@ final class ClearSelectionTextField: UITextField {
 final class FirstRunningGoalSettingViewController: UIViewController {
 
   // MARK: - Properties
-
-  enum GoalInputType {
-    case time // 시간 입력 화면
-    case distance // 거리 입력 화면
-
-    var title: String {
-      switch self {
-      case .time:
-        return "한 번에 몇 분을 달려볼까요?"
-      case .distance:
-        return "한 번에 몇 km를 달려볼까요?"
-      }
-    }
-
-    var subTitle: String {
-      switch self {
-      case .time:
-        return "러닝을 처음 시작할 땐 30분을 목표로\n걷기와 달리기를 번갈아 달려보는 걸 추천해요."
-      case .distance:
-        return "러닝을 처음 시작할 땐\n3km를 목표로 달리는 걸 추천해요."
-      }
-    }
-
-    var unit: String {
-      switch self {
-      case .time:
-        return "분"
-      case .distance:
-        return "km"
-      }
-    }
-
-    var initialGoalValue: Int {
-      switch self {
-      case .time:
-        return 30
-      case .distance:
-        return 3
-      }
-    }
-  }
 
   weak var coordinator: RunningCoordinator?
 
@@ -413,29 +412,4 @@ extension FirstRunningGoalSettingViewController: UITextFieldDelegate {
 
     return true
   }
-
 }
-
-
-//import SwiftUI
-//
-//struct FirstRunningGoalSettingRepresentable: UIViewControllerRepresentable {
-//  func makeUIViewController(context: Context) -> FirstRunningGoalSettingViewController {
-//    // Instantiate your UIKit ViewController
-//    return FirstRunningGoalSettingViewController(inputType: .distance)
-//  }
-//
-//  func updateUIViewController(_ uiViewController: FirstRunningGoalSettingViewController, context: Context) {
-//    // No updates needed for this simple preview
-//  }
-//}
-//
-//struct FirstRunningGoalSettingViewController_Previews: PreviewProvider {
-//  static var previews: some View {
-//    Group {
-//      FirstRunningGoalSettingRepresentable()
-//        .previewDevice("iPhone 15 Pro")
-//        .edgesIgnoringSafeArea(.all)
-//    }
-//  }
-//}

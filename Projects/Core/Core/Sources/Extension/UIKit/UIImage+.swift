@@ -8,15 +8,37 @@
 import UIKit
 
 extension UIImage {
-  public func resized(to newSize: CGSize) -> UIImage? {
-    let format = UIGraphicsImageRendererFormat()
-    format.scale = scale // 원본 이미지의 스케일 유지 (ex: @2x, @3x)
-    format.opaque = false // 투명도 유지
+  public func resized(to targetSize: CGSize) -> UIImage? {
+    let aspectWidth = targetSize.width / size.width
+    let aspectHeight = targetSize.height / size.height
+    let aspectRatio = min(aspectWidth, aspectHeight)
 
-    let renderer = UIGraphicsImageRenderer(size: newSize, format: format)
-    let image = renderer.image { _ in
-      self.draw(in: CGRect(origin: .zero, size: newSize))
+    let newSize = CGSize(width: size.width * aspectRatio, height: size.height * aspectRatio)
+
+    let renderer = UIGraphicsImageRenderer(size: targetSize)
+    return renderer.image { _ in
+      let origin = CGPoint(x: (targetSize.width - newSize.width) / 2,
+                           y: (targetSize.height - newSize.height) / 2)
+      self.draw(in: CGRect(origin: origin, size: newSize))
     }
-    return image
+  }
+
+  public func resizedToFill(to targetSize: CGSize) -> UIImage? {
+    let originalAspect = self.size.width / self.size.height
+    let targetAspect = targetSize.width / targetSize.height
+
+    var newSize: CGSize
+    if originalAspect > targetAspect {
+      newSize = CGSize(width: targetSize.height * originalAspect, height: targetSize.height)
+    } else {
+      newSize = CGSize(width: targetSize.width, height: targetSize.width / originalAspect)
+    }
+
+    let renderer = UIGraphicsImageRenderer(size: targetSize)
+    return renderer.image { _ in
+      let origin = CGPoint(x: (targetSize.width - newSize.width) / 2,
+                           y: (targetSize.height - newSize.height) / 2)
+      self.draw(in: CGRect(origin: origin, size: newSize))
+    }
   }
 }

@@ -38,8 +38,8 @@ public final class RunningAssembly: Assembly {
       return viewController
     }
 
-    container.register(FirstRunningGoalSettingViewController.self) { r in
-      let viewController = FirstRunningGoalSettingViewController(inputType: .distance)
+    container.register(FirstRunningGoalSettingViewController.self) { (r, type: GoalInputType) in
+      let viewController = FirstRunningGoalSettingViewController(inputType: type)
       return viewController
     }
 

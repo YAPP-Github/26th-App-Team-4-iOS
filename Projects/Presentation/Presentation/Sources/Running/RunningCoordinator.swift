@@ -13,7 +13,7 @@ import Core
 public protocol RunningCoordinator: Coordinator {
   func showFirstRunningOnboarding()
   func showFirstRunningGoalSettingIntro()
-  func showFirstRunningGoalSetting()
+  func showFirstRunningGoalSetting(goalInputType: GoalInputType)
   func showRunning()
   func showRunningResult()
   func showRunningPaceSetting()
@@ -57,7 +57,7 @@ extension RunningCoordinatorImpl {
     runningFlowNavigationController.modalPresentationStyle = .fullScreen
     runningFlowNavigationController.isNavigationBarHidden = true
     
-    navigationController.present(runningFlowNavigationController, animated: true)
+    navigationController.present(runningFlowNavigationController, animated: false)
   }
   
   public func showFirstRunningGoalSettingIntro() {
@@ -69,8 +69,8 @@ extension RunningCoordinatorImpl {
     runningFlowNavigationController.pushViewController(viewController, animated: false)
   }
   
-  public func showFirstRunningGoalSetting() {
-    guard let viewController = resolver.resolve(FirstRunningGoalSettingViewController.self) else {
+  public func showFirstRunningGoalSetting(goalInputType: GoalInputType) {
+    guard let viewController = resolver.resolve(FirstRunningGoalSettingViewController.self, argument: GoalInputType.time) else {
       fatalError("Failed to resolve FirstRunningGoalSettingViewController. Ensure it is registered correctly in Swinject.")
     }
     viewController.coordinator = self
