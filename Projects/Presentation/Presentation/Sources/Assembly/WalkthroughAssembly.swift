@@ -13,17 +13,17 @@ public final class WalkthroughAssembly: Assembly {
   public init() {}
   
   public func assemble(container: Container) {
-    container.autoregister(WalkthroughReactor.self, initializer: WalkthroughReactor.init)
+    container.autoregister(WalkThroughReactor.self, initializer: WalkThroughReactor.init)
     
-    container.register(WalkthroughCoordinatorImpl.self) { (r, navigationController: UINavigationController) in
-      return WalkthroughCoordinatorImpl(navigationController: navigationController, resolver: r)
+    container.register(WalkThroughCoordinatorImpl.self) { (r, navigationController: UINavigationController) in
+      return WalkThroughCoordinatorImpl(navigationController: navigationController, resolver: r)
     }
     
-    container.register(WalkthroughViewController.self) { r in
-      guard let reactor = r.resolve(WalkthroughReactor.self) else {
+    container.register(WalkThroughViewController.self) { r in
+      guard let reactor = r.resolve(WalkThroughReactor.self) else {
         fatalError("Failed to resolve WalkthroughReactor.")
       }
-      let viewController = WalkthroughViewController()
+      let viewController = WalkThroughViewController()
       viewController.reactor = reactor
       return viewController
     }

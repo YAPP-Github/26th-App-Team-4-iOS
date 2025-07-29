@@ -9,11 +9,11 @@ import UIKit
 import Swinject
 import Core
 
-public protocol WalkthroughCoordinator: Coordinator {
+public protocol WalkThroughCoordinator: Coordinator {
   func showLogin()
 }
 
-public final class WalkthroughCoordinatorImpl: WalkthroughCoordinator {
+public final class WalkThroughCoordinatorImpl: WalkThroughCoordinator {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: Core.CoordinatorType = .walkthrough
@@ -26,16 +26,16 @@ public final class WalkthroughCoordinatorImpl: WalkthroughCoordinator {
   }
 
   public func start() {
-    guard let viewController = resolver.resolve(WalkthroughViewController.self) else {
+    guard let viewController = resolver.resolve(WalkThroughViewController.self) else {
       fatalError("Failed to resolve WalkthroughViewController. Ensure it is registered correctly in Swinject.")
     }
     viewController.coordinator = self
-
+    viewController.reactor = WalkThroughReactor()
     navigationController.setViewControllers([viewController], animated: true)
   }
 }
 
-extension WalkthroughCoordinatorImpl {
+extension WalkThroughCoordinatorImpl {
   public func showLogin() {
     finishDelegate?.coordinatorDidFinish(childCoordinator: self)
   }
