@@ -34,7 +34,7 @@ public final class OnboardingViewController: BaseViewController, View {
 
   private let nextButton = UIButton(type: .system).then {
     $0.setTitle("다음", for: .normal)
-    $0.setTitleColor(FRColor.FG.Icon.interactive.primary, for: .normal)
+    $0.setTitleColor(FRColor.Fg.Icon.Interactive.primary, for: .normal)
     $0.titleLabel?.font = .boldSystemFont(ofSize: 16)
   }
 
@@ -47,7 +47,7 @@ public final class OnboardingViewController: BaseViewController, View {
   }
   
   private let activityIndicator = UIActivityIndicatorView().then {
-    $0.tintColor = FRColor.FG.Icon.interactive.primary
+    $0.tintColor = FRColor.Fg.Icon.Interactive.primary
     $0.hidesWhenStopped = true
   }
 

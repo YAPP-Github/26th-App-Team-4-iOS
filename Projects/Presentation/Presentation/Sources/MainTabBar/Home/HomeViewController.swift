@@ -31,15 +31,15 @@ public final class HomeViewController: BaseViewController, View {
   private let titleLabel = UILabel().then {
     $0.text = "나에게 딱 맞는 러닝을\n핏런에서 함께해요!"
     $0.font = UIFont.systemFont(ofSize: 22, weight: .bold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
     $0.numberOfLines = 0
   }
   
   private let runButton = UIButton().then {
     $0.setTitle("달리기", for: .normal)
     $0.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
-    $0.titleLabel?.textColor = FRColor.FG.Text.Interactive.inverse
-    $0.backgroundColor = FRColor.FG.Icon.primary
+    $0.titleLabel?.textColor = FRColor.Fg.Text.Interactive.inverse
+    $0.backgroundColor = FRColor.Fg.Icon.primary
     $0.layer.cornerRadius = 50
   }
   
