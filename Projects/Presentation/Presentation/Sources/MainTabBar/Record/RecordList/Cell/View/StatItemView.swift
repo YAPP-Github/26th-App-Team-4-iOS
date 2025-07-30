@@ -24,7 +24,7 @@ public class StatItemView: BaseView {
   private let titleLabel = UILabel().then {
     $0.text = "평균 페이스"
     $0.font = .systemFont(ofSize: 12)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   private lazy var valueStack = UIStackView(arrangedSubviews: [
@@ -44,7 +44,7 @@ public class StatItemView: BaseView {
   private let unitLabel = UILabel().then {
     $0.text = "회"
     $0.font = .systemFont(ofSize: 13, weight: .semibold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
   }
   public override func initUI() {
     super.initUI()

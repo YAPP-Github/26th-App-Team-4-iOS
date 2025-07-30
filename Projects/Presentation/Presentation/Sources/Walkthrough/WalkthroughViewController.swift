@@ -1,13 +1,5 @@
 //
 //  WalkThroughViewController.swift
-//  MaumNote_iOS
-//
-//  Created by JDeoks on 7/9/25.
-//
-
-
-//
-//  WalkThroughViewController.swift
 //  Presentation
 //
 //  Created by JDeoks on 7/8/25.
@@ -83,7 +75,7 @@ public final class WalkThroughViewController: BaseViewController, View {
       .subscribe(with: self) { object, _ in
         guard let reactor = object.reactor else { return }
         if reactor.currentState.shouldShowStart {
-          object.goToNextScreen()
+          object.coordinator?.showLogin()
         } else {
           reactor.action.onNext(.moveToNextPage)
         }
@@ -108,13 +100,6 @@ public final class WalkThroughViewController: BaseViewController, View {
         object.nextButton.setTitle(shouldShowStart ? "시작하기" : "다음", for: .normal)
       }
       .disposed(by: disposeBag)
-  }
-
-  private func goToNextScreen() {
-    let vc = OnboardingViewController()
-    vc.modalTransitionStyle = .crossDissolve
-    vc.modalPresentationStyle = .overFullScreen
-    present(vc, animated: true)
   }
 }
 

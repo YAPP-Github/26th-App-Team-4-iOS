@@ -27,7 +27,7 @@ public final class RecordDetailViewController: BaseViewController {
   }
   
   private lazy var tableView = UITableView(frame: .zero, style: .grouped).then {
-    $0.backgroundColor = FRColor.Base.grey
+    $0.backgroundColor = FRColor.Bg.secondary
     $0.separatorStyle = .none
     $0.showsVerticalScrollIndicator = false
     $0.sectionHeaderTopPadding = 0
@@ -44,7 +44,7 @@ public final class RecordDetailViewController: BaseViewController {
   
   public override func initUI() {
     super.initUI()
-    self.view.backgroundColor = FRColor.Base.grey
+    self.view.backgroundColor = FRColor.Base.gray
 
     view.addSubview(backButton)
     backButton.snp.makeConstraints {
