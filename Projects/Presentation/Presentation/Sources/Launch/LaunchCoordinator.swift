@@ -39,7 +39,7 @@ public final class LaunchCoordinatorImpl: LaunchScreenCoordinator {
     }
     viewController.coordinator = self
 
-    navigationController.setViewControllers([viewController], animated: false)
+    navigationController.setViewControllers([RunningPaceSettingViewController()], animated: false)
   }
 }
 
