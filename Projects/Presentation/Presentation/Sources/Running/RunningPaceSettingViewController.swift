@@ -20,11 +20,11 @@ final class RunningPaceSettingViewController: BaseViewController {
   weak var coordinator: RunningCoordinator?
 
   // TODO: - 서버로 부터 값 받도록 수정
-  private let challengerPace: Float = 10 * 60
+  private let challengerPace: Float = 5 * 60
   private let routinePace: Float = 7 * 60
-  private let warmUpPace: Float = 5 * 60
+  private let warmUpPace: Float = 9 * 60
 
-  private lazy var paceValues: [Float] = [challengerPace, routinePace, warmUpPace]
+  private lazy var paceValues: [Float] = [warmUpPace, routinePace, challengerPace]
 
   // MARK: - UI Elements
 
@@ -216,7 +216,7 @@ final class RunningPaceSettingViewController: BaseViewController {
       $0.leading.trailing.equalToSuperview().inset(30)
     }
 
-    challengerLabel.snp.makeConstraints {
+    warmUpLabel.snp.makeConstraints {
       $0.top.equalTo(fixedPaceSlider.snp.bottom).offset(8)
       $0.centerX.equalTo(fixedPaceSlider.snp.leading)
     }
@@ -226,7 +226,7 @@ final class RunningPaceSettingViewController: BaseViewController {
       $0.centerX.equalTo(fixedPaceSlider.snp.centerX)
     }
 
-    warmUpLabel.snp.makeConstraints {
+    challengerLabel.snp.makeConstraints {
       $0.top.equalTo(fixedPaceSlider.snp.bottom).offset(8)
       $0.centerX.equalTo(fixedPaceSlider.snp.trailing)
     }
