@@ -13,6 +13,8 @@ import Domain
 
 public final class RecordListViewController: BaseViewController {
   
+  weak var coordinator: RecordCoordinator?
+  
   enum Section: Int, CaseIterable {
     case header
     case recordList
@@ -39,6 +41,7 @@ public final class RecordListViewController: BaseViewController {
   
   public override func initUI() {
     super.initUI()
+    self.navigationController?.navigationBar.isHidden = true
     self.view.backgroundColor = .white
     
     view.addSubview(navTitleLabel)
