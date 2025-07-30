@@ -187,7 +187,6 @@ final class FirstRunningGoalSettingViewController: UIViewController {
 
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
-    navigationController?.setNavigationBarHidden(false, animated: animated)
     view.endEditing(true)
   }
 
@@ -205,9 +204,9 @@ final class FirstRunningGoalSettingViewController: UIViewController {
     view.addSubview(animationView)
 
     backButton.snp.makeConstraints { make in
-      make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(10)
-      make.leading.equalToSuperview().offset(20)
-      make.width.height.equalTo(30)
+      make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(6)
+      make.leading.equalToSuperview().offset(6)
+      make.width.height.equalTo(44)
     }
 
     skipButton.snp.makeConstraints { make in

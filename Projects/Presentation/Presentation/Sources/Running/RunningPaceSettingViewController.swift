@@ -167,12 +167,12 @@ final class RunningPaceSettingViewController: BaseViewController {
   // MARK: - Layout
   
   private func setupLayout() {
-    backButton.snp.makeConstraints {
-      $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
-      $0.leading.equalToSuperview().offset(20)
-      $0.width.height.equalTo(30)
+    backButton.snp.makeConstraints { make in
+      make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(6)
+      make.leading.equalToSuperview().offset(6)
+      make.width.height.equalTo(44)
     }
-    
+
     infoBannerView.snp.makeConstraints {
       $0.top.equalTo(backButton.snp.bottom).offset(20)
       $0.leading.trailing.equalToSuperview().inset(20)

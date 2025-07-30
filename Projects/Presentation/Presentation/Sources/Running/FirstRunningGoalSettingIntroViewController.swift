@@ -147,11 +147,6 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     navigationController?.setNavigationBarHidden(true, animated: animated)
   }
 
-  override func viewWillDisappear(_ animated: Bool) {
-    super.viewWillDisappear(animated)
-    navigationController?.setNavigationBarHidden(false, animated: animated)
-  }
-
   // MARK: - Setup Layout
 
   private func setupLayout() {
@@ -164,9 +159,9 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     view.addSubview(footerStackView)
 
     backButton.snp.makeConstraints { make in
-      make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(10)
-      make.leading.equalToSuperview().offset(20)
-      make.width.height.equalTo(30)
+      make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(6)
+      make.leading.equalToSuperview().offset(6)
+      make.width.height.equalTo(44)
     }
 
     skipButton.snp.makeConstraints { make in

@@ -58,6 +58,7 @@ extension RunningCoordinatorImpl {
     runningFlowNavigationController.modalPresentationStyle = .fullScreen
     runningFlowNavigationController.isNavigationBarHidden = true
     
+    navigationController.isNavigationBarHidden = true
     navigationController.present(runningFlowNavigationController, animated: false)
   }
   
