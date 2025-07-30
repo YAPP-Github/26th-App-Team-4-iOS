@@ -36,6 +36,7 @@ public enum CoordinatorType {
   case mainTabBar
   case home
   case running
+  case record
 }
 
 public protocol AppCoordinator: Coordinator {
