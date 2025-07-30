@@ -12,7 +12,9 @@ import NMapsMap
 import Domain
 
 public final class RecordDetailViewController: BaseViewController {
-  
+
+  weak var coordinator: RunningCoordinator?
+
   enum Section: Int, CaseIterable {
     case title
     case goalAchievement
@@ -27,7 +29,7 @@ public final class RecordDetailViewController: BaseViewController {
   }
   
   private lazy var tableView = UITableView(frame: .zero, style: .grouped).then {
-    $0.backgroundColor = FRColor.Base.grey
+    $0.backgroundColor = FRColor.Bg.secondary
     $0.separatorStyle = .none
     $0.showsVerticalScrollIndicator = false
     $0.sectionHeaderTopPadding = 0
@@ -41,10 +43,30 @@ public final class RecordDetailViewController: BaseViewController {
     $0.delegate = self
     $0.dataSource = self
   }
-  
+
+  private lazy var popUpView = FirstRunningPopUpView().then {
+//    $0.isHidden = true
+    $0.onConfirm = { [weak self] in
+      guard let self = self else { return }
+      self.coordinator?.showRunningPaceSetting()
+    }
+  }
+
+  public override func viewDidLoad() {
+    super.viewDidLoad()
+    self.view.backgroundColor = FRColor.Bg.secondary
+
+    bind()
+  }
+
+  public override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    navigationController?.setNavigationBarHidden(true, animated: animated)
+  }
+
   public override func initUI() {
     super.initUI()
-    self.view.backgroundColor = FRColor.Base.grey
+    self.view.backgroundColor = FRColor.Bg.secondary
 
     view.addSubview(backButton)
     backButton.snp.makeConstraints {
@@ -59,6 +81,19 @@ public final class RecordDetailViewController: BaseViewController {
       $0.leading.trailing.equalToSuperview()
       $0.bottom.equalToSuperview()
     }
+
+    view.addSubview(popUpView)
+    popUpView.snp.makeConstraints {
+      $0.edges.equalToSuperview()
+    }
+  }
+
+  private func bind() {
+    backButton.rx.tap
+      .subscribe(with: self) { object, _ in
+        object.coordinator?.dismissRunningFlow()
+      }
+      .disposed(by: disposeBag)
   }
 }
 

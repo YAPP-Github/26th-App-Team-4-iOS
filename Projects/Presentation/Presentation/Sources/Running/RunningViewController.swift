@@ -235,8 +235,7 @@ final class RunningViewController: BaseViewController, View {
 
     secondaryActionButton.rx.tap
       .subscribe(with: self) { object, _ in
-        // TODO: - 기록상세 화면으로 갈 수 있도록 수정 필요
-        object.coordinator?.showRunningPaceSetting()
+        object.coordinator?.showRunningResult()
       }
       .disposed(by: disposeBag)
 

@@ -21,11 +21,11 @@ public final class RecordListViewController: BaseViewController {
   private let navTitleLabel = UILabel().then {
     $0.text = "기록"
     $0.font = .systemFont(ofSize: 20, weight: .bold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
   }
   
   private lazy var tableView = UITableView(frame: .zero, style: .grouped).then {
-    $0.backgroundColor = FRColor.BG.primary
+    $0.backgroundColor = FRColor.Bg.primary
     $0.separatorStyle = .none
     $0.showsVerticalScrollIndicator = false
     $0.sectionHeaderTopPadding = 0
@@ -73,7 +73,7 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
   public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
     guard Section(rawValue: section) == .recordList else { return nil }
     return UIView().then {
-      $0.backgroundColor = FRColor.BG.secondary
+      $0.backgroundColor = FRColor.Bg.secondary
     }
   }
   

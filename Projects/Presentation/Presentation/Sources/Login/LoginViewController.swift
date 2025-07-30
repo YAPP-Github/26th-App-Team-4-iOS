@@ -36,7 +36,8 @@ public class LoginViewController: BaseViewController, View {
 
   private let logoLabel = UILabel().then { label in
     label.text = "fitrun"
-    label.textColor = FRColor.Fg.Text.primary
+    label.font = UIFont.boldSystemFont(ofSize: 56.37)
+    label.textColor = FRColor.Fg.Text.Interactive.primary
     label.setContentCompressionResistancePriority(.required, for: .horizontal)
     label.setContentHuggingPriority(.defaultLow, for: .horizontal)
   }

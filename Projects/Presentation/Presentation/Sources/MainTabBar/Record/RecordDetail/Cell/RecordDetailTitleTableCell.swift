@@ -42,20 +42,20 @@ public class RecordDetailTitleTableCell: BaseTableViewCell {
   private let dateLabel = UILabel().then {  // 24
     $0.text = "2025/07/20 13:00:00"
     $0.font = .systemFont(ofSize: 16)
-    $0.textColor = FRColor.FG.Text.secondary.withAlphaComponent(0.8)
+    $0.textColor = FRColor.Fg.Text.secondary.withAlphaComponent(0.8)
   }
     
   let editButton = UIButton(type: .system).then { // 24
     let img = UIImage(systemName: "pencil")?
       .withRenderingMode(.alwaysTemplate)
     $0.setImage(img, for: .normal)
-    $0.tintColor = FRColor.FG.Text.secondary.withAlphaComponent(0.8)
+    $0.tintColor = FRColor.Fg.Text.secondary.withAlphaComponent(0.8)
   }
   
   public override func initUI() {
     super.initUI()
     
-    contentView.backgroundColor = FRColor.Base.grey
+    contentView.backgroundColor = .clear
 
     contentView.addSubview(rootStack)
     rootStack.snp.makeConstraints {

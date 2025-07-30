@@ -35,13 +35,13 @@ public class RecordDetailAchievementTableCell: BaseTableViewCell {
   private let achievementTitleLabel = UILabel().then { // 20
     $0.text = "페이스, 거리, 시간 목표를 달성했어요! "
     $0.font = .systemFont(ofSize: 13, weight: .semibold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
   }
   
   public override func initUI() {
     super.initUI()
     
-    contentView.backgroundColor = FRColor.Base.grey
+    contentView.backgroundColor = .clear
 
     contentView.addSubview(rootStack)
     rootStack.snp.makeConstraints {

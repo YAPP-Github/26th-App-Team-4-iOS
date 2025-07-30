@@ -18,7 +18,7 @@ open class BaseCollectionViewCell: UICollectionViewCell {
   }
   
   required public init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+    super.init(coder: coder)
   }
 
   open override func prepareForReuse() {
