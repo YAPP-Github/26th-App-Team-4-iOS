@@ -19,21 +19,23 @@ public class RecordListReactor: Reactor {
   }
 
   public enum Mutation {
-    case
+    case setRecordSummary(RecordSummary)
+    case setRecords([RunningRecord])
     case setError(Error)
   }
 
   public struct State {
-    fileprivate(set) var recordOverViewData: HomeInfo?
+    fileprivate(set) var recordSummry: RecordSummary?
+    fileprivate(set) var records: [RunningRecord] = []
     @Pulse fileprivate(set) var error: Error?
   }
 
   public var initialState: State = State()
 
-  private let homeUseCase: HomeUseCase
+  private let recordUseCase: RecordUseCase
 
-  init(homeUseCase: HomeUseCase) {
-    self.homeUseCase = homeUseCase
+  init(recordUseCase: RecordUseCase) {
+    self.recordUseCase = recordUseCase
   }
 
 }
