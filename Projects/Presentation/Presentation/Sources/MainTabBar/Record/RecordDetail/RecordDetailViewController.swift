@@ -12,7 +12,9 @@ import NMapsMap
 import Domain
 
 public final class RecordDetailViewController: BaseViewController {
-  
+
+  weak var coordinator: RunningCoordinator?
+
   enum Section: Int, CaseIterable {
     case title
     case goalAchievement
@@ -41,10 +43,22 @@ public final class RecordDetailViewController: BaseViewController {
     $0.delegate = self
     $0.dataSource = self
   }
-  
+
+  public override func viewDidLoad() {
+    super.viewDidLoad()
+    self.view.backgroundColor = FRColor.Bg.secondary
+
+    bind()
+  }
+
+  public override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    navigationController?.setNavigationBarHidden(true, animated: animated)
+  }
+
   public override func initUI() {
     super.initUI()
-    self.view.backgroundColor = FRColor.Base.gray
+    self.view.backgroundColor = FRColor.Bg.secondary
 
     view.addSubview(backButton)
     backButton.snp.makeConstraints {
@@ -59,6 +73,14 @@ public final class RecordDetailViewController: BaseViewController {
       $0.leading.trailing.equalToSuperview()
       $0.bottom.equalToSuperview()
     }
+  }
+
+  private func bind() {
+    backButton.rx.tap
+      .subscribe(with: self) { object, _ in
+        object.coordinator?.dismissRunningFlow()
+      }
+      .disposed(by: disposeBag)
   }
 }
 

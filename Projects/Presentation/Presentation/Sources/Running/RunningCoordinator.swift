@@ -72,7 +72,7 @@ extension RunningCoordinatorImpl {
   }
   
   public func showFirstRunningGoalSetting(goalInputType: GoalInputType) {
-    guard let viewController = resolver.resolve(FirstRunningGoalSettingViewController.self, argument: GoalInputType.time) else {
+    guard let viewController = resolver.resolve(FirstRunningGoalSettingViewController.self, argument: goalInputType) else {
       fatalError("Failed to resolve FirstRunningGoalSettingViewController. Ensure it is registered correctly in Swinject.")
     }
     viewController.coordinator = self
@@ -100,11 +100,12 @@ extension RunningCoordinatorImpl {
   
   public func showRunningResult() {
     // TODO: - 기록상세/러닝결과 화면
-    //    guard let viewController = resolver.resolve(RunningResultViewController.self) else {
-    //      fatalError("Failed to resolve RunningResultViewController. Ensure it is registered correctly in Swinject.")
-    //    }
-    //    viewController.coordinator = self
-    //    runningFlowNavigationController.pushViewController(viewController, animated: true)
+    guard let viewController = resolver.resolve(RecordDetailViewController.self) else {
+      fatalError("Failed to resolve RecordDetailViewController. Ensure it is registered correctly in Swinject.")
+    }
+    viewController.coordinator = self
+    runningFlowNavigationController.navigationBar.backgroundColor = .yellow
+    runningFlowNavigationController.pushViewController(viewController, animated: true)
   }
 
   public func pop() {

@@ -64,7 +64,7 @@ public class RecordDetailCourseTableCell: BaseTableViewCell {
   public override func initUI() {
     super.initUI()
     
-    contentView.backgroundColor = FRColor.Fg.Nuetral.gray0
+    contentView.backgroundColor = .clear
 
     contentView.addSubview(rootStack)
     rootStack.snp.makeConstraints {

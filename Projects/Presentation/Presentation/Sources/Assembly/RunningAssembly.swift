@@ -47,6 +47,13 @@ public final class RunningAssembly: Assembly {
       let viewController = RunningPaceSettingViewController()
       return viewController
     }
+
+    // TODO: - runningassembly로 이동
+    // RecordDetail
+    container.register(RecordDetailViewController.self) { r in
+      let viewController = RecordDetailViewController()
+      return viewController
+    }
   }
 }
 
