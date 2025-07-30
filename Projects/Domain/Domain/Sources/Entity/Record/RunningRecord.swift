@@ -41,4 +41,27 @@ public struct RunningRecord {
     self.totalTime = totalTime
     self.imageURL = imageURL
   }
+  
+  static let dummys = [
+    RunningRecord(
+      recordId: 1,
+      title: "아침 러닝",
+      userId: 1,
+      startAt: Date(),
+      averagePace: 300, // 5분 페이스
+      totalDistance: 5000, // 5km
+      totalTime: 1500, // 25분
+      imageURL: "https://example.com/image1.jpg"
+    ),
+    RunningRecord(
+      recordId: 2,
+      title: "저녁 러닝",
+      userId: 1,
+      startAt: Date().addingTimeInterval(-3600), // 한 시간 전
+      averagePace: 320, // 5분 20초 페이스
+      totalDistance: 8000, // 8km
+      totalTime: 2560, // 약 42분
+      imageURL: "https://example.com/image2.jpg"
+    )
+  ]
 }
