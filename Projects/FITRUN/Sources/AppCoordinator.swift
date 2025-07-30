@@ -33,17 +33,17 @@ final class AppCoordinatorImpl {
 
 extension AppCoordinatorImpl: AppCoordinator {
   func showLaunch() {
-    guard let coordinator = resolver.resolve(LaunchCoordinatorImpl.self, argument: navigationController) else {
+    guard let launchCoordinator = resolver.resolve(LaunchCoordinatorImpl.self, argument: navigationController) else {
       fatalError("Failed to resolve LaunchCoordinatorImpl. Ensure it is registered correctly in Swinject.")
     }
-    coordinator.finishDelegate = self
-    coordinator.launchScreenCoordinatorDelegate = self
-    childCoordinators.append(coordinator)
-    coordinator.start()
+    launchCoordinator.finishDelegate = self
+    launchCoordinator.launchScreenCoordinatorDelegate = self
+    childCoordinators.append(launchCoordinator)
+    launchCoordinator.start()
   }
 
   func showWalkthrough() {
-    guard let coordinator = resolver.resolve(WalkthroughCoordinatorImpl.self, argument: navigationController) else {
+    guard let coordinator = resolver.resolve(WalkThroughCoordinatorImpl.self, argument: navigationController) else {
       fatalError("Failed to resolve WalkthroughCoordinatorImpl. Ensure it is registered correctly in Swinject.")
     }
     coordinator.finishDelegate = self
