@@ -99,13 +99,14 @@ extension RunningCoordinatorImpl {
   }
   
   public func showRunningResult() {
-    // TODO: - 기록상세/러닝결과 화면
+    // TODO: - 기록상세/러닝결과 coordinator 생성해서 분리하기
     guard let viewController = resolver.resolve(RecordDetailViewController.self) else {
       fatalError("Failed to resolve RecordDetailViewController. Ensure it is registered correctly in Swinject.")
     }
     viewController.coordinator = self
-    runningFlowNavigationController.navigationBar.backgroundColor = .yellow
-    runningFlowNavigationController.pushViewController(viewController, animated: true)
+
+    runningFlowNavigationController.modalPresentationStyle = .none
+    runningFlowNavigationController.pushViewController(viewController, animated: false)
   }
 
   public func pop() {

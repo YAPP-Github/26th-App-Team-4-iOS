@@ -329,7 +329,7 @@ final class RunningPaceSettingViewController: BaseViewController {
 
             object.view.isUserInteractionEnabled = true
 
-            object.coordinator?.showRunningPaceSetting()
+            object.coordinator?.pop()
           }
         }
       }

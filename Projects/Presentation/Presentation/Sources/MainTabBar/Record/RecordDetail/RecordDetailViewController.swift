@@ -44,6 +44,14 @@ public final class RecordDetailViewController: BaseViewController {
     $0.dataSource = self
   }
 
+  private lazy var popUpView = FirstRunningPopUpView().then {
+//    $0.isHidden = true
+    $0.onConfirm = { [weak self] in
+      guard let self = self else { return }
+      self.coordinator?.showRunningPaceSetting()
+    }
+  }
+
   public override func viewDidLoad() {
     super.viewDidLoad()
     self.view.backgroundColor = FRColor.Bg.secondary
@@ -72,6 +80,11 @@ public final class RecordDetailViewController: BaseViewController {
       $0.top.equalTo(backButton.snp.bottom).offset(16)
       $0.leading.trailing.equalToSuperview()
       $0.bottom.equalToSuperview()
+    }
+
+    view.addSubview(popUpView)
+    popUpView.snp.makeConstraints {
+      $0.edges.equalToSuperview()
     }
   }
 

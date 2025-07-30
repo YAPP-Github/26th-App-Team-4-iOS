@@ -1,10 +1,9 @@
 //
 //  FRWalkThroughCollectionCell.swift
-//  MaumNote_iOS
+//  Presentation
 //
 //  Created by JDeoks on 7/9/25.
 //
-
 
 import UIKit
 import Then
