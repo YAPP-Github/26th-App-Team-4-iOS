@@ -53,10 +53,10 @@ public class MainTabBarCoordinatorImpl: NSObject, MainTabBarCoordinator {
     appearance.configureWithOpaqueBackground()
     appearance.backgroundColor = .white
 
-    appearance.stackedLayoutAppearance.selected.iconColor = .systemBlue
-    appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.systemBlue]
-    appearance.stackedLayoutAppearance.normal.iconColor = .systemGray
-    appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.systemGray]
+    appearance.stackedLayoutAppearance.selected.iconColor = FRColor.Fg.Icon.primary
+    appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: FRColor.Fg.Text.primary]
+    appearance.stackedLayoutAppearance.normal.iconColor = FRColor.Fg.Icon.primary
+    appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: FRColor.Fg.Text.primary]
 
     tabBarController.tabBar.standardAppearance = appearance
     tabBarController.tabBar.scrollEdgeAppearance = appearance

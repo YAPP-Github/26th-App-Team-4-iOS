@@ -17,7 +17,7 @@ public final class OnboardingAnswerTableCell: BaseTableViewCell {
   public override var isSelected: Bool {
     didSet {
       let borderColor = isSelected
-        ? FRColor.FG.Icon.interactive.primary.cgColor
+        ? FRColor.Fg.Icon.Interactive.primary.cgColor
         : UIColor.systemGray4.cgColor
       
       let bgColor = isSelected
