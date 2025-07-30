@@ -32,14 +32,14 @@ final class RunningPaceSettingViewController: BaseViewController {
   }
   
   private let infoBannerView = UIView().then {
-    $0.backgroundColor = UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1.0) // Light grey
+    $0.backgroundColor = FRColor.Fg.Nuetral.gray1000
     $0.layer.cornerRadius = 8
   }
   
   private let infoBannerLabel = UILabel().then {
     $0.text = "슬라이더로 조절하거나 직접 입력할 수 있어요!"
     $0.font = UIFont.systemFont(ofSize: 14)
-    $0.textColor = .black
+    $0.textColor = .white
   }
   
   private let infoBannerCloseButton = UIButton().then {
@@ -50,14 +50,14 @@ final class RunningPaceSettingViewController: BaseViewController {
   private let myPaceLabel = UILabel().then {
     $0.text = "나의 페이스는"
     $0.font = UIFont.systemFont(ofSize: 16)
-    $0.textColor = .black
+    $0.textColor = FRColor.Fg.Text.secondary
   }
   
   private lazy var paceInputTextField = UITextField().then {
     $0.text = "7'00''"
     $0.textAlignment = .center
     $0.font = UIFont.systemFont(ofSize: 60, weight: .bold)
-    $0.textColor = .black
+    $0.textColor = FRColor.Fg.Text.primary
     $0.keyboardType = .numberPad
     $0.borderStyle = .none
     $0.tintColor = .clear
@@ -69,57 +69,55 @@ final class RunningPaceSettingViewController: BaseViewController {
     $0.maximumValue = 2
     $0.value = 1
     $0.isContinuous = true
-    $0.minimumTrackTintColor = .orange
-    $0.maximumTrackTintColor = .lightGray
-    $0.thumbTintColor = .orange
+    $0.minimumTrackTintColor = FRColor.Fg.Nuetral.gray1000
+    $0.maximumTrackTintColor = FRColor.Fg.Nuetral.gray300
+    $0.thumbTintColor = FRColor.Fg.Nuetral.gray1000
   }
   
   private let warmUpLabel = UILabel().then {
     $0.text = "워밍업"
     $0.font = UIFont.systemFont(ofSize: 14)
-    $0.textColor = .gray
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   private let routineLabel = UILabel().then {
     $0.text = "루틴"
     $0.font = UIFont.systemFont(ofSize: 14)
-    $0.textColor = .black
+    $0.textColor = FRColor.Fg.Text.primary
   }
   
   private let challengerLabel = UILabel().then {
     $0.text = "챌린저"
     $0.font = UIFont.systemFont(ofSize: 14)
-    $0.textColor = .gray
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   private let infoBoxView = UIView().then {
-    $0.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.95, alpha: 1.0)
+    $0.backgroundColor = FRColor.Fg.Nuetral.gray200
     $0.layer.cornerRadius = 10
-    $0.layer.borderWidth = 1
-    $0.layer.borderColor = UIColor(red: 0.85, green: 0.85, blue: 0.85, alpha: 1.0).cgColor
   }
   
   private let infoIcon = UIImageView().then {
     $0.image = UIImage(systemName: "questionmark.circle.fill")
-    $0.tintColor = .darkGray
+    $0.tintColor = FRColor.Fg.Nuetral.gray800
   }
   
   private let infoTitleLabel = UILabel().then {
     $0.text = "페이스"
     $0.font = UIFont.systemFont(ofSize: 16, weight: .bold)
-    $0.textColor = .black
+    $0.textColor = FRColor.Fg.Text.secondary
   }
   
   private let infoDescriptionLabel = UILabel().then {
     $0.text = "러닝에서 '페이스'는 1km당 걸리는 시간으로,\n나의 러닝 속도를 나타내는 기준이에요.\n처음 달린 기록을 토대로 추천 페이스를 알려주고 있어요."
     $0.font = UIFont.systemFont(ofSize: 14)
-    $0.textColor = .darkGray
+    $0.textColor = FRColor.Fg.Text.tertiary
     $0.numberOfLines = 0
   }
   
   private let confirmButton = UIButton().then {
     $0.setTitle("설정하기", for: .normal)
-    $0.backgroundColor = .orange
+    $0.backgroundColor = FRColor.Bg.Interactive.primary
     $0.setTitleColor(.white, for: .normal)
     $0.layer.cornerRadius = 10
     $0.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
@@ -342,9 +340,9 @@ final class RunningPaceSettingViewController: BaseViewController {
   
   // MARK: - UI Update for Pace Labels
   private func updatePaceLabelsTextColor(for currentPace: Float) {
-    challengerLabel.textColor = (abs(currentPace - challengerPace) < 0.1) ? .black : .gray
-    routineLabel.textColor = (abs(currentPace - routinePace) < 0.1) ? .black : .gray
-    warmUpLabel.textColor = (abs(currentPace - warmUpPace) < 0.1) ? .black : .gray
+    challengerLabel.textColor = (abs(currentPace - challengerPace) < 0.1) ? FRColor.Fg.Text.primary : FRColor.Fg.Text.tertiary
+    routineLabel.textColor = (abs(currentPace - routinePace) < 0.1) ? FRColor.Fg.Text.primary : FRColor.Fg.Text.tertiary
+    warmUpLabel.textColor = (abs(currentPace - warmUpPace) < 0.1) ? FRColor.Fg.Text.primary : FRColor.Fg.Text.tertiary
   }
   
   // MARK: - Pace Formatting and Parsing

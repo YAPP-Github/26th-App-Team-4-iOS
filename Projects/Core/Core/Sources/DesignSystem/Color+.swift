@@ -9,7 +9,7 @@ import UIKit
 
 private extension UIColor {
   static func loadColor(named name: String) -> UIColor {
-    guard let color = UIColor(named: name) else {
+    guard let color = UIColor(named: name, in: .module, compatibleWith: nil) else {
       fatalError("Color asset '\(name)' not found in asset catalog.")
     }
     return color
@@ -92,9 +92,9 @@ public extension UIColor {
 public enum FRColor {
 
   public enum Base {
-    static let black = UIColor.baseBlack
-    static let white = UIColor.baseWhite
-    static let gray = UIColor.baseBlack
+    public static let black = UIColor.baseBlack
+    public static let white = UIColor.baseWhite
+    public static let gray = UIColor.baseBlack
   }
 
   // MARK: - Brand Colors

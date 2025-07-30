@@ -30,7 +30,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
   let titleLabel = UILabel().then {
     $0.text = "러닝 목표를 선택해 주세요!"
     $0.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-    $0.textColor = .white
+    $0.textColor = FRColor.Fg.Nuetral.gray0
     $0.numberOfLines = 0
     $0.textAlignment = .center
   }
@@ -38,13 +38,13 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
   let subtitleLabel = UILabel().then {
     $0.text = "한번 달릴 때 마다\n달성하고 싶은 목표를 설정해 보세요."
     $0.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-    $0.textColor = .lightGray
+    $0.textColor = FRColor.Fg.Nuetral.gray400
     $0.numberOfLines = 2
     $0.textAlignment = .center
   }
 
   let timeGoalButton = UIButton().then {
-    $0.backgroundColor = .gray
+    $0.backgroundColor = FRColor.Fg.Nuetral.gray900
     $0.layer.cornerRadius = 10
     $0.clipsToBounds = true
 
@@ -56,7 +56,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
       var outgoing = incoming
       outgoing.font = UIFont.systemFont(ofSize: 18, weight: .bold)
-      outgoing.foregroundColor = .white
+      outgoing.foregroundColor = FRColor.Fg.Text.Interactive.inverse
       return outgoing
     }
 
@@ -64,7 +64,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     config.subtitleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
       var outgoing = incoming
       outgoing.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-      outgoing.foregroundColor = .lightGray
+      outgoing.foregroundColor = FRColor.Fg.Nuetral.gray500
       return outgoing
     }
 
@@ -75,7 +75,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
   }
 
   let distanceGoalButton = UIButton().then {
-    $0.backgroundColor = .gray
+    $0.backgroundColor = FRColor.Fg.Nuetral.gray900
     $0.layer.cornerRadius = 10
     $0.clipsToBounds = true
 
@@ -87,7 +87,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
       var outgoing = incoming
       outgoing.font = UIFont.systemFont(ofSize: 18, weight: .bold)
-      outgoing.foregroundColor = .white
+      outgoing.foregroundColor = FRColor.Fg.Text.Interactive.inverse
       return outgoing
     }
 
@@ -95,7 +95,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     config.subtitleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
       var outgoing = incoming
       outgoing.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-      outgoing.foregroundColor = .lightGray
+      outgoing.foregroundColor = FRColor.Fg.Nuetral.gray500
       return outgoing
     }
 
@@ -109,20 +109,21 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     $0.axis = .horizontal
     $0.alignment = .center
     $0.spacing = 4
-    $0.backgroundColor = .gray
+    $0.backgroundColor = FRColor.Fg.Nuetral.gray200
+    $0.layer.cornerRadius = 16
 
     let iconImageView = UIImageView().then {
       $0.image = UIImage(systemName: "questionmark.circle.fill")
-      $0.tintColor = .lightGray
+      $0.tintColor = FRColor.Fg.Text.secondary
       $0.contentMode = .scaleAspectFit
       $0.snp.makeConstraints { make in
-        make.width.height.equalTo(16)
+        make.width.height.equalTo(24)
       }
     }
 
     let messageLabel = UILabel().then {
       $0.text = "목표는 마이페이지에서 수정할 수 있어요!"
-      $0.textColor = .lightGray
+      $0.textColor = FRColor.Fg.Text.secondary
       $0.font = UIFont.systemFont(ofSize: 14, weight: .regular)
       $0.numberOfLines = 1
     }
@@ -174,7 +175,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     }
 
     titleLabel.snp.makeConstraints { make in
-      make.top.equalTo(backButton.snp.bottom).offset(40)
+      make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(136)
       make.leading.trailing.equalToSuperview().inset(20)
     }
 
@@ -184,9 +185,9 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     }
 
     timeGoalButton.snp.makeConstraints { make in
-      make.top.equalTo(subtitleLabel.snp.bottom).offset(40)
+      make.top.equalTo(subtitleLabel.snp.bottom).offset(44)
       make.leading.equalToSuperview().offset(20)
-      make.width.equalTo((view.bounds.width - 60) / 2)
+      make.width.equalTo(160)
       make.height.equalTo(200)
     }
 
@@ -200,6 +201,8 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     footerStackView.snp.makeConstraints { make in
       make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-20)
       make.centerX.equalToSuperview()
+      make.width.equalTo(335)
+      make.height.equalTo(56)
     }
   }
 

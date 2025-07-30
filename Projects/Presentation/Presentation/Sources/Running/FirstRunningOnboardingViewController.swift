@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 import Then
 import Lottie
+import Core
 
 final class FirstRunningOnboardingViewController: UIViewController {
 
@@ -25,7 +26,7 @@ final class FirstRunningOnboardingViewController: UIViewController {
 
   let setGoalButton = UIButton().then {
     $0.setTitle("목표 설정하기", for: .normal)
-    $0.backgroundColor = .orange
+    $0.backgroundColor = FRColor.Bg.Interactive.primary
     $0.layer.cornerRadius = 10
     $0.clipsToBounds = true
     $0.setTitleColor(.white, for: .normal)
@@ -36,7 +37,7 @@ final class FirstRunningOnboardingViewController: UIViewController {
   let doLaterButton = UIButton().then {
     $0.setTitle("다음에 하기", for: .normal)
     $0.backgroundColor = .clear
-    $0.setTitleColor(.white, for: .normal)
+    $0.setTitleColor(FRColor.Fg.Nuetral.gray600, for: .normal)
     $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
     $0.isHidden = true
   }

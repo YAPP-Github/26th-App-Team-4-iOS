@@ -11,6 +11,7 @@ import Then
 import RxSwift
 import RxCocoa
 import Lottie
+import Core
 
 public enum GoalInputType {
   case time // 시간 입력 화면
@@ -89,14 +90,14 @@ final class FirstRunningGoalSettingViewController: UIViewController {
 
   let titleLabel = UILabel().then {
     $0.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-    $0.textColor = .white
+    $0.textColor = FRColor.Fg.Text.Interactive.inverse
     $0.numberOfLines = 0
     $0.textAlignment = .center
   }
 
   let subTitleLabel = UILabel().then {
     $0.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-    $0.textColor = .lightGray
+    $0.textColor = FRColor.Fg.Nuetral.gray400
     $0.numberOfLines = 0
     $0.textAlignment = .center
   }
@@ -113,18 +114,18 @@ final class FirstRunningGoalSettingViewController: UIViewController {
   }
 
   let goalValueUnderline = UIView().then {
-    $0.backgroundColor = UIColor(red: 255/255, green: 112/255, blue: 0/255, alpha: 1.0)
+    $0.backgroundColor = FRColor.Bg.Interactive.primary
     $0.isHidden = true
   }
 
   let unitLabel = UILabel().then {
     $0.font = UIFont.systemFont(ofSize: 30, weight: .bold)
-    $0.textColor = UIColor(red: 255/255, green: 112/255, blue: 0/255, alpha: 1.0)
+    $0.textColor = FRColor.Fg.Text.disabled
     $0.textAlignment = .left
   }
 
   let setAndRunButton = UIButton().then {
-    $0.backgroundColor = UIColor(red: 255/255, green: 112/255, blue: 0/255, alpha: 1.0)
+    $0.backgroundColor = FRColor.Bg.Interactive.primary
     $0.layer.cornerRadius = 10
     $0.clipsToBounds = true
     $0.setTitle("설정하고 달리기", for: .normal)
