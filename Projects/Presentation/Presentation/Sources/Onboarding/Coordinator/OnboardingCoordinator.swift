@@ -28,7 +28,13 @@ public final class OnboardingCoordinatorImpl: OnboardingCoordinator {
   }
 
   public func start() {
-    guard let viewController = resolver.resolve(OnboardingViewController.self) else {
+//    guard let viewController = resolver.resolve(OnboardingViewController.self) else {
+//      fatalError("Failed to resolve OnboardingViewController. Ensure it is registered correctly in Swinject.")
+//    }
+//    viewController.coordinator = self
+//
+//    navigationController.setViewControllers([viewController], animated: false)
+    guard let viewController = resolver.resolve(RunnerTypeViewController.self) else {
       fatalError("Failed to resolve OnboardingViewController. Ensure it is registered correctly in Swinject.")
     }
     viewController.coordinator = self

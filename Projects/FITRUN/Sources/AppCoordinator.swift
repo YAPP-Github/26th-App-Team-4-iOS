@@ -27,7 +27,8 @@ final class AppCoordinatorImpl {
   }
 
   func start() {
-    showLaunch()
+//    showLaunch()
+    showOnboarding()
   }
 }
 
