@@ -111,10 +111,9 @@ public final class WalkThroughViewController: BaseViewController, View {
   }
 
   private func goToNextScreen() {
-    let vc = OnboardingViewController()
-    vc.modalTransitionStyle = .crossDissolve
-    vc.modalPresentationStyle = .overFullScreen
-    present(vc, animated: true)
+    guard let coordinator = self.coordinator else { return }
+    // WalkThrough 완료 후 시작 화면으로 이동
+    coordinator.finishDelegate?.coordinatorDidFinish(childCoordinator: coordinator)
   }
 }
 
