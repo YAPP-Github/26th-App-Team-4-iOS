@@ -11,7 +11,7 @@ import Then
 import Lottie
 import Core
 
-final class FirstRunningOnboardingViewController: UIViewController {
+final class FirstRunningOnboardingViewController: BaseViewController {
 
   weak var coordinator: RunningCoordinator?
 
@@ -22,6 +22,11 @@ final class FirstRunningOnboardingViewController: UIViewController {
     $0.loopMode = .playOnce
     $0.animationSpeed = 1.0
     $0.animation = LottieAnimation.named("running_onboarding", bundle: .module)
+  }
+
+  let backButton = UIButton().then {
+    $0.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+    $0.tintColor = UIColor(hex: "#D9D9D9")
   }
 
   let setGoalButton = UIButton().then {
@@ -46,10 +51,11 @@ final class FirstRunningOnboardingViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = .black
+    view.backgroundColor = FRColor.Fg.Nuetral.gray1000
 
     setupLayout()
     addTargets()
+    bind()
   }
 
   override func viewDidAppear(_ animated: Bool) {
@@ -61,8 +67,15 @@ final class FirstRunningOnboardingViewController: UIViewController {
 
   private func setupLayout() {
     view.addSubview(animationView)
+    view.addSubview(backButton)
     view.addSubview(setGoalButton)
     view.addSubview(doLaterButton)
+
+    backButton.snp.makeConstraints {
+      $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
+      $0.leading.equalToSuperview().offset(20)
+      $0.width.height.equalTo(30)
+    }
 
     animationView.snp.makeConstraints { make in
       make.center.equalToSuperview()
@@ -109,5 +122,13 @@ final class FirstRunningOnboardingViewController: UIViewController {
 
   @objc private func doLaterButtonTapped() {
     coordinator?.showRunning()
+  }
+
+  private func bind() {
+    backButton.rx.tap
+      .subscribe(onNext: { [weak self] in
+        self?.coordinator?.dismissRunningFlow()
+      })
+      .disposed(by: disposeBag)
   }
 }

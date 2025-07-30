@@ -349,11 +349,11 @@ final class FirstRunningGoalSettingViewController: UIViewController {
   }
 
   @objc private func backButtonTapped() {
-
+    coordinator?.pop()
   }
 
   @objc private func skipButtonTapped() {
-
+    coordinator?.showRunning()
   }
 
   // MARK: - Keyboard Handling

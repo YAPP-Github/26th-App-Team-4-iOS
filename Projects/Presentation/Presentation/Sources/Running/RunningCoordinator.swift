@@ -18,6 +18,7 @@ public protocol RunningCoordinator: Coordinator {
   func showRunningResult()
   func showRunningPaceSetting()
   func dismissRunningFlow()
+  func pop()
 }
 
 public final class RunningCoordinatorImpl: RunningCoordinator {
@@ -103,5 +104,9 @@ extension RunningCoordinatorImpl {
     //    }
     //    viewController.coordinator = self
     //    runningFlowNavigationController.pushViewController(viewController, animated: true)
+  }
+
+  public func pop() {
+    runningFlowNavigationController.popViewController(animated: false)
   }
 }

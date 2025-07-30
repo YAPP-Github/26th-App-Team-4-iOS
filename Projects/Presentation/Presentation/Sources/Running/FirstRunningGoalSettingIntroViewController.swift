@@ -217,10 +217,12 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
 
   @objc private func backButtonTapped() {
     print("Back button tapped!")
+    coordinator?.pop()
   }
 
   @objc private func skipButtonTapped() {
     print("Skip button tapped!")
+    coordinator?.showRunning()
   }
 
   @objc private func timeGoalButtonTapped() {

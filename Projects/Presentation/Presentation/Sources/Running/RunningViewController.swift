@@ -117,12 +117,12 @@ final class RunningViewController: BaseViewController, View {
     super.viewDidLoad()
     setupUI()
     bindUI()
-    playAnimationAndShowUI()
   }
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     navigationController?.setNavigationBarHidden(true, animated: false)
+    playAnimationAndShowUI()
   }
 
   private func setupUI() {

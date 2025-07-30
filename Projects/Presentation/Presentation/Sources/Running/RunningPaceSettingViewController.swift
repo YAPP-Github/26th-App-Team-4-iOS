@@ -131,7 +131,7 @@ final class RunningPaceSettingViewController: BaseViewController {
     super.viewDidLoad()
     setupUI()
     setupLayout()
-    bindViewModel()
+    bind()
     setupKeyboardNotifications()
     setupTapGestureForDismissKeyboard()
     
@@ -250,12 +250,12 @@ final class RunningPaceSettingViewController: BaseViewController {
     }
   }
   
-  // MARK: - Reactive Binding (RxSwift/RxCocoa)
+  // MARK: - Reactive Binding
   
-  private func bindViewModel() {
+  private func bind() {
     backButton.rx.tap
       .subscribe(onNext: { [weak self] in
-        self?.navigationController?.popViewController(animated: true)
+        self?.coordinator?.pop()
       })
       .disposed(by: disposeBag)
     
@@ -305,6 +305,7 @@ final class RunningPaceSettingViewController: BaseViewController {
         let finalIndex = Int(self.fixedPaceSlider.value.rounded())
         let finalPace = self.paceValues[finalIndex]
         // TODO: - 서버 전달
+        coordinator?.showRunningResult()
       })
       .disposed(by: disposeBag)
   }
