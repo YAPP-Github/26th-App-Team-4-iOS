@@ -11,6 +11,7 @@ import SnapKit
 import Then
 import RxSwift
 import RxCocoa
+import Lottie
 
 final class RunningPaceSettingViewController: BaseViewController {
   
@@ -122,7 +123,15 @@ final class RunningPaceSettingViewController: BaseViewController {
     $0.layer.cornerRadius = 10
     $0.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
   }
-  
+
+  private let animationView = LottieAnimationView().then {
+    $0.contentMode = .scaleAspectFit
+    $0.loopMode = .playOnce
+    $0.animationSpeed = 1.0
+    $0.animation = LottieAnimation.named("toast_completed", bundle: .module)
+    $0.isHidden = true
+  }
+
   private var confirmButtonBottomConstraint: Constraint?
   
   // MARK: - Lifecycle
@@ -144,9 +153,7 @@ final class RunningPaceSettingViewController: BaseViewController {
   
   // MARK: - UI Setup
   
-  private func setupUI() {
-    view.backgroundColor = .white
-    
+  private func setupUI() {    
     view.addSubview(backButton)
     view.addSubview(infoBannerView)
     infoBannerView.addSubview(infoBannerLabel)
@@ -162,6 +169,7 @@ final class RunningPaceSettingViewController: BaseViewController {
     infoBoxView.addSubview(infoTitleLabel)
     infoBoxView.addSubview(infoDescriptionLabel)
     view.addSubview(confirmButton)
+    view.addSubview(animationView)
   }
   
   // MARK: - Layout
@@ -248,6 +256,12 @@ final class RunningPaceSettingViewController: BaseViewController {
       self.confirmButtonBottomConstraint = $0.bottom.equalTo(view.snp.bottom).offset(-46).constraint
       $0.height.equalTo(50)
     }
+
+    animationView.snp.makeConstraints {
+      $0.center.equalToSuperview()
+      $0.width.equalTo(174)
+      $0.height.equalTo(208)
+    }
   }
   
   // MARK: - Reactive Binding
@@ -298,15 +312,27 @@ final class RunningPaceSettingViewController: BaseViewController {
       .disposed(by: disposeBag)
     
     confirmButton.rx.tap
-      .subscribe(onNext: { [weak self] in
-        self?.paceInputTextField.resignFirstResponder()
-        
-        guard let self = self else { return }
+      .subscribe(with: self) { object, _ in
+        object.paceInputTextField.resignFirstResponder()
+
+        object.view.isUserInteractionEnabled = false
+
+        // TODO: - API 연결
         let finalIndex = Int(self.fixedPaceSlider.value.rounded())
-        let finalPace = self.paceValues[finalIndex]
-        // TODO: - 서버 전달
-        coordinator?.showRunningResult()
-      })
+        let finalPace = object.paceValues[finalIndex]
+
+
+        object.animationView.isHidden = false
+        object.animationView.play { finished in
+          if finished {
+            object.animationView.isHidden = true
+
+            object.view.isUserInteractionEnabled = true
+
+            object.coordinator?.showRunningPaceSetting()
+          }
+        }
+      }
       .disposed(by: disposeBag)
   }
   

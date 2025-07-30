@@ -111,6 +111,8 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     $0.spacing = 4
     $0.backgroundColor = FRColor.Fg.Nuetral.gray200
     $0.layer.cornerRadius = 16
+    $0.isLayoutMarginsRelativeArrangement = true
+    $0.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20)
 
     let iconImageView = UIImageView().then {
       $0.image = UIImage(systemName: "questionmark.circle.fill")
@@ -136,15 +138,10 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = UIColor(red: 29/255, green: 29/255, blue: 29/255, alpha: 1.0)
+    view.backgroundColor = FRColor.Fg.Nuetral.gray1000
 
     setupLayout()
     addTargets()
-  }
-
-  override func viewWillAppear(_ animated: Bool) {
-    super.viewWillAppear(animated)
-    navigationController?.setNavigationBarHidden(true, animated: animated)
   }
 
   // MARK: - Setup Layout

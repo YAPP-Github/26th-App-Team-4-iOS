@@ -20,7 +20,7 @@ final class RunningViewController: BaseViewController, View {
 
   weak var coordinator: RunningCoordinator?
 
-  lazy var animationView = LottieAnimationView().then {
+  private lazy var animationView = LottieAnimationView().then {
     $0.contentMode = .scaleAspectFit
     $0.loopMode = .playOnce
     $0.animationSpeed = 1.0
