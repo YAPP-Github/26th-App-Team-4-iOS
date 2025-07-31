@@ -11,7 +11,7 @@ import RxSwift
 import Domain
 
 public final class GoalRepositoryImpl: GoalRepository {
-  
+
   private let provider: NetworkProvider<GoalAPI>
   
   public init(provider: NetworkProvider<GoalAPI> = .init()) {
@@ -41,6 +41,14 @@ public final class GoalRepositoryImpl: GoalRepository {
   
   public func saveRunningCount(count: Int) -> Single<Bool> {
     return provider.request(.saveRunningCount(weeklyRunningCount: count))
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<GoalDTO>.self)
+      .map { $0.code == "SUCCESS" }
+      .asSingle()
+  }
+
+  public func saveGoalTime(time: Int) -> Single<Bool> {
+    return provider.request(.saveGoalTime(time: time))
       .filter(statusCodes: 200..<300)
       .map(APIResponse<GoalDTO>.self)
       .map { $0.code == "SUCCESS" }
