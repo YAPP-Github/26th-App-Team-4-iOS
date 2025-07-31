@@ -54,4 +54,12 @@ public final class GoalRepositoryImpl: GoalRepository {
       .map { $0.code == "SUCCESS" }
       .asSingle()
   }
+
+  public func saveGoalDistance(distance: Int) -> Single<Bool> {
+    return provider.request(.saveGoalDistance(distance: distance))
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<GoalDTO>.self)
+      .map { $0.code == "SUCCESS" }
+      .asSingle()
+  }
 }

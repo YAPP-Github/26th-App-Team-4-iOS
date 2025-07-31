@@ -35,8 +35,15 @@ public final class FirstRunningGoalSettingReactor: Reactor {
 }
 
 private extension FirstRunningGoalSettingReactor {
-  private func saveGoalTime(time: Int) -> Observable<Mutation> {
+  func saveGoalTime(time: Int) -> Observable<Mutation> {
     return goalUseCase.saveGoalTime(time: time)
+      .map { _ in Mutation.setIsSaved(true) }
+      .catch { _ in .just(.setIsSaved(false)) }
+      .asObservable()
+  }
+
+  func saveGoalDistance(distance: Int) -> Observable<Mutation> {
+    return goalUseCase.saveGoalDistance(distance: distance)
       .map { _ in Mutation.setIsSaved(true) }
       .catch { _ in .just(.setIsSaved(false)) }
       .asObservable()

@@ -17,9 +17,10 @@ public enum GoalAPI: BaseAPI {
   case savePace(paceGoalMs: Int)
   /// 주간 러닝 횟수 저장
   case saveRunningCount(weeklyRunningCount: Int)
-
   /// 시간 목표 설정
   case saveGoalTime(time: Int)
+  /// 거리 목표 설정 (distance: 거리 목표(m))
+  case saveGoalDistance(distance: Int)
 
   public var path: String {
     switch self {
@@ -33,6 +34,8 @@ public enum GoalAPI: BaseAPI {
       return "/users/goals/weekly-run-count"
     case .saveGoalTime:
       return "/users/goals/time"
+    case .saveGoalDistance(distance: let distance):
+      return "users/goals/distance"
     }
   }
 
@@ -43,6 +46,7 @@ public enum GoalAPI: BaseAPI {
     case .savePace: return .post
     case .saveRunningCount: return .post
     case .saveGoalTime: return .post
+    case .saveGoalDistance: return .post
     }
   }
   
@@ -61,6 +65,8 @@ public enum GoalAPI: BaseAPI {
       return .requestParameters(parameters: ["count": weeklyRunningCount], encoding: JSONEncoding.default)
     case .saveGoalTime(time: let time):
       return .requestParameters(parameters: ["time": time], encoding: JSONEncoding.default)
+    case .saveGoalDistance(distance: let distance):
+      return .requestParameters(parameters: ["distanceMeterGoal": time], encoding: JSONEncoding.default)
     }
   }
 }

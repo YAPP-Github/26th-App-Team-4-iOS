@@ -12,6 +12,7 @@ public protocol GoalUseCase {
   func savePace(second: Int) -> Single<Bool>
   func saveRunningCount(count: Int) -> Single<Bool>
   func saveGoalTime(time: Int) -> Single<Bool>
+  func saveGoalDistance(distance: Int) -> Single<Bool>
 }
 
 public final class GoalUseCaseImpl: GoalUseCase {
@@ -37,5 +38,9 @@ public final class GoalUseCaseImpl: GoalUseCase {
 
   public func saveGoalTime(time: Int) -> RxSwift.Single<Bool> {
     return goalRepository.saveGoalTime(time: time)
+  }
+
+  public func saveGoalDistance(distance: Int) -> RxSwift.Single<Bool> {
+    return goalRepository.saveGoalDistance(distance: distance)
   }
 }
