@@ -20,10 +20,10 @@ public struct RunningRecordList: Equatable {
   public static let dummy = RunningRecordList(
     summary: RecordSummary(
         recordCount: 10,
-        totalDistance: 5000.0,
-        totalTime: 3600000, // 1시간
+        totalDistance: 120.0,
+        totalTime: 32487, // 1시간
         totalCalories: 500,
-        averagePace: 300000, // 5분
+        averagePace: 300, // 5분
         timeGoalAchievedCount: 3,
         distanceGoalAchievedCount: 2
       ),
