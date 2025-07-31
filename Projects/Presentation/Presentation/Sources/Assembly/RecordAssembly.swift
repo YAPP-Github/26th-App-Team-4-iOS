@@ -11,10 +11,16 @@ import SwinjectAutoregistration
 
 public final class RecordAssembly: Assembly {
   public init() {}
-
+  
   public func assemble(container: Container) {
     container.autoregister(RecordListReactor.self, initializer: RecordListReactor.init)
-
+    
+    container.autoregister(
+      RecordDetailReactor.self,
+      argument: Int.self,
+      initializer: RecordDetailReactor.init
+    )
+    
     container.register(RecordCoordinatorImpl.self) { (r, navigationController: UINavigationController) in
       return RecordCoordinatorImpl(navigationController: navigationController, resolver: r)
     }
@@ -27,5 +33,14 @@ public final class RecordAssembly: Assembly {
       viewController.reactor = reactor
       return viewController
     }
+    
+    container.register(
+      RecordDetailViewController.self,
+      factory: { (r, recordId: Int) in
+        let vc = RecordDetailViewController()
+        vc.reactor = r.resolve(RecordDetailReactor.self, argument: recordId)
+        return vc
+      }
+    )
   }
 }
