@@ -48,6 +48,7 @@ public class RecordDetailReactor: Reactor {
     case .initialize:
       return Observable.concat([
         .just(.setLoading(true)),
+        fetchDetail(),
         .just(.setLoading(false))
       ])
     }
