@@ -36,7 +36,7 @@ public struct RunningRecordList: Equatable {
         averagePace: 300, // 5분 페이스
         totalDistance: 5000, // 5km
         totalTime: 1500, // 25분
-        imageURL: "https://example.com/image1.jpg"
+        imageURL: "https://firebasestorage.googleapis.com/v0/b/maumnote-dev.firebasestorage.app/o/adfhdgsg.png?alt=media&token=8b2f3a4b-1c2a-4658-acc8-1af8cd070800"
       ),
       RunningRecord(
         recordId: 2,
@@ -46,7 +46,7 @@ public struct RunningRecordList: Equatable {
         averagePace: 320, // 5분 20초 페이스
         totalDistance: 8000, // 8km
         totalTime: 2560, // 약 42분
-        imageURL: "https://example.com/image2.jpg"
+        imageURL: "https://firebasestorage.googleapis.com/v0/b/maumnote-dev.firebasestorage.app/o/adfhdgsg.png?alt=media&token=8b2f3a4b-1c2a-4658-acc8-1af8cd070800"
       ),
       RunningRecord(
         recordId: 2,
@@ -56,7 +56,7 @@ public struct RunningRecordList: Equatable {
         averagePace: 320, // 5분 20초 페이스
         totalDistance: 8000, // 8km
         totalTime: 2560, // 약 42분
-        imageURL: "https://example.com/image2.jpg"
+        imageURL: "https://firebasestorage.googleapis.com/v0/b/maumnote-dev.firebasestorage.app/o/adfhdgsg.png?alt=media&token=8b2f3a4b-1c2a-4658-acc8-1af8cd070800"
       )
     ]
   )

@@ -49,16 +49,16 @@ public struct RecordDetail {
   
   public static let dummy = RecordDetail(
     recordID: 1,
-    title: "Morning Run",
+    title: "7월 20일 점심 러닝",
     userID: 123,
     startAt: Date(),
     totalDistance: 5000,
     totalTime: 1800,
     totalCalories: 300,
     averagePace: 360, // 6 minutes per km
-    imageURL: URL(string: "https://example.com/image.jpg"),
+    imageURL: URL(string: "https://firebasestorage.googleapis.com/v0/b/maumnote-dev.firebasestorage.app/o/adfhdgsg.png?alt=media&token=8b2f3a4b-1c2a-4658-acc8-1af8cd070800"),
     runningPoints: (0..<10).map { _ in RecordDetail.randomRecordPoint() },
-    segments: [RecordDetail.randomRecordSegment(), RecordDetail.randomRecordSegment()]
+    segments: [RecordDetail.randomRecordSegment(), RecordDetail.randomRecordSegment(), RecordDetail.randomRecordSegment(), RecordDetail.randomRecordSegment(), RecordDetail.randomRecordSegment()]
   )
   
   static func randomRecordPoint() -> RecordPoint {
@@ -71,10 +71,10 @@ public struct RecordDetail {
       latitude: Double.random(in: -90...90),
       longitude: Double.random(in: -180...180),
       distance: Double.random(in: 0...10000),
-      pace: Double.random(in: 0...3600), // pace in seconds
+      pace: Double.random(in: 240...600), // pace in seconds
       calories: Int.random(in: 50...500),
-      totalRunningTime: Double.random(in: 0...7200), // total running time in seconds
-      totalRunningDistance: Double.random(in: 0...10000), // total distance in meters
+      totalRunningTime: Double.random(in: 3600...7200), // total running time in seconds
+      totalRunningDistance: Double.random(in: 2000...10000), // total distance in meters
       timestamp: Date()
     )
   }
@@ -82,8 +82,8 @@ public struct RecordDetail {
   static func randomRecordSegment() -> RecordSegment {
     return RecordSegment(
       orderNo: Int.random(in: 50...500),
-      distanceMeter: Double.random(in: 1000...10000),
-      averagePace: TimeInterval.random(in: 1800...3600)
+      distanceMeter: Double.random(in: 2000...10000),
+      averagePace: TimeInterval.random(in: 240...600)
     )
   }
 }
