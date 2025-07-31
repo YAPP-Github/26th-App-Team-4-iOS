@@ -166,6 +166,13 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
         imageURL: record.imageURL
       )
     }
+    
+    cell.contentView.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        owner.coordinator?.showRecordDetail(recordID: 0)
+      }
+      .disposed(by: cell.disposeBag)
     return cell
   }
 }
