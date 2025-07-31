@@ -24,13 +24,21 @@ public struct RecordSummary {
   /// 거리 목표 달성 횟수
   public let distanceGoalAchievedCount: Int
   
-  static let dummy = RecordSummary(
-    recordCount: 10,
-    totalDistance: 5000.0,
-    totalTime: 3600000, // 1시간
-    totalCalories: 500,
-    averagePace: 300000, // 5분
-    timeGoalAchievedCount: 3,
-    distanceGoalAchievedCount: 2
-  )
+  public init(
+    recordCount: Int,
+    totalDistance: Double,
+    totalTime: TimeInterval,
+    totalCalories: Int,
+    averagePace: TimeInterval,
+    timeGoalAchievedCount: Int,
+    distanceGoalAchievedCount: Int
+  ) {
+    self.recordCount = recordCount
+    self.totalDistance = totalDistance
+    self.totalTime = totalTime
+    self.totalCalories = totalCalories
+    self.averagePace = averagePace
+    self.timeGoalAchievedCount = timeGoalAchievedCount
+    self.distanceGoalAchievedCount = distanceGoalAchievedCount
+  }
 }
