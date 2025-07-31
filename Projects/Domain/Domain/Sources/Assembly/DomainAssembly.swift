@@ -46,5 +46,12 @@ public class DomainAssembly: Assembly {
       }
       return HomeUseCaseImpl(homeRepository: repository)
     }
+    
+    container.register(RecordUseCase.self) { r in
+      guard let recordRepository = r.resolve(RecordRepository.self) else {
+        fatalError("Failed to resolve OnboardingRepository for OnboardingUseCase.")
+      }
+      return RecordUseCaseImpl(recordRepository: recordRepository)
+    }
   }
 }
