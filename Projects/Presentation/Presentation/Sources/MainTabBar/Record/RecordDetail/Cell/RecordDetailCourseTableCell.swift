@@ -10,6 +10,7 @@ import Core
 import ReactorKit
 import NMapsMap
 import Domain
+import Kingfisher
 
 public class RecordDetailCourseTableCell: BaseTableViewCell {
   
@@ -55,9 +56,20 @@ public class RecordDetailCourseTableCell: BaseTableViewCell {
     $0.clipsToBounds = true
   }
   
+  private let courseImageView = UIImageView().then {
+    $0.contentMode = .scaleAspectFill
+    $0.clipsToBounds = true
+    $0.layer.cornerRadius = 12
+  }
+  
   let mapView = NMFMapView(frame: .zero).then {
     $0.positionMode = .direction
     $0.locationOverlay.hidden = true
+  }
+  
+  public func setData(imageURL: URL?, location: String) {
+    locationLabel.text = location
+    courseImageView.kf.setImage(with: imageURL)
   }
   
   // MARK: - Life Cycle
@@ -81,8 +93,8 @@ public class RecordDetailCourseTableCell: BaseTableViewCell {
       $0.height.equalTo(20)
     }
     
-    mapContainer.addSubview(mapView)
-    mapView.snp.makeConstraints {
+    mapContainer.addSubview(courseImageView)
+    courseImageView.snp.makeConstraints {
       $0.edges.equalToSuperview()
     }
     

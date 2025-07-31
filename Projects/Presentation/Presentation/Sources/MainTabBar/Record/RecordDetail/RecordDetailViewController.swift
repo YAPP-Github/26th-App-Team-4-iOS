@@ -12,6 +12,8 @@ import NMapsMap
 import Domain
 
 public final class RecordDetailViewController: BaseViewController {
+  
+  let dummy = RecordDetail.dummy
 
   weak var coordinator: RunningCoordinator?
 
@@ -118,7 +120,8 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
       return 1
       
     case .lapSegment:
-      return 5
+      let segments = dummy.segments
+      return segments.count
       
     case .none:
       return 0
@@ -189,6 +192,7 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailTitleTableCell.identifier, for: indexPath
     ) as! RecordDetailTitleTableCell
+    cell.setData(title: dummy.title, date: dummy.startAt)
     return cell
   }
   
@@ -203,6 +207,7 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailRecordTableCell.identifier, for: indexPath
     ) as! RecordDetailRecordTableCell
+    cell.setData(distance: dummy.totalDistance, pace: dummy.averagePace, runningTime: dummy.totalTime)
     return cell
   }
   
@@ -210,6 +215,7 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailCourseTableCell.identifier, for: indexPath
     ) as! RecordDetailCourseTableCell
+    cell.setData(imageURL: dummy.imageURL, location: "종로구 서울특별시 대한민국")
     return cell
   }
   
@@ -217,6 +223,54 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailLapTableCell.identifier, for: indexPath
     ) as! RecordDetailLapTableCell
+    let segments = dummy.segments
+    guard segments.indices.contains(indexPath.row) else { return cell }
+    
+    let segment = segments[indexPath.row]
+    let lapNumber = segment.orderNo
+    
+    let paceString = segment.averagePace.minuteSecondFormatted
+
+    let scale = normalizedScale(for: indexPath.row, in: segments)
+    let length = CGFloat(scale)
+    
+    let isPrimary = scale == 1.0
+    
+    cell.setData(lapNumber: indexPath.row + 1, lapTime: paceString, length: CGFloat(length), isPrimary: isPrimary)
+    print("\(type(of: self)) - \(#function)", indexPath, scale)
     return cell
   }
+  
+  
+  public func normalizedScale(
+    for index: Int,
+    in segments: [RecordSegment],
+    minScale: Float = 0.35,
+    maxScale: Float = 1.0
+  ) -> Float {
+    // 안전성 검사
+    guard !segments.isEmpty,
+          segments.indices.contains(index) else {
+      return minScale
+    }
+
+    // 모든 페이스 값 추출
+    let paces = segments.map { $0.averagePace }
+    guard let minPace = paces.min(),
+          let maxPace = paces.max(),
+          minPace < maxPace else {
+      // 모든 값이 동일하면 가장 빠른 값 스케일로
+      return maxScale
+    }
+
+    // 타겟 segment 페이스
+    let pace = segments[index].averagePace
+
+    // faster (작은 페이스) → 큰 normalized, slower (큰 페이스) → 작은 normalized
+    let normalized = (maxPace - pace) / (maxPace - minPace)
+
+    // minScale…maxScale 구간으로 매핑
+    return minScale + Float(normalized) * (maxScale - minScale)
+  }
+  
 }
