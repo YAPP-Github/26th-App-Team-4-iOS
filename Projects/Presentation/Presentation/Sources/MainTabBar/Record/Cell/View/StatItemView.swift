@@ -46,6 +46,13 @@ public class StatItemView: BaseView {
     $0.font = .systemFont(ofSize: 13, weight: .semibold)
     $0.textColor = FRColor.FG.Text.primary
   }
+  
+  func setData(title: String, value: String, unit: String = "") {
+    titleLabel.text = title
+    valueLabel.text = value
+    unitLabel.text = unit
+  }
+  
   public override func initUI() {
     super.initUI()
     
