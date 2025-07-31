@@ -11,7 +11,7 @@ import Core
 
 public protocol RecordCoordinator: Coordinator {
   /// 리스트에서 특정 기록 상세로 이동할 때 호출
-  func showRecordDetail(recordID: String)
+  func showRecordDetail(recordID: Int)
 }
 
 public final class RecordCoordinatorImpl: RecordCoordinator {
@@ -37,14 +37,14 @@ public final class RecordCoordinatorImpl: RecordCoordinator {
   }
   
   /// 리스트에서 개별 기록 상세보기
-  public func showRecordDetail(recordID: String) {
+  public func showRecordDetail(recordID: Int) {
     guard let viewController = resolver.resolve(
       RecordDetailViewController.self,
       argument: recordID
     ) else {
       fatalError("Failed to resolve RecordDetailViewController. Ensure it is registered in Swinject.")
     }
-//    viewController.coordinator = self
+    viewController.coordinator = self
     navigationController.pushViewController(viewController, animated: true)
   }
 }
