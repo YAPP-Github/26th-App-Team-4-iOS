@@ -60,6 +60,13 @@ public class RecordDetailCourseTableCell: BaseTableViewCell {
     $0.locationOverlay.hidden = true
   }
   
+  public func setData(imageURL: String, location: String) {
+    locationLabel.text = location
+    
+    // Assuming you have a method to load the image into the mapView
+    // loadImageIntoMapView(imageURL: imageURL)
+  }
+  
   // MARK: - Life Cycle
   public override func initUI() {
     super.initUI()

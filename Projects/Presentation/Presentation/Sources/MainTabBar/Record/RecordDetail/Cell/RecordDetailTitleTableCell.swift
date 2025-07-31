@@ -52,6 +52,16 @@ public class RecordDetailTitleTableCell: BaseTableViewCell {
     $0.tintColor = FRColor.FG.Text.secondary.withAlphaComponent(0.8)
   }
   
+  public func setData(
+    title: String,
+    date: Date
+  ) {
+    titleLabel.text = title
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy/MM/dd HH:mm:ss"
+    dateLabel.text = dateFormatter.string(from: date)
+  }
+  
   public override func initUI() {
     super.initUI()
     

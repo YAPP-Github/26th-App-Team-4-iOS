@@ -93,6 +93,12 @@ public class RecordDetailRecordTableCell: BaseTableViewCell {
     $0.text = "hh:mm:ss"
   }
   
+  public func setData(distance: Double, pace: TimeInterval, runningTime: TimeInterval) {
+    distanceValueLabel.text = String(format: "%.1f", distance/1000)
+    paceValueLabel.text = pace.minuteSecondFormatted
+    runningTimeValueLabel.text = runningTime.hourMinuteSecondFormatted
+  }
+  
   public override func initUI() {
     super.initUI()
     
