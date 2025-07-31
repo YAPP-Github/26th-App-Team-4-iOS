@@ -11,7 +11,9 @@ import ReactorKit
 import NMapsMap
 import Domain
 
-public final class RecordDetailViewController: BaseViewController {
+public final class RecordDetailViewController: BaseViewController, View {
+  
+  public typealias Reactor = RecordDetailReactor
   
   enum Section: Int, CaseIterable {
     case title
@@ -20,6 +22,8 @@ public final class RecordDetailViewController: BaseViewController {
     case runningCourse
     case lapSegment
   }
+  
+  weak var coordinator: RecordCoordinator?
   
   private let backButton = UIButton().then {
     $0.setImage(.init(systemName: "chevron.left"), for: .normal)
@@ -42,6 +46,15 @@ public final class RecordDetailViewController: BaseViewController {
     $0.dataSource = self
   }
   
+  override init() {
+    super.init()
+    hidesBottomBarWhenPushed = true
+  }
+  
+  @MainActor required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
   public override func initUI() {
     super.initUI()
     self.view.backgroundColor = FRColor.Base.grey
@@ -59,6 +72,25 @@ public final class RecordDetailViewController: BaseViewController {
       $0.leading.trailing.equalToSuperview()
       $0.bottom.equalToSuperview()
     }
+  }
+  
+  public func bind(reactor: RecordDetailReactor) {
+    self.rx.viewDidAppear
+      .take(1)
+      .subscribe(with: self) { object, _ in
+        reactor.action.onNext(.initialize)
+      }
+      .disposed(by: disposeBag)
+  }
+  
+  public override func action() {
+    super.action()
+    
+    backButton.rx.tap
+      .subscribe(with: self) { owner, _ in
+        owner.navigationController?.popViewController(animated: true)
+      }
+      .disposed(by: disposeBag)
   }
 }
 
