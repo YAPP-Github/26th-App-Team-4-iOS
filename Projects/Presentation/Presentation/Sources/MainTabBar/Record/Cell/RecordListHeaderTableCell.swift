@@ -169,6 +169,16 @@ public class RecordListHeaderTableCell: BaseTableViewCell {
     $0.textColor = FRColor.FG.Text.tertiary.withAlphaComponent(0.8)
   }
   
+  func setData(summary: RecordSummary) {
+    distanceLabel.text = String(format: "%.1f", summary.totalDistance)
+    runCountStatView.setData(title: "총 러닝 횟수", value: String(summary.recordCount), unit: "회")
+    runPaceStatView.setData(title: "평균 페이스", value: summary.averagePace.minuteSecondFormatted)
+    runTimeStatView.setData(title: "총 러닝 시간", value: summary.totalTime.hourMinuteSecondFormatted)
+    
+    goalDistanceLabel.text = String(summary.distanceGoalAchievedCount)
+    goalTimeLabel.text = String(summary.timeGoalAchievedCount)
+  }
+  
   public override func initUI() {
     super.initUI()
     contentView.backgroundColor = .white
