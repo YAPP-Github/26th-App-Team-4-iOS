@@ -29,7 +29,7 @@ public final class RecordListViewController: BaseViewController, View {
   }
   
   private lazy var tableView = UITableView(frame: .zero, style: .grouped).then {
-    $0.backgroundColor = FRColor.BG.primary
+    $0.backgroundColor = FRColor.BG.secondary
     $0.separatorStyle = .none
     $0.showsVerticalScrollIndicator = false
     $0.sectionHeaderTopPadding = 0
@@ -96,9 +96,15 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
   
   public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     switch Section(rawValue: section) {
-    case .header: return 1
-    case .recordList: return 10
-    case .none: return 0
+    case .header:
+      return 1
+      
+    case .recordList:
+      guard let records = self.reactor?.currentState.records else { return 0 }
+      return records.count
+      
+    case .none:
+      return 0
     }
   }
   
@@ -149,6 +155,17 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordListTableCell.identifier, for: indexPath
     ) as! RecordListTableCell
+    guard let records = self.reactor?.currentState.records else { return cell }
+    if records.indices.contains(indexPath.row) {
+      let record = records[indexPath.row]
+      cell.setData(
+        title: record.title,
+        distance: record.totalDistance,
+        pace: record.averagePace,
+        time: record.totalTime,
+        imageURL: record.imageURL
+      )
+    }
     return cell
   }
 }
