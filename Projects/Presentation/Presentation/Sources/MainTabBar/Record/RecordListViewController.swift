@@ -11,7 +11,9 @@ import ReactorKit
 import NMapsMap
 import Domain
 
-public final class RecordListViewController: BaseViewController {
+public final class RecordListViewController: BaseViewController, View {
+  
+  public typealias Reactor = RecordListReactor
   
   weak var coordinator: RecordCoordinator?
   
@@ -56,6 +58,33 @@ public final class RecordListViewController: BaseViewController {
       $0.top.equalTo(navTitleLabel.snp.bottom).offset(16)
       $0.leading.trailing.bottom.equalToSuperview()
     }
+  }
+  
+  public func bind(reactor: RecordListReactor) {
+    self.rx.viewDidAppear
+      .take(1)
+      .map { _ in Reactor.Action.initialize }
+      .bind(to: reactor.action)
+      .disposed(by: self.disposeBag)
+    
+    reactor.state.map(\.summary)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .subscribe(with: self) { owner, summary in
+        guard let summary = summary else { return }
+        // 섹션 0만 리로드
+        owner.tableView.reloadSections(IndexSet(integer: Section.header.rawValue), with: .none)
+      }
+      .disposed(by: self.disposeBag)
+    
+    reactor.state.map(\.records)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .subscribe(with: self) { owner, records in
+        // 섹션 1만 리로드
+        owner.tableView.reloadSections(IndexSet(integer: Section.recordList.rawValue), with: .none)
+      }
+      .disposed(by: self.disposeBag)
   }
 }
 
@@ -111,7 +140,8 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordListHeaderTableCell.identifier, for: indexPath
     ) as! RecordListHeaderTableCell
-    cell.selectionStyle = .none
+    guard let summary = self.reactor?.currentState.summary else { return cell }
+    cell.setData(summary: summary)
     return cell
   }
   
@@ -119,7 +149,6 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordListTableCell.identifier, for: indexPath
     ) as! RecordListTableCell
-    cell.selectionStyle = .none
     return cell
   }
 }
