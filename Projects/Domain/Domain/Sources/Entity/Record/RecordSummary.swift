@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct RecordSummary {
+public struct RecordSummary: Equatable {
   /// 전체 기록 개수
   public let recordCount: Int
   /// 총 이동 거리(m)

@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct RunningRecordList {
+public struct RunningRecordList: Equatable {
   public let summary: RecordSummary
   public let records: [RunningRecord]
 

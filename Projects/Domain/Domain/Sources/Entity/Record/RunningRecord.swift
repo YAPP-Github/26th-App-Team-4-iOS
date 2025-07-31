@@ -9,7 +9,7 @@
 import Foundation
 
 /// 단일 러닝 기록 도메인 엔티티
-public struct RunningRecord {
+public struct RunningRecord: Equatable {
   public let recordId: Int
   public let title: String
   public let userId: Int
