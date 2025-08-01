@@ -12,16 +12,19 @@ import Core
 
 enum TabBarPage: Int, CaseIterable {
   case home = 0
+  case record
 
   var pageTitle: String {
     switch self {
     case .home: return "홈"
+    case .record: return "기록"
     }
   }
 
   var pageImage: UIImage? {
     switch self {
     case .home: return UIImage(systemName: "house.fill")
+    case .record: return UIImage(systemName: "list.bullet")
     }
   }
 }
@@ -63,8 +66,8 @@ public class MainTabBarCoordinatorImpl: NSObject, MainTabBarCoordinator {
   }
 
   public func start() {
-    let pages: [TabBarPage] = [.home]
-    let controllers: [UINavigationController] = pages.map({ getTabController($0) })
+    let pages: [TabBarPage] = TabBarPage.allCases
+    let controllers = pages.map { getTabController($0) }
 
     tabBarController.setViewControllers(controllers, animated: false)
     tabBarController.modalPresentationStyle = .fullScreen
@@ -84,6 +87,12 @@ public class MainTabBarCoordinatorImpl: NSObject, MainTabBarCoordinator {
       coordinator.finishDelegate = self
       childCoordinators.append(coordinator)
       coordinator.start()
+      
+    case .record:
+      let recordCoord = resolver.resolve(RecordCoordinatorImpl.self, argument: navController)!
+      recordCoord.finishDelegate = self
+      childCoordinators.append(recordCoord)
+      recordCoord.start()
     }
     return navController
   }

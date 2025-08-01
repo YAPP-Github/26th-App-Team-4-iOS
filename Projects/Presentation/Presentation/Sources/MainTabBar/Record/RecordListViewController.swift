@@ -11,7 +11,11 @@ import ReactorKit
 import NMapsMap
 import Domain
 
-public final class RecordListViewController: BaseViewController {
+public final class RecordListViewController: BaseViewController, View {
+  
+  public typealias Reactor = RecordListReactor
+  
+  weak var coordinator: RecordCoordinator?
   
   enum Section: Int, CaseIterable {
     case header
@@ -39,6 +43,7 @@ public final class RecordListViewController: BaseViewController {
   
   public override func initUI() {
     super.initUI()
+    self.navigationController?.navigationBar.isHidden = true
     self.view.backgroundColor = .white
     
     view.addSubview(navTitleLabel)
@@ -54,6 +59,33 @@ public final class RecordListViewController: BaseViewController {
       $0.leading.trailing.bottom.equalToSuperview()
     }
   }
+  
+  public func bind(reactor: RecordListReactor) {
+    self.rx.viewDidAppear
+      .take(1)
+      .map { _ in Reactor.Action.initialize }
+      .bind(to: reactor.action)
+      .disposed(by: self.disposeBag)
+    
+    reactor.state.map(\.summary)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .subscribe(with: self) { owner, summary in
+        guard let summary = summary else { return }
+        // 섹션 0만 리로드
+        owner.tableView.reloadSections(IndexSet(integer: Section.header.rawValue), with: .none)
+      }
+      .disposed(by: self.disposeBag)
+    
+    reactor.state.map(\.records)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .subscribe(with: self) { owner, records in
+        // 섹션 1만 리로드
+        owner.tableView.reloadSections(IndexSet(integer: Section.recordList.rawValue), with: .none)
+      }
+      .disposed(by: self.disposeBag)
+  }
 }
 
 extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
@@ -64,9 +96,15 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
   
   public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     switch Section(rawValue: section) {
-    case .header: return 1
-    case .recordList: return 10
-    case .none: return 0
+    case .header:
+      return 1
+      
+    case .recordList:
+      guard let records = self.reactor?.currentState.records else { return 0 }
+      return records.count
+      
+    case .none:
+      return 0
     }
   }
   
@@ -108,7 +146,8 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordListHeaderTableCell.identifier, for: indexPath
     ) as! RecordListHeaderTableCell
-    cell.selectionStyle = .none
+    guard let summary = self.reactor?.currentState.summary else { return cell }
+    cell.setData(summary: summary)
     return cell
   }
   
@@ -116,6 +155,24 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordListTableCell.identifier, for: indexPath
     ) as! RecordListTableCell
+    guard let records = self.reactor?.currentState.records else { return cell }
+    if records.indices.contains(indexPath.row) {
+      let record = records[indexPath.row]
+      cell.setData(
+        title: record.title,
+        distance: record.totalDistance,
+        pace: record.averagePace,
+        time: record.totalTime,
+        imageURL: record.imageURL
+      )
+    }
+    
+    cell.contentView.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        owner.coordinator?.showRecordDetail(recordID: 0)
+      }
+      .disposed(by: cell.disposeBag)
     cell.selectionStyle = .none
     return cell
   }
