@@ -9,50 +9,58 @@ import UIKit
 import SnapKit
 import Then
 import Lottie
+import Core
 
-final class FirstRunningOnboardingViewController: UIViewController {
+final class FirstRunningOnboardingViewController: BaseViewController {
 
   weak var coordinator: RunningCoordinator?
 
   // MARK: - UI Elements
 
-  let animationView = LottieAnimationView().then {
+  lazy var animationView = LottieAnimationView().then {
     $0.contentMode = .scaleAspectFit
     $0.loopMode = .playOnce
     $0.animationSpeed = 1.0
-    $0.animation = LottieAnimation.named("file_name")
+    $0.animation = LottieAnimation.named("running_onboarding", bundle: .module)
+  }
+
+  let backButton = UIButton().then {
+    $0.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+    $0.tintColor = UIColor(hex: "#D9D9D9")
   }
 
   let setGoalButton = UIButton().then {
     $0.setTitle("목표 설정하기", for: .normal)
-    $0.backgroundColor = .orange
+    $0.backgroundColor = FRColor.Bg.Interactive.primary
     $0.layer.cornerRadius = 10
     $0.clipsToBounds = true
     $0.setTitleColor(.white, for: .normal)
     $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-    //    $0.isHidden = true
+    $0.isHidden = true
   }
 
   let doLaterButton = UIButton().then {
     $0.setTitle("다음에 하기", for: .normal)
     $0.backgroundColor = .clear
-    $0.setTitleColor(.white, for: .normal)
+    $0.setTitleColor(FRColor.Fg.Nuetral.gray600, for: .normal)
     $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-    //    $0.isHidden = true
+    $0.isHidden = true
   }
 
   // MARK: - Lifecycle
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = .black
+    view.backgroundColor = FRColor.Fg.Nuetral.gray1000
 
     setupLayout()
     addTargets()
+    bind()
   }
 
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
+    navigationController?.setNavigationBarHidden(true, animated: animated)
     playAnimationAndShowButtons()
   }
 
@@ -60,13 +68,20 @@ final class FirstRunningOnboardingViewController: UIViewController {
 
   private func setupLayout() {
     view.addSubview(animationView)
+    view.addSubview(backButton)
     view.addSubview(setGoalButton)
     view.addSubview(doLaterButton)
 
+    backButton.snp.makeConstraints { make in
+      make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(6)
+      make.leading.equalToSuperview().offset(6)
+      make.width.height.equalTo(44)
+    }
+
     animationView.snp.makeConstraints { make in
       make.center.equalToSuperview()
-      make.width.equalToSuperview().multipliedBy(0.8)
-      make.height.equalTo(animationView.snp.width)
+      make.width.equalTo(335)
+      make.height.equalTo(668)
     }
 
     setGoalButton.snp.makeConstraints { make in
@@ -109,34 +124,12 @@ final class FirstRunningOnboardingViewController: UIViewController {
   @objc private func doLaterButtonTapped() {
     coordinator?.showRunning()
   }
+
+  private func bind() {
+    backButton.rx.tap
+      .subscribe(onNext: { [weak self] in
+        self?.coordinator?.dismissRunningFlow()
+      })
+      .disposed(by: disposeBag)
+  }
 }
-
-
-//import SwiftUI
-//
-//struct GoalSelectionViewControllerRepresentable: UIViewControllerRepresentable {
-//  func makeUIViewController(context: Context) -> FirstRunningOnboardingViewController {
-//    // Instantiate your UIKit ViewController
-//    return FirstRunningOnboardingViewController()
-//  }
-//
-//  func updateUIViewController(_ uiViewController: FirstRunningOnboardingViewController, context: Context) {
-//    // No updates needed for this simple preview
-//  }
-//}
-//
-//struct GoalSelectionViewController_Previews: PreviewProvider {
-//  static var previews: some View {
-//    Group {
-//      GoalSelectionViewControllerRepresentable()
-//        .previewDisplayName("Goal Selection Screen - iPhone 15 Pro")
-//        .previewDevice("iPhone 15 Pro")
-//        .edgesIgnoringSafeArea(.all)
-//      GoalSelectionViewControllerRepresentable()
-//        .previewDisplayName("Goal Selection Screen - iPhone SE (3rd Gen)")
-//        .previewDevice("iPhone SE (3rd generation)")
-//        .edgesIgnoringSafeArea(.all)
-//        .preferredColorScheme(.dark)
-//    }
-//  }
-//}

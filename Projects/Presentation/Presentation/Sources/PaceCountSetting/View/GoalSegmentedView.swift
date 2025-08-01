@@ -42,7 +42,7 @@ public final class GoalSegmentedView: BaseView {
   private let paceLabel = UILabel().then {
     $0.text = Segment.pace.title
     $0.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
     $0.textAlignment = .center
     $0.isUserInteractionEnabled = true
   }
@@ -50,13 +50,13 @@ public final class GoalSegmentedView: BaseView {
   private let countLabel = UILabel().then {
     $0.text = Segment.runningCount.title
     $0.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
     $0.textAlignment = .center
     $0.isUserInteractionEnabled = true
   }
 
   private let indicatorView = UIView().then {
-    $0.backgroundColor = FRColor.BG.primary
+    $0.backgroundColor = FRColor.Bg.primary
     $0.layer.cornerRadius = 19
     $0.addShadow()
   }

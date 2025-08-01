@@ -13,11 +13,12 @@ import Core
 public protocol RunningCoordinator: Coordinator {
   func showFirstRunningOnboarding()
   func showFirstRunningGoalSettingIntro()
-  func showFirstRunningGoalSetting()
+  func showFirstRunningGoalSetting(goalInputType: GoalInputType)
   func showRunning()
   func showRunningResult()
   func showRunningPaceSetting()
   func dismissRunningFlow()
+  func pop()
 }
 
 public final class RunningCoordinatorImpl: RunningCoordinator {
@@ -57,7 +58,8 @@ extension RunningCoordinatorImpl {
     runningFlowNavigationController.modalPresentationStyle = .fullScreen
     runningFlowNavigationController.isNavigationBarHidden = true
     
-    navigationController.present(runningFlowNavigationController, animated: true)
+    navigationController.isNavigationBarHidden = true
+    navigationController.present(runningFlowNavigationController, animated: false)
   }
   
   public func showFirstRunningGoalSettingIntro() {
@@ -69,8 +71,8 @@ extension RunningCoordinatorImpl {
     runningFlowNavigationController.pushViewController(viewController, animated: false)
   }
   
-  public func showFirstRunningGoalSetting() {
-    guard let viewController = resolver.resolve(FirstRunningGoalSettingViewController.self) else {
+  public func showFirstRunningGoalSetting(goalInputType: GoalInputType) {
+    guard let viewController = resolver.resolve(FirstRunningGoalSettingViewController.self, argument: goalInputType) else {
       fatalError("Failed to resolve FirstRunningGoalSettingViewController. Ensure it is registered correctly in Swinject.")
     }
     viewController.coordinator = self
@@ -97,11 +99,17 @@ extension RunningCoordinatorImpl {
   }
   
   public func showRunningResult() {
-    // TODO: - 기록상세/러닝결과 화면
-    //    guard let viewController = resolver.resolve(RunningResultViewController.self) else {
-    //      fatalError("Failed to resolve RunningResultViewController. Ensure it is registered correctly in Swinject.")
-    //    }
-    //    viewController.coordinator = self
-    //    runningFlowNavigationController.pushViewController(viewController, animated: true)
+    // TODO: - 기록상세/러닝결과 coordinator 생성해서 분리하기
+    guard let viewController = resolver.resolve(RecordDetailViewController.self) else {
+      fatalError("Failed to resolve RecordDetailViewController. Ensure it is registered correctly in Swinject.")
+    }
+    viewController.coordinator = self
+
+    runningFlowNavigationController.modalPresentationStyle = .none
+    runningFlowNavigationController.pushViewController(viewController, animated: false)
+  }
+
+  public func pop() {
+    runningFlowNavigationController.popViewController(animated: false)
   }
 }

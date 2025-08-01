@@ -43,13 +43,13 @@ public class RecordDetailLapTableHeaderView: BaseView {
   public let kmLabel = UILabel().then { // 20
     $0.text = "km"
     $0.font = .systemFont(ofSize: 14, weight: .medium)
-    $0.textColor = FRColor.FG.Text.secondary
+    $0.textColor = FRColor.Fg.Text.secondary
   }
   
   public let paceLabel = UILabel().then { // 20
     $0.text = "평균 페이스"
     $0.font = .systemFont(ofSize: 14, weight: .medium)
-    $0.textColor = FRColor.FG.Text.secondary
+    $0.textColor = FRColor.Fg.Text.secondary
   }
   
   public override func initUI() {

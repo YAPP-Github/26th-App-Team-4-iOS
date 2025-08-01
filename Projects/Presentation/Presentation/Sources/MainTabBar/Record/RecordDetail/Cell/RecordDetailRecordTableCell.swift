@@ -35,13 +35,13 @@ public class RecordDetailRecordTableCell: BaseTableViewCell {
 
   private let distanceValueLabel = UILabel().then { //56
     $0.font = .systemFont(ofSize: 48, weight: .bold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
     $0.text = "5.0"
   }
   
   private let kmLabel = UILabel().then { // 30
     $0.font = .systemFont(ofSize: 28, weight: .semibold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
     $0.text = "km"
   }
   
@@ -64,12 +64,12 @@ public class RecordDetailRecordTableCell: BaseTableViewCell {
   private let paceTitleLabel = UILabel().then { //20
     $0.text = "페이스"
     $0.font = .systemFont(ofSize: 14)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   private let paceValueLabel = UILabel().then { //24
     $0.font = .systemFont(ofSize: 20, weight: .bold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
     $0.text = "5'00\""
   }
   
@@ -84,12 +84,12 @@ public class RecordDetailRecordTableCell: BaseTableViewCell {
   private let runningTimeTitleLabel = UILabel().then { //20
     $0.text = "러닝 시간"
     $0.font = .systemFont(ofSize: 14)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   private let runningTimeValueLabel = UILabel().then { //24
     $0.font = .systemFont(ofSize: 20, weight: .bold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
     $0.text = "hh:mm:ss"
   }
   
@@ -102,7 +102,7 @@ public class RecordDetailRecordTableCell: BaseTableViewCell {
   public override func initUI() {
     super.initUI()
     
-    contentView.backgroundColor = FRColor.Base.grey
+    contentView.backgroundColor = .clear
     contentView.addSubview(rootStack)
     
     rootStack.snp.makeConstraints {

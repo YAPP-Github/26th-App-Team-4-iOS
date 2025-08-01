@@ -36,7 +36,7 @@ public class RecordListHeaderTableCell: BaseTableViewCell {
   private let distanceTitleLabel = UILabel().then { // 20
     $0.text = "총 러닝 거리"
     $0.font = .systemFont(ofSize: 14)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   private lazy var distanceStack = UIStackView(
@@ -84,12 +84,12 @@ public class RecordListHeaderTableCell: BaseTableViewCell {
   private let goalAchieveLabel = UILabel().then { // 20
     $0.text = "목표 달성 횟수"
     $0.font = .systemFont(ofSize: 14)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   // MARK: - 목표 달성 내용 컨테이너
   private lazy var goalAchieveStatContainerView = UIView().then {
-    $0.backgroundColor = FRColor.BG.secondary
+    $0.backgroundColor = FRColor.Bg.secondary
     $0.layer.cornerRadius = 16
   }
   
@@ -111,7 +111,7 @@ public class RecordListHeaderTableCell: BaseTableViewCell {
   private let goalDistanceTitleLabel = UILabel().then { // 20
     $0.text = "거리"
     $0.font = .systemFont(ofSize: 14)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   /// 목표달성 거리 카운트 스택
@@ -125,12 +125,12 @@ public class RecordListHeaderTableCell: BaseTableViewCell {
   private let goalDistanceLabel = UILabel().then { // 20
     $0.text = "N"
     $0.font = .systemFont(ofSize: 16, weight: .bold)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   private let goalDistanceCountLabel = UILabel().then { // 20
     $0.text = "회"
     $0.font = .systemFont(ofSize: 13, weight: .bold)
-    $0.textColor = FRColor.FG.Text.tertiary.withAlphaComponent(0.8)
+    $0.textColor = FRColor.Fg.Text.tertiary.withAlphaComponent(0.8)
   }
 
   /// 시간 타이틀 스택
@@ -147,7 +147,7 @@ public class RecordListHeaderTableCell: BaseTableViewCell {
   private let goalTimeTitleLabel = UILabel().then { // 20
     $0.text = "시간"
     $0.font = .systemFont(ofSize: 14)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   /// 목표달성 시간 카운트 스택
@@ -161,12 +161,12 @@ public class RecordListHeaderTableCell: BaseTableViewCell {
   private let goalTimeLabel = UILabel().then { // 20
     $0.text = "N"
     $0.font = .systemFont(ofSize: 16, weight: .bold)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   private let goalTimeCountLabel = UILabel().then { // 20
     $0.text = "회"
     $0.font = .systemFont(ofSize: 13, weight: .bold)
-    $0.textColor = FRColor.FG.Text.tertiary.withAlphaComponent(0.8)
+    $0.textColor = FRColor.Fg.Text.tertiary.withAlphaComponent(0.8)
   }
   
   func setData(summary: RecordSummary) {

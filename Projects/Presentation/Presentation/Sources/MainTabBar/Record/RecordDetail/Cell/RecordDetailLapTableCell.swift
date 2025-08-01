@@ -27,7 +27,8 @@ public class RecordDetailLapTableCell: BaseTableViewCell {
   
   private let lapNumberLabel = UILabel().then {
     $0.font = .systemFont(ofSize: 14, weight: .bold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
+    $0.text = "1"
   }
     
   private let lapTimeGraphView = UIView().then {

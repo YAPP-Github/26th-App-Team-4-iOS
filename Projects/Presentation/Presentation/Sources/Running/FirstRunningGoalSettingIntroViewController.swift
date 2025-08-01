@@ -30,7 +30,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
   let titleLabel = UILabel().then {
     $0.text = "러닝 목표를 선택해 주세요!"
     $0.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-    $0.textColor = .white
+    $0.textColor = FRColor.Fg.Nuetral.gray0
     $0.numberOfLines = 0
     $0.textAlignment = .center
   }
@@ -38,25 +38,25 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
   let subtitleLabel = UILabel().then {
     $0.text = "한번 달릴 때 마다\n달성하고 싶은 목표를 설정해 보세요."
     $0.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-    $0.textColor = .lightGray
+    $0.textColor = FRColor.Fg.Nuetral.gray400
     $0.numberOfLines = 2
     $0.textAlignment = .center
   }
 
   let timeGoalButton = UIButton().then {
-    $0.backgroundColor = .gray
+    $0.backgroundColor = FRColor.Fg.Nuetral.gray900
     $0.layer.cornerRadius = 10
     $0.clipsToBounds = true
 
     var config = UIButton.Configuration.plain()
-    config.image = UIImage(systemName: "clock.fill")
+    config.image = UIImage(named: "clock", in: .module, with: nil)?.resized(to: CGSize(width: 45.56, height: 47.56))
     config.imageColorTransformer = UIConfigurationColorTransformer { _ in .white }
 
     config.title = "목표 시간"
     config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
       var outgoing = incoming
       outgoing.font = UIFont.systemFont(ofSize: 18, weight: .bold)
-      outgoing.foregroundColor = .white
+      outgoing.foregroundColor = FRColor.Fg.Text.Interactive.inverse
       return outgoing
     }
 
@@ -64,7 +64,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     config.subtitleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
       var outgoing = incoming
       outgoing.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-      outgoing.foregroundColor = .lightGray
+      outgoing.foregroundColor = FRColor.Fg.Nuetral.gray500
       return outgoing
     }
 
@@ -75,19 +75,19 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
   }
 
   let distanceGoalButton = UIButton().then {
-    $0.backgroundColor = .gray
+    $0.backgroundColor = FRColor.Fg.Nuetral.gray900
     $0.layer.cornerRadius = 10
     $0.clipsToBounds = true
 
     var config = UIButton.Configuration.plain()
-    config.image = UIImage(systemName: "figure.run.circle.fill")
+    config.image = UIImage(named: "track", in: .module, with: nil)?.resizedToFill(to: CGSize(width: 70, height: 48))
     config.imageColorTransformer = UIConfigurationColorTransformer { _ in .white }
 
     config.title = "목표 거리"
     config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
       var outgoing = incoming
       outgoing.font = UIFont.systemFont(ofSize: 18, weight: .bold)
-      outgoing.foregroundColor = .white
+      outgoing.foregroundColor = FRColor.Fg.Text.Interactive.inverse
       return outgoing
     }
 
@@ -95,7 +95,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     config.subtitleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
       var outgoing = incoming
       outgoing.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-      outgoing.foregroundColor = .lightGray
+      outgoing.foregroundColor = FRColor.Fg.Nuetral.gray500
       return outgoing
     }
 
@@ -109,20 +109,23 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     $0.axis = .horizontal
     $0.alignment = .center
     $0.spacing = 4
-    $0.backgroundColor = .gray
+    $0.backgroundColor = FRColor.Fg.Nuetral.gray200
+    $0.layer.cornerRadius = 16
+    $0.isLayoutMarginsRelativeArrangement = true
+    $0.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20)
 
     let iconImageView = UIImageView().then {
       $0.image = UIImage(systemName: "questionmark.circle.fill")
-      $0.tintColor = .lightGray
+      $0.tintColor = FRColor.Fg.Text.secondary
       $0.contentMode = .scaleAspectFit
       $0.snp.makeConstraints { make in
-        make.width.height.equalTo(16)
+        make.width.height.equalTo(24)
       }
     }
 
     let messageLabel = UILabel().then {
       $0.text = "목표는 마이페이지에서 수정할 수 있어요!"
-      $0.textColor = .lightGray
+      $0.textColor = FRColor.Fg.Text.secondary
       $0.font = UIFont.systemFont(ofSize: 14, weight: .regular)
       $0.numberOfLines = 1
     }
@@ -131,25 +134,14 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     $0.addArrangedSubview(messageLabel)
   }
 
-
   // MARK: - Lifecycle
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = UIColor(red: 29/255, green: 29/255, blue: 29/255, alpha: 1.0)
+    view.backgroundColor = FRColor.Fg.Nuetral.gray1000
 
     setupLayout()
     addTargets()
-  }
-
-  override func viewWillAppear(_ animated: Bool) {
-    super.viewWillAppear(animated)
-    navigationController?.setNavigationBarHidden(true, animated: animated)
-  }
-
-  override func viewWillDisappear(_ animated: Bool) {
-    super.viewWillDisappear(animated)
-    navigationController?.setNavigationBarHidden(false, animated: animated)
   }
 
   // MARK: - Setup Layout
@@ -164,9 +156,9 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     view.addSubview(footerStackView)
 
     backButton.snp.makeConstraints { make in
-      make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(10)
-      make.leading.equalToSuperview().offset(20)
-      make.width.height.equalTo(30)
+      make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(6)
+      make.leading.equalToSuperview().offset(6)
+      make.width.height.equalTo(44)
     }
 
     skipButton.snp.makeConstraints { make in
@@ -175,7 +167,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     }
 
     titleLabel.snp.makeConstraints { make in
-      make.top.equalTo(backButton.snp.bottom).offset(40)
+      make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(136)
       make.leading.trailing.equalToSuperview().inset(20)
     }
 
@@ -185,9 +177,9 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     }
 
     timeGoalButton.snp.makeConstraints { make in
-      make.top.equalTo(subtitleLabel.snp.bottom).offset(40)
+      make.top.equalTo(subtitleLabel.snp.bottom).offset(44)
       make.leading.equalToSuperview().offset(20)
-      make.width.equalTo((view.bounds.width - 60) / 2)
+      make.width.equalTo(160)
       make.height.equalTo(200)
     }
 
@@ -201,6 +193,8 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
     footerStackView.snp.makeConstraints { make in
       make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-20)
       make.centerX.equalToSuperview()
+      make.width.equalTo(335)
+      make.height.equalTo(56)
     }
   }
 
@@ -215,40 +209,19 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
 
   @objc private func backButtonTapped() {
     print("Back button tapped!")
+    coordinator?.pop()
   }
 
   @objc private func skipButtonTapped() {
     print("Skip button tapped!")
+    coordinator?.showRunning()
   }
 
   @objc private func timeGoalButtonTapped() {
-    print("목표 시간 button tapped!")
+    coordinator?.showFirstRunningGoalSetting(goalInputType: .time)
   }
 
   @objc private func distanceGoalButtonTapped() {
-    coordinator?.showFirstRunningGoalSetting()
+    coordinator?.showFirstRunningGoalSetting(goalInputType: .distance)
   }
 }
-
-//import SwiftUI
-//
-//struct FirstRunningGoalSettingIntroRepresentable: UIViewControllerRepresentable {
-//  func makeUIViewController(context: Context) -> FirstRunningGoalSettingIntroViewController {
-//    // Instantiate your UIKit ViewController
-//    return FirstRunningGoalSettingIntroViewController()
-//  }
-//
-//  func updateUIViewController(_ uiViewController: FirstRunningGoalSettingIntroViewController, context: Context) {
-//    // No updates needed for this simple preview
-//  }
-//}
-//
-//struct FirstRunningGoalSettingIntroViewController_Previews: PreviewProvider {
-//  static var previews: some View {
-//    Group {
-//      FirstRunningGoalSettingIntroRepresentable()
-//        .previewDevice("iPhone 15 Pro")
-//        .edgesIgnoringSafeArea(.all)
-//    }
-//  }
-//}

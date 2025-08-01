@@ -31,7 +31,7 @@ public final class RecordDetailViewController: BaseViewController, View {
   }
   
   private lazy var tableView = UITableView(frame: .zero, style: .grouped).then {
-    $0.backgroundColor = FRColor.Base.grey
+    $0.backgroundColor = FRColor.Bg.secondary
     $0.separatorStyle = .none
     $0.showsVerticalScrollIndicator = false
     $0.sectionHeaderTopPadding = 0
@@ -45,19 +45,39 @@ public final class RecordDetailViewController: BaseViewController, View {
     $0.delegate = self
     $0.dataSource = self
   }
-  
-  override init() {
-    super.init()
-    hidesBottomBarWhenPushed = true
+
+  private lazy var popUpView = FirstRunningPopUpView().then {
+//    $0.isHidden = true
+    $0.onConfirm = { [weak self] in
+      guard let self = self else { return }
+      self.coordinator?.showRunningPaceSetting()
+    }
   }
-  
-  @MainActor required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+    override init() {
+        super.init()
+        hidesBottomBarWhenPushed = true
+    }
+
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+  public override func viewDidLoad() {
+    super.viewDidLoad()
+    self.view.backgroundColor = FRColor.Bg.secondary
+
+    bind()
   }
-  
+
+  public override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    navigationController?.setNavigationBarHidden(true, animated: animated)
+  }
+
+
   public override func initUI() {
     super.initUI()
-    self.view.backgroundColor = FRColor.Base.grey
+    self.view.backgroundColor = FRColor.Bg.secondary
 
     view.addSubview(backButton)
     backButton.snp.makeConstraints {
@@ -72,6 +92,19 @@ public final class RecordDetailViewController: BaseViewController, View {
       $0.leading.trailing.equalToSuperview()
       $0.bottom.equalToSuperview()
     }
+
+    view.addSubview(popUpView)
+    popUpView.snp.makeConstraints {
+      $0.edges.equalToSuperview()
+    }
+  }
+
+  private func bind() {
+    backButton.rx.tap
+      .subscribe(with: self) { object, _ in
+        object.coordinator?.dismissRunningFlow()
+      }
+      .disposed(by: disposeBag)
   }
   
   public func bind(reactor: RecordDetailReactor) {

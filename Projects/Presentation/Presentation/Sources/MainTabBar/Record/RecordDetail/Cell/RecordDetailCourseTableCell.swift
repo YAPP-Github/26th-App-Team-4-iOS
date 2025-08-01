@@ -39,14 +39,14 @@ public class RecordDetailCourseTableCell: BaseTableViewCell {
   private let courseTitleLabel = UILabel().then { // 24
     $0.text = "러닝 코스"
     $0.font = .systemFont(ofSize: 20, weight: .bold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
   }
   
   // MARK: - Location
   private let locationLabel = UILabel().then { // 20
     $0.text = "종로구 서울특별시 대한민국"
     $0.font = .systemFont(ofSize: 14)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   // MARK: - Map Container
@@ -71,8 +71,8 @@ public class RecordDetailCourseTableCell: BaseTableViewCell {
   public override func initUI() {
     super.initUI()
     
-    contentView.backgroundColor = FRColor.Base.grey
-    
+    contentView.backgroundColor = .clear
+
     contentView.addSubview(rootStack)
     rootStack.snp.makeConstraints {
       $0.top.equalToSuperview()

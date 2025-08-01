@@ -105,7 +105,7 @@ public class WeeklyRunningGoalCardView: BaseView {
 
   public override func initUI() {
     super.initUI()
-    backgroundColor = FRColor.BG.primary
+    backgroundColor = FRColor.Bg.primary
     layer.cornerRadius = 12
     addShadow()
     

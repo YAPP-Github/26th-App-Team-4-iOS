@@ -36,7 +36,8 @@ public class LoginViewController: BaseViewController, View {
 
   private let logoLabel = UILabel().then { label in
     label.text = "fitrun"
-    label.textColor = .orange
+    label.font = UIFont.boldSystemFont(ofSize: 56.37)
+    label.textColor = FRColor.Fg.Text.Interactive.primary
     label.setContentCompressionResistancePriority(.required, for: .horizontal)
     label.setContentHuggingPriority(.defaultLow, for: .horizontal)
   }
@@ -60,7 +61,7 @@ public class LoginViewController: BaseViewController, View {
     config.imagePlacement = .leading
     config.imagePadding = 6
     config.baseForegroundColor = .black
-    config.baseBackgroundColor = .yellow
+    config.baseBackgroundColor = UIColor(hex: "#FFE500")
 
     let button = UIButton(configuration: config, primaryAction: nil)
     button.layer.cornerRadius = 10
@@ -75,13 +76,11 @@ public class LoginViewController: BaseViewController, View {
     config.image = UIImage(systemName: "applelogo")
     config.imagePlacement = .leading
     config.imagePadding = 8.5
-    config.baseBackgroundColor = .black
+    config.baseBackgroundColor = FRColor.Base.black
 
     let button = UIButton(configuration: config, primaryAction: nil)
     button.layer.cornerRadius = 10
     button.clipsToBounds = true
-    button.layer.borderWidth = 1
-    button.layer.borderColor = UIColor.white.cgColor
 
     return button
   }()

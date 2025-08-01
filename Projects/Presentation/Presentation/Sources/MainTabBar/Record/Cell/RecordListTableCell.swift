@@ -49,7 +49,7 @@ public class RecordListTableCell: BaseTableViewCell {
   private let titleLabel = UILabel().then { // 20
     $0.text = "m월 dd일 시간 러닝"
     $0.font = .systemFont(ofSize: 16, weight: .bold)
-    $0.textColor = FRColor.FG.Text.secondary
+    $0.textColor = FRColor.Fg.Text.secondary
   }
   
   private lazy var distanceStack = UIStackView(
@@ -63,13 +63,13 @@ public class RecordListTableCell: BaseTableViewCell {
   private let distanceLabel = UILabel().then { // 36
     $0.text = "86.3"
     $0.font = .systemFont(ofSize: 28, weight: .bold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
   }
   
   private let kmLabel = UILabel().then { // 28
     $0.text = "km"
     $0.font = .systemFont(ofSize: 18, weight: .semibold)
-    $0.textColor = FRColor.FG.Text.primary
+    $0.textColor = FRColor.Fg.Text.primary
   }
   
   private let CourseImageView = UIImageView().then {
@@ -97,13 +97,13 @@ public class RecordListTableCell: BaseTableViewCell {
   private let paceTitleLabel = UILabel().then {
     $0.text = "평균 페이스"
     $0.font = .systemFont(ofSize: 14, weight: .medium)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   private let paceValueLabel = UILabel().then { // 24
     $0.text = "n'nn\""
     $0.font = .systemFont(ofSize: 20, weight: .bold)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   private lazy var timeStack = UIStackView(
@@ -117,13 +117,13 @@ public class RecordListTableCell: BaseTableViewCell {
   private let timeTitleLabel = UILabel().then {
     $0.text = "러닝 시간"
     $0.font = .systemFont(ofSize: 14, weight: .medium)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   private let timeValueLabel = UILabel().then { // 24
     $0.text = "hh:mm:ss"
     $0.font = .systemFont(ofSize: 20, weight: .bold)
-    $0.textColor = FRColor.FG.Text.tertiary
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
   
   func setData(
@@ -147,8 +147,8 @@ public class RecordListTableCell: BaseTableViewCell {
   
   public override func initUI() {
     super.initUI()
-    contentView.backgroundColor = FRColor.BG.secondary
-    
+    contentView.backgroundColor = FRColor.Bg.secondary
+
     contentView.addSubview(rootContainerStackView)
     rootContainerStackView.snp.makeConstraints {
       $0.top.equalToSuperview()

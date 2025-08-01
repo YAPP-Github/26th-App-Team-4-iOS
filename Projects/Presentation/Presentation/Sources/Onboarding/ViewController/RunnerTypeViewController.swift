@@ -43,7 +43,7 @@ public final class RunnerTypeViewController: BaseViewController {
   private let goToHomeButton = UIButton().then {
     $0.setTitle("홈으로", for: .normal)
     $0.tintColor = .white
-    $0.backgroundColor = FRColor.BG.interactive.primary
+    $0.backgroundColor = FRColor.Bg.Interactive.primary
     $0.layer.cornerRadius = 16
   }
   

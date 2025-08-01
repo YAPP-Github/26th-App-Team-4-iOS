@@ -38,13 +38,20 @@ public final class RunningAssembly: Assembly {
       return viewController
     }
 
-    container.register(FirstRunningGoalSettingViewController.self) { r in
-      let viewController = FirstRunningGoalSettingViewController(inputType: .distance)
+    container.register(FirstRunningGoalSettingViewController.self) { (r, type: GoalInputType) in
+      let viewController = FirstRunningGoalSettingViewController(inputType: type)
       return viewController
     }
 
     container.register(RunningPaceSettingViewController.self) { r in
       let viewController = RunningPaceSettingViewController()
+      return viewController
+    }
+
+    // TODO: - runningassembly로 이동
+    // RecordDetail
+    container.register(RecordDetailViewController.self) { r in
+      let viewController = RecordDetailViewController()
       return viewController
     }
   }

@@ -11,7 +11,48 @@ import Then
 import RxSwift
 import RxCocoa
 import Lottie
+import Core
 
+public enum GoalInputType {
+  case time // 시간 입력 화면
+  case distance // 거리 입력 화면
+
+  var title: String {
+    switch self {
+    case .time:
+      return "한 번에 몇 분을 달려볼까요?"
+    case .distance:
+      return "한 번에 몇 km를 달려볼까요?"
+    }
+  }
+
+  var subTitle: String {
+    switch self {
+    case .time:
+      return "러닝을 처음 시작할 땐 30분을 목표로\n걷기와 달리기를 번갈아 달려보는 걸 추천해요."
+    case .distance:
+      return "러닝을 처음 시작할 땐\n3km를 목표로 달리는 걸 추천해요."
+    }
+  }
+
+  var unit: String {
+    switch self {
+    case .time:
+      return "분"
+    case .distance:
+      return "km"
+    }
+  }
+
+  var initialGoalValue: Int {
+    switch self {
+    case .time:
+      return 30
+    case .distance:
+      return 3
+    }
+  }
+}
 
 final class ClearSelectionTextField: UITextField {
   override func selectionRects(for range: UITextRange) -> [UITextSelectionRect] {
@@ -27,47 +68,6 @@ final class FirstRunningGoalSettingViewController: UIViewController {
 
   // MARK: - Properties
 
-  enum GoalInputType {
-    case time // 시간 입력 화면
-    case distance // 거리 입력 화면
-
-    var title: String {
-      switch self {
-      case .time:
-        return "한 번에 몇 분을 달려볼까요?"
-      case .distance:
-        return "한 번에 몇 km를 달려볼까요?"
-      }
-    }
-
-    var subTitle: String {
-      switch self {
-      case .time:
-        return "러닝을 처음 시작할 땐 30분을 목표로\n걷기와 달리기를 번갈아 달려보는 걸 추천해요."
-      case .distance:
-        return "러닝을 처음 시작할 땐\n3km를 목표로 달리는 걸 추천해요."
-      }
-    }
-
-    var unit: String {
-      switch self {
-      case .time:
-        return "분"
-      case .distance:
-        return "km"
-      }
-    }
-
-    var initialGoalValue: Int {
-      switch self {
-      case .time:
-        return 30
-      case .distance:
-        return 3
-      }
-    }
-  }
-
   weak var coordinator: RunningCoordinator?
 
   private let disposeBag = DisposeBag()
@@ -77,32 +77,32 @@ final class FirstRunningGoalSettingViewController: UIViewController {
 
   // MARK: - UI Elements
 
-  let backButton = UIButton().then {
+  private let backButton = UIButton().then {
     $0.setImage(UIImage(systemName: "chevron.backward"), for: .normal)
     $0.tintColor = .white
   }
 
-  let skipButton = UIButton().then {
+  private let skipButton = UIButton().then {
     $0.setTitle("건너뛰기", for: .normal)
     $0.setTitleColor(.white, for: .normal)
     $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
   }
 
-  let titleLabel = UILabel().then {
+  private let titleLabel = UILabel().then {
     $0.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-    $0.textColor = .white
+    $0.textColor = FRColor.Fg.Text.Interactive.inverse
     $0.numberOfLines = 0
     $0.textAlignment = .center
   }
 
-  let subTitleLabel = UILabel().then {
+  private let subTitleLabel = UILabel().then {
     $0.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-    $0.textColor = .lightGray
+    $0.textColor = FRColor.Fg.Nuetral.gray400
     $0.numberOfLines = 0
     $0.textAlignment = .center
   }
 
-  lazy var goalValueTextField = ClearSelectionTextField().then {
+  private lazy var goalValueTextField = ClearSelectionTextField().then {
     $0.text = "0"
     $0.font = UIFont.systemFont(ofSize: 60, weight: .bold)
     $0.textColor = .white
@@ -113,19 +113,19 @@ final class FirstRunningGoalSettingViewController: UIViewController {
     $0.delegate = self
   }
 
-  let goalValueUnderline = UIView().then {
-    $0.backgroundColor = UIColor(red: 255/255, green: 112/255, blue: 0/255, alpha: 1.0)
+  private let goalValueUnderline = UIView().then {
+    $0.backgroundColor = FRColor.Bg.Interactive.primary
     $0.isHidden = true
   }
 
-  let unitLabel = UILabel().then {
+  private let unitLabel = UILabel().then {
     $0.font = UIFont.systemFont(ofSize: 30, weight: .bold)
-    $0.textColor = UIColor(red: 255/255, green: 112/255, blue: 0/255, alpha: 1.0)
+    $0.textColor = FRColor.Fg.Text.disabled
     $0.textAlignment = .left
   }
 
-  let setAndRunButton = UIButton().then {
-    $0.backgroundColor = UIColor(red: 255/255, green: 112/255, blue: 0/255, alpha: 1.0)
+  private let setAndRunButton = UIButton().then {
+    $0.backgroundColor = FRColor.Bg.Interactive.primary
     $0.layer.cornerRadius = 10
     $0.clipsToBounds = true
     $0.setTitle("설정하고 달리기", for: .normal)
@@ -133,10 +133,11 @@ final class FirstRunningGoalSettingViewController: UIViewController {
     $0.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
   }
 
-  let animationView = LottieAnimationView(name: "LottieCheckAnimation.json").then {
+  private let animationView = LottieAnimationView().then {
     $0.contentMode = .scaleAspectFit
     $0.loopMode = .playOnce
     $0.animationSpeed = 1.0
+    $0.animation = LottieAnimation.named("toast_completed", bundle: .module)
     $0.isHidden = true
   }
 
@@ -167,7 +168,8 @@ final class FirstRunningGoalSettingViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = .black
+    view.backgroundColor = FRColor.Fg.Nuetral.gray1000
+    
     setupLayout()
     bindUI()
     addTargets()
@@ -187,7 +189,6 @@ final class FirstRunningGoalSettingViewController: UIViewController {
 
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
-    navigationController?.setNavigationBarHidden(false, animated: animated)
     view.endEditing(true)
   }
 
@@ -205,9 +206,9 @@ final class FirstRunningGoalSettingViewController: UIViewController {
     view.addSubview(animationView)
 
     backButton.snp.makeConstraints { make in
-      make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(10)
-      make.leading.equalToSuperview().offset(20)
-      make.width.height.equalTo(30)
+      make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(6)
+      make.leading.equalToSuperview().offset(6)
+      make.width.height.equalTo(44)
     }
 
     skipButton.snp.makeConstraints { make in
@@ -252,7 +253,8 @@ final class FirstRunningGoalSettingViewController: UIViewController {
 
     animationView.snp.makeConstraints { make in
       make.center.equalToSuperview()
-      make.width.height.equalTo(200)
+      make.width.equalTo(174)
+      make.height.equalTo(208)
     }
   }
 
@@ -306,19 +308,16 @@ final class FirstRunningGoalSettingViewController: UIViewController {
 
         object.view.isUserInteractionEnabled = false
 
-//        object.animationView.isHidden = false
-//        object.animationView.play { [weak self] finished in
-//          guard let self = self else { return }
-//
-//          if finished {
-//            object.animationView.isHidden = true
-//
-//            object.view.isUserInteractionEnabled = true
-//
-//            object.coordinator?.showRunning()
-//          }
-//        }
-        object.coordinator?.showRunning()
+        object.animationView.isHidden = false
+        object.animationView.play { finished in
+          if finished {
+            object.animationView.isHidden = true
+
+            object.view.isUserInteractionEnabled = true
+
+            object.coordinator?.showRunning()
+          }
+        }
       }
       .disposed(by: disposeBag)
   }
@@ -349,11 +348,11 @@ final class FirstRunningGoalSettingViewController: UIViewController {
   }
 
   @objc private func backButtonTapped() {
-
+    coordinator?.pop()
   }
 
   @objc private func skipButtonTapped() {
-
+    coordinator?.showRunning()
   }
 
   // MARK: - Keyboard Handling
@@ -413,29 +412,4 @@ extension FirstRunningGoalSettingViewController: UITextFieldDelegate {
 
     return true
   }
-
 }
-
-
-//import SwiftUI
-//
-//struct FirstRunningGoalSettingRepresentable: UIViewControllerRepresentable {
-//  func makeUIViewController(context: Context) -> FirstRunningGoalSettingViewController {
-//    // Instantiate your UIKit ViewController
-//    return FirstRunningGoalSettingViewController(inputType: .distance)
-//  }
-//
-//  func updateUIViewController(_ uiViewController: FirstRunningGoalSettingViewController, context: Context) {
-//    // No updates needed for this simple preview
-//  }
-//}
-//
-//struct FirstRunningGoalSettingViewController_Previews: PreviewProvider {
-//  static var previews: some View {
-//    Group {
-//      FirstRunningGoalSettingRepresentable()
-//        .previewDevice("iPhone 15 Pro")
-//        .edgesIgnoringSafeArea(.all)
-//    }
-//  }
-//}
