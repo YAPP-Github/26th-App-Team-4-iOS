@@ -88,7 +88,10 @@ final class RunningViewController: BaseViewController, View {
   private let mainActionButton = UIButton().then {
     $0.backgroundColor = FRColor.Bg.Interactive.primary
     $0.layer.cornerRadius = 55
-    $0.setImage(UIImage(systemName: "pause.fill"), for: .normal)
+    let resizedImage = UIImage(systemName: "pause.fill")?
+            .resized(to: CGSize(width: 32, height: 32))?
+            .withRenderingMode(.alwaysTemplate)
+    $0.setImage(resizedImage, for: .normal)
     $0.tintColor = .white
     $0.imageView?.contentMode = .scaleAspectFit
   }
@@ -96,7 +99,10 @@ final class RunningViewController: BaseViewController, View {
   private let secondaryActionButton = UIButton().then {
     $0.backgroundColor = FRColor.Bg.Interactive.secondary
     $0.layer.cornerRadius = 45
-    $0.setImage(UIImage(systemName: "stop.fill"), for: .normal)
+    let resizedImage = UIImage(systemName: "stop.fill")?
+            .resized(to: CGSize(width: 32, height: 32))?
+            .withRenderingMode(.alwaysTemplate)
+    $0.setImage(resizedImage, for: .normal)
     $0.tintColor = .white
     $0.imageView?.contentMode = .scaleAspectFit
     $0.isHidden = true
@@ -105,7 +111,10 @@ final class RunningViewController: BaseViewController, View {
   private let playButton = UIButton().then {
     $0.backgroundColor = FRColor.Bg.Interactive.primary
     $0.layer.cornerRadius = 45
-    $0.setImage(UIImage(systemName: "play.fill"), for: .normal)
+    let resizedImage = UIImage(systemName: "play.fill")?
+            .resized(to: CGSize(width: 32, height: 32))?
+            .withRenderingMode(.alwaysTemplate)
+    $0.setImage(resizedImage, for: .normal)
     $0.tintColor = .white
     $0.imageView?.contentMode = .scaleAspectFit
     $0.isHidden = true
