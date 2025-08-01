@@ -19,6 +19,10 @@ final class RunningPaceSettingViewController: BaseViewController {
 
   weak var coordinator: RunningCoordinator?
 
+  private var toastTimer: Timer?
+
+  private var previousPaceIndex: Int?
+
   // TODO: - 서버로 부터 값 받도록 수정
   private let challengerPace: Float = 5 * 60
   private let routinePace: Float = 7 * 60
@@ -33,20 +37,20 @@ final class RunningPaceSettingViewController: BaseViewController {
     $0.tintColor = .black
   }
 
-  private let infoBannerView = UIView().then {
-    $0.backgroundColor = FRColor.Fg.Nuetral.gray1000
+  private let toastView = UIView().then {
+    $0.backgroundColor = .black.withAlphaComponent(0.7)
     $0.layer.cornerRadius = 8
+    $0.alpha = 0.0
   }
 
-  private let infoBannerLabel = UILabel().then {
-    $0.text = "슬라이더로 조절하거나 직접 입력할 수 있어요!"
+  private let toastIconImageView = UIImageView().then {
+    $0.image = UIImage(systemName: "exclamationmark.circle.fill")
+    $0.tintColor = FRColor.Fg.Icon.Interactive.primary
+  }
+
+  private let toastLabel = UILabel().then {
     $0.font = UIFont.systemFont(ofSize: 14)
     $0.textColor = .white
-  }
-
-  private let infoBannerCloseButton = UIButton().then {
-    $0.setImage(UIImage(systemName: "xmark"), for: .normal)
-    $0.tintColor = .white
   }
 
   private let myPaceLabel = UILabel().then {
@@ -64,6 +68,11 @@ final class RunningPaceSettingViewController: BaseViewController {
     $0.borderStyle = .none
     $0.tintColor = .clear
     $0.delegate = self
+  }
+
+  private let underlineView = UIView().then {
+    $0.backgroundColor = FRColor.Bg.Interactive.primary
+    $0.isHidden = true
   }
 
   private let fixedPaceSlider = UISlider().then {
@@ -92,6 +101,22 @@ final class RunningPaceSettingViewController: BaseViewController {
     $0.text = "챌린저"
     $0.font = UIFont.systemFont(ofSize: 14)
     $0.textColor = FRColor.Fg.Text.tertiary
+  }
+
+  private let infoBannerView = UIView().then {
+    $0.backgroundColor = FRColor.Fg.Nuetral.gray1000
+    $0.layer.cornerRadius = 8
+  }
+
+  private let infoBannerLabel = UILabel().then {
+    $0.text = "슬라이더로 조절하거나 직접 입력할 수 있어요!"
+    $0.font = UIFont.systemFont(ofSize: 14)
+    $0.textColor = .white
+  }
+
+  private let infoBannerCloseButton = UIButton().then {
+    $0.setImage(UIImage(systemName: "xmark"), for: .normal)
+    $0.tintColor = .white
   }
 
   private let infoBoxView = UIView().then {
@@ -145,7 +170,9 @@ final class RunningPaceSettingViewController: BaseViewController {
     setupKeyboardNotifications()
     setupTapGestureForDismissKeyboard()
 
-    setSliderAndUI(toIndex: 1)
+    let initialIndex = 1
+    previousPaceIndex = initialIndex
+    setSliderAndUI(toIndex: initialIndex)
   }
 
   deinit {
@@ -156,19 +183,23 @@ final class RunningPaceSettingViewController: BaseViewController {
 
   private func setupUI() {
     view.addSubview(backButton)
-    view.addSubview(infoBannerView)
-    infoBannerView.addSubview(infoBannerLabel)
-    infoBannerView.addSubview(infoBannerCloseButton)
     view.addSubview(myPaceLabel)
     view.addSubview(paceInputTextField)
+    view.addSubview(underlineView)
     view.addSubview(fixedPaceSlider)
     view.addSubview(warmUpLabel)
     view.addSubview(routineLabel)
     view.addSubview(challengerLabel)
+    view.addSubview(infoBannerView)
+    infoBannerView.addSubview(infoBannerLabel)
+    infoBannerView.addSubview(infoBannerCloseButton)
     view.addSubview(infoBoxView)
     infoBoxView.addSubview(infoIcon)
     infoBoxView.addSubview(infoTitleLabel)
     infoBoxView.addSubview(infoDescriptionLabel)
+    view.addSubview(toastView)
+    toastView.addSubview(toastIconImageView)
+    toastView.addSubview(toastLabel)
     view.addSubview(confirmButton)
     view.addSubview(animationView)
   }
@@ -182,21 +213,22 @@ final class RunningPaceSettingViewController: BaseViewController {
       make.width.height.equalTo(44)
     }
 
-    infoBannerView.snp.makeConstraints {
-      $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(112)
-      $0.leading.trailing.equalToSuperview().inset(42.5)
-      $0.height.equalTo(34)
+    toastView.snp.makeConstraints {
+      $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(72)
+      $0.leading.trailing.equalToSuperview().inset(20)
+      $0.height.equalTo(48)
     }
 
-    infoBannerLabel.snp.makeConstraints {
-      $0.leading.equalToSuperview().offset(12)
-      $0.centerY.equalToSuperview()
-    }
-
-    infoBannerCloseButton.snp.makeConstraints {
-      $0.trailing.equalToSuperview().offset(-8)
+    toastIconImageView.snp.makeConstraints {
+      $0.leading.equalToSuperview().offset(16)
       $0.centerY.equalToSuperview()
       $0.width.height.equalTo(24)
+    }
+
+    toastLabel.snp.makeConstraints {
+      $0.leading.equalTo(toastIconImageView.snp.trailing).offset(8)
+      $0.centerY.equalToSuperview()
+      $0.trailing.lessThanOrEqualToSuperview().offset(-16)
     }
 
     myPaceLabel.snp.makeConstraints {
@@ -209,6 +241,13 @@ final class RunningPaceSettingViewController: BaseViewController {
       $0.centerX.equalToSuperview()
       $0.width.equalTo(250)
       $0.height.equalTo(80)
+    }
+
+    underlineView.snp.makeConstraints {
+      $0.centerX.equalTo(paceInputTextField)
+      $0.top.equalTo(paceInputTextField.snp.bottom)
+      $0.width.equalTo(200)
+      $0.height.equalTo(2)
     }
 
     fixedPaceSlider.snp.makeConstraints {
@@ -229,6 +268,23 @@ final class RunningPaceSettingViewController: BaseViewController {
     challengerLabel.snp.makeConstraints {
       $0.top.equalTo(fixedPaceSlider.snp.bottom).offset(8)
       $0.centerX.equalTo(fixedPaceSlider.snp.trailing)
+    }
+
+    infoBannerView.snp.makeConstraints {
+      $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(112)
+      $0.leading.trailing.equalToSuperview().inset(42.5)
+      $0.height.equalTo(34)
+    }
+
+    infoBannerLabel.snp.makeConstraints {
+      $0.leading.equalToSuperview().offset(12)
+      $0.centerY.equalToSuperview()
+    }
+
+    infoBannerCloseButton.snp.makeConstraints {
+      $0.trailing.equalToSuperview().offset(-8)
+      $0.centerY.equalToSuperview()
+      $0.width.height.equalTo(18)
     }
 
     infoBoxView.snp.makeConstraints {
@@ -275,9 +331,11 @@ final class RunningPaceSettingViewController: BaseViewController {
       .disposed(by: disposeBag)
 
     infoBannerCloseButton.rx.tap
-      .asDriver()
-      .drive(onNext: { [weak self] in
-        self?.infoBannerView.isHidden = true
+      .subscribe(onNext: { [weak self] in
+        UIView.animate(withDuration: 0.3) {
+          self?.infoBannerView.alpha = 0
+          self?.infoBannerView.isHidden = true
+        }
       })
       .disposed(by: disposeBag)
 
@@ -302,26 +360,68 @@ final class RunningPaceSettingViewController: BaseViewController {
     confirmButton.rx.tap
       .subscribe(with: self) { object, _ in
         object.paceInputTextField.resignFirstResponder()
-
         object.view.isUserInteractionEnabled = false
 
-        // TODO: - API 연결
         let finalIndex = Int(object.fixedPaceSlider.value.rounded())
         let finalPace = object.paceValues[finalIndex]
-
 
         object.animationView.isHidden = false
         object.animationView.play { finished in
           if finished {
             object.animationView.isHidden = true
-
             object.view.isUserInteractionEnabled = true
-
             object.coordinator?.pop()
           }
         }
       }
       .disposed(by: disposeBag)
+
+    paceInputTextField.rx.controlEvent(.editingDidBegin)
+      .subscribe(onNext: { [weak self] in
+        self?.animateUnderline(isVisible: true)
+      })
+      .disposed(by: disposeBag)
+
+    paceInputTextField.rx.controlEvent(.editingDidEnd)
+      .subscribe(onNext: { [weak self] in
+        self?.animateUnderline(isVisible: false)
+      })
+      .disposed(by: disposeBag)
+  }
+
+  // MARK: - Toast View Logic
+
+  private func showToast(with message: String) {
+    toastTimer?.invalidate()
+    toastTimer = nil
+    toastLabel.text = message
+    if toastView.alpha > 0.0 {
+      startToastHideTimer()
+    } else {
+      UIView.animate(withDuration: 0.2, animations: {
+        self.toastView.alpha = 1.0
+      }) { _ in
+        self.startToastHideTimer()
+      }
+    }
+  }
+
+  private func startToastHideTimer() {
+    toastTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { [weak self] _ in
+      UIView.animate(withDuration: 0.2) {
+        self?.toastView.alpha = 0.0
+      }
+    }
+  }
+
+  private func hideToast() {
+    toastTimer?.invalidate()
+    toastTimer = nil
+    if toastView.alpha > 0.0 {
+      UIView.animate(withDuration: 0.2) {
+        self.toastView.alpha = 0.0
+      }
+    }
   }
 
   // MARK: - Slider Index & UI Sync Helpers
@@ -342,6 +442,21 @@ final class RunningPaceSettingViewController: BaseViewController {
 
   private func setSliderAndUI(toIndex index: Int) {
     let clampedIndex = max(0, min(paceValues.count - 1, index))
+
+    if previousPaceIndex != clampedIndex {
+      switch clampedIndex {
+      case 0:
+        showToast(with: "나에게 살짝 여유로운 페이스일 수 있어요.")
+      case 1:
+        showToast(with: "나에게 적절한 페이스에요.")
+      case 2:
+        showToast(with: "아직은 조금 벅찰 수 있는 페이스일 수 있어요.")
+      default:
+        hideToast()
+      }
+      previousPaceIndex = clampedIndex
+    }
+
     fixedPaceSlider.value = Float(clampedIndex)
     let currentPace = paceValues[clampedIndex]
     paceInputTextField.text = formatPace(seconds: currentPace)
@@ -428,6 +543,21 @@ final class RunningPaceSettingViewController: BaseViewController {
 
   @objc private func dismissKeyboard() {
     view.endEditing(true)
+  }
+
+  private func animateUnderline(isVisible: Bool) {
+    if isVisible {
+      self.underlineView.transform = CGAffineTransform(scaleX: 0.01, y: 1.0)
+      self.underlineView.isHidden = false
+      self.underlineView.transform = .identity
+    } else {
+      UIView.animate(withDuration: 0.25, animations: {
+        self.underlineView.transform = CGAffineTransform(scaleX: 0.01, y: 1.0)
+      }) { _ in
+        self.underlineView.isHidden = true
+        self.underlineView.transform = .identity
+      }
+    }
   }
 }
 
