@@ -7,9 +7,9 @@ let orgName = "com.yapp"
 
 let appTargetInfoPlist: InfoPlist = .extendingDefault(
   with: [
-    "UILaunchStoryboardName": "LaunchScreen.storyboard",
+    "UILaunchStoryboardName": "LaunchScreen",
     "UIApplicationSceneManifest": [
-      "UIApplicationSupportsMultipleScenes": true,
+      "UIApplicationSupportsMultipleScenes": false,
       "UISceneConfigurations": [
         "UIWindowSceneSessionRoleApplication": [
           [
@@ -19,6 +19,10 @@ let appTargetInfoPlist: InfoPlist = .extendingDefault(
         ]
       ]
     ],
+    // 3) 앱 아이콘 에셋 이름
+    "CFBundleIconName": "AppIcon",
+    // 1 = iPhone 전용 (iPad 제외)
+    "UIDeviceFamily": [1],
     "CFBundleURLTypes": [
       [
         "CFBundleTypeRole": "Editor",
