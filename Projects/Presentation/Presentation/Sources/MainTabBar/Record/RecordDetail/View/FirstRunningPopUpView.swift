@@ -29,14 +29,15 @@ final class FirstRunningPopUpView: UIView {
 
   private let titleLabel = UILabel().then {
     $0.text = "첫 러닝\n완주 축하해요!"
-    $0.font = UIFont.boldSystemFont(ofSize: 22)
+    $0.font = UIFont.boldSystemFont(ofSize: 24)
+    $0.textColor = FRColor.Fg.Text.primary
     $0.textAlignment = .center
     $0.numberOfLines = 2
   }
 
   private let descriptionLabel = UILabel().then {
     $0.text = "체력분석과 최초 러닝 기록으로\n나에게 딱 맞는 페이스를 확인해보세요."
-    $0.font = UIFont.systemFont(ofSize: 14)
+    $0.font = UIFont.systemFont(ofSize: 16)
     $0.textColor = FRColor.Fg.Text.secondary
     $0.textAlignment = .center
     $0.numberOfLines = 2
@@ -51,8 +52,9 @@ final class FirstRunningPopUpView: UIView {
   }
 
   private let closeButton = UIButton().then {
-    $0.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
-    $0.tintColor = FRColor.Fg.Nuetral.gray1000
+    $0.setImage(UIImage(named: "close", in: .module, with: nil), for: .normal)
+    $0.imageView?.contentMode = .scaleAspectFill
+    $0.clipsToBounds = true
   }
 
   // MARK: - Callbacks for actions
@@ -70,9 +72,6 @@ final class FirstRunningPopUpView: UIView {
   }
 
   private func setupViews() {
-    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleDimmedBackgroundTap))
-    dimmedBackgroundView.addGestureRecognizer(tapGesture)
-
     addSubview(dimmedBackgroundView)
     dimmedBackgroundView.addSubview(popupCardView)
 
@@ -93,13 +92,14 @@ final class FirstRunningPopUpView: UIView {
 
     popupCardView.snp.makeConstraints { make in
       make.center.equalToSuperview()
-      make.width.equalToSuperview().multipliedBy(0.8)
-      make.height.equalTo(350)
+      make.width.equalTo(290)
+      make.height.equalTo(360)
     }
 
     closeButton.snp.makeConstraints { make in
-      make.top.right.equalToSuperview().inset(10)
-      make.width.height.equalTo(30)
+      make.top.equalToSuperview().inset(20)
+      make.right.equalToSuperview().inset(15)
+      make.width.height.equalTo(24)
     }
 
     confettiImageView.snp.makeConstraints { make in
@@ -121,15 +121,12 @@ final class FirstRunningPopUpView: UIView {
     confirmButton.snp.makeConstraints { make in
       make.top.equalTo(descriptionLabel.snp.bottom).offset(30)
       make.left.right.equalToSuperview().inset(20)
-      make.height.equalTo(50)
+      make.height.equalTo(56)
       make.bottom.equalToSuperview().offset(-30)
     }
   }
 
   // MARK: - Action Handlers
-  @objc private func handleDimmedBackgroundTap() {
-    self.removeFromSuperview()
-  }
 
   @objc private func confirmButtonTapped() {
     onConfirm?()
