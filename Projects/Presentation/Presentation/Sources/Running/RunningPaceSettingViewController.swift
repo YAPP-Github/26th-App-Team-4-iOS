@@ -299,20 +299,6 @@ final class RunningPaceSettingViewController: BaseViewController {
       })
       .disposed(by: disposeBag)
 
-    paceInputTextField.rx.controlEvent(.editingDidEnd)
-      .asDriver()
-      .drive(onNext: { [weak self] in
-        guard let self = self, let text = self.paceInputTextField.text else { return }
-        if let totalSeconds = self.parsePace(text: text) {
-          self.setSliderAndUI(toPace: totalSeconds)
-        } else {
-          self.showInvalidInputAlert()
-          let currentIndex = Int(self.fixedPaceSlider.value.rounded())
-          self.setSliderAndUI(toIndex: currentIndex)
-        }
-      })
-      .disposed(by: disposeBag)
-
     confirmButton.rx.tap
       .subscribe(with: self) { object, _ in
         object.paceInputTextField.resignFirstResponder()
@@ -385,13 +371,12 @@ final class RunningPaceSettingViewController: BaseViewController {
   private func parsePace(text: String) -> Float? {
     let cleanedDigits = text.filter(\.isWholeNumber)
 
-    guard cleanedDigits.count >= 1 else { return nil }
+    guard cleanedDigits.count >= 3 else { return nil }
 
-    let minutes = Float(cleanedDigits.prefix(1)) ?? 0
-    let secondsString = String(cleanedDigits.suffix(from: cleanedDigits.index(cleanedDigits.startIndex, offsetBy: 1)))
+    let minutesString = cleanedDigits.count == 4 ? cleanedDigits.prefix(2) : cleanedDigits.prefix(1)
+    let minutes = Float(minutesString) ?? 0
+    let secondsString = cleanedDigits.suffix(2)
     let seconds = Float(secondsString) ?? 0
-
-    if seconds >= 60 { return nil }
 
     return minutes * 60 + seconds
   }
@@ -463,7 +448,7 @@ extension RunningPaceSettingViewController: UITextFieldDelegate {
         updatedDigits.removeLast()
       }
     } else {
-      if updatedDigits.count < 3 {
+      if updatedDigits.count < 4 {
         updatedDigits.append(contentsOf: newDigits)
       }
     }
@@ -485,6 +470,14 @@ extension RunningPaceSettingViewController: UITextFieldDelegate {
       if let totalSeconds = parsePace(text: formatted) {
         setSliderAndUI(toPace: totalSeconds)
       }
+    case 4:
+      let min = updatedDigits.prefix(2)
+      let sec = updatedDigits.suffix(2)
+      formatted = "\(min)'\(sec)''"
+
+      if let totalSeconds = parsePace(text: formatted) {
+        setSliderAndUI(toPace: totalSeconds)
+      }
     default:
       formatted = ""
     }
@@ -493,14 +486,9 @@ extension RunningPaceSettingViewController: UITextFieldDelegate {
     return false
   }
 
-
   func textFieldDidEndEditing(_ textField: UITextField) {
-    if let text = textField.text, let totalSeconds = parsePace(text: text) {
-      setSliderAndUI(toPace: totalSeconds)
-    } else {
-      showInvalidInputAlert()
-      let currentIndex = Int(fixedPaceSlider.value.rounded())
-      setSliderAndUI(toIndex: currentIndex)
-    }
+    guard let text = textField.text, (parsePace(text: text) == nil) else { return }
+    showInvalidInputAlert()
+    setSliderAndUI(toIndex: 1)
   }
 }

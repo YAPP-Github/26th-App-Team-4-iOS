@@ -36,7 +36,7 @@ final class RunningViewController: BaseViewController, View {
     $0.font = UIFont.systemFont(ofSize: 80, weight: .bold)
     $0.textColor = FRColor.Fg.Text.Interactive.inverse
     $0.textAlignment = .center
-    $0.text = "1.87"
+    $0.text = "0.00"
   }
 
   private let unitLabel = UILabel().then {

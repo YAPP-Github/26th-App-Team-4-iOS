@@ -51,7 +51,7 @@ final class FirstRunningPopUpView: UIView {
   }
 
   private let closeButton = UIButton().then {
-    $0.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+    $0.setImage(UIImage(named: "close"), for: .normal)
     $0.tintColor = FRColor.Fg.Nuetral.gray1000
   }
 
@@ -99,7 +99,7 @@ final class FirstRunningPopUpView: UIView {
 
     closeButton.snp.makeConstraints { make in
       make.top.right.equalToSuperview().inset(10)
-      make.width.height.equalTo(30)
+      make.width.height.equalTo(24)
     }
 
     confettiImageView.snp.makeConstraints { make in
