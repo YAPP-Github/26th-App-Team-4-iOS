@@ -21,4 +21,18 @@ public struct CommonNetworkHeaders {
 
     return headers
   }
+
+  /// 러닝 완료 API 헤더
+  public static var runningAPI: [String: String] {
+    var headers: [String: String] = [
+      "Content-Type": "multipart/form-data"
+    ]
+
+    // TODO: - AuthTokenStorageType 을 구현한 싱글톤 또는 DI 컨테이너에서 가져오세요.
+    if let token = AuthTokenStorageImpl().getAccessToken() {
+      headers["Authorization"] = "Bearer \(token)"
+    }
+
+    return headers
+  }
 }

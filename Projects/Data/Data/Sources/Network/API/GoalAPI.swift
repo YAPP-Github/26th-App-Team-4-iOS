@@ -34,7 +34,7 @@ public enum GoalAPI: BaseAPI {
       return "/users/goals/weekly-run-count"
     case .saveGoalTime:
       return "/users/goals/time"
-    case .saveGoalDistance(distance: let distance):
+    case .saveGoalDistance:
       return "users/goals/distance"
     }
   }
@@ -66,7 +66,7 @@ public enum GoalAPI: BaseAPI {
     case .saveGoalTime(time: let time):
       return .requestParameters(parameters: ["time": time], encoding: JSONEncoding.default)
     case .saveGoalDistance(distance: let distance):
-      return .requestParameters(parameters: ["distanceMeterGoal": time], encoding: JSONEncoding.default)
+      return .requestParameters(parameters: ["distanceMeterGoal": distance], encoding: JSONEncoding.default)
     }
   }
 }
