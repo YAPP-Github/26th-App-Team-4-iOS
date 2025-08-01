@@ -31,7 +31,7 @@ public class WeeklyRunningGoalCardView: BaseView {
   }
 
   let editButton = UIButton(type: .system).then {
-    $0.setImage(UIImage(systemName: "pencil"), for: .normal)
+    $0.setImage(UIImage(named: "EditIcon", in: Bundle.module, compatibleWith: nil), for: .normal)
     $0.tintColor = .gray
   }
 
@@ -114,6 +114,10 @@ public class WeeklyRunningGoalCardView: BaseView {
       $0.top.equalToSuperview().offset(12)
       $0.leading.trailing.equalToSuperview().inset(20)
       $0.height.equalTo(24)
+    }
+    
+    editButton.snp.makeConstraints {
+      $0.size.equalTo(24)
     }
     
     addSubview(progressStackView)

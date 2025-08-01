@@ -46,8 +46,7 @@ public class RecordDetailTitleTableCell: BaseTableViewCell {
   }
     
   let editButton = UIButton(type: .system).then { // 24
-    let img = UIImage(systemName: "pencil")?
-      .withRenderingMode(.alwaysTemplate)
+    let img = UIImage(named: "EditIcon", in: Bundle.module, compatibleWith: nil)
     $0.setImage(img, for: .normal)
     $0.tintColor = FRColor.Fg.Text.secondary.withAlphaComponent(0.8)
   }
