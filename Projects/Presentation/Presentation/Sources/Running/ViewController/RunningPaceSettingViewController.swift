@@ -46,7 +46,7 @@ final class RunningPaceSettingViewController: BaseViewController {
 
   private let infoBannerCloseButton = UIButton().then {
     $0.setImage(UIImage(systemName: "xmark"), for: .normal)
-    $0.tintColor = .black
+    $0.tintColor = .white
   }
 
   private let myPaceLabel = UILabel().then {
@@ -183,36 +183,36 @@ final class RunningPaceSettingViewController: BaseViewController {
     }
 
     infoBannerView.snp.makeConstraints {
-      $0.top.equalTo(backButton.snp.bottom).offset(20)
-      $0.leading.trailing.equalToSuperview().inset(20)
-      $0.height.equalTo(44)
+      $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(112)
+      $0.leading.trailing.equalToSuperview().inset(42.5)
+      $0.height.equalTo(34)
     }
 
     infoBannerLabel.snp.makeConstraints {
-      $0.leading.equalToSuperview().offset(16)
+      $0.leading.equalToSuperview().offset(12)
       $0.centerY.equalToSuperview()
     }
 
     infoBannerCloseButton.snp.makeConstraints {
-      $0.trailing.equalToSuperview().offset(-16)
+      $0.trailing.equalToSuperview().offset(-8)
       $0.centerY.equalToSuperview()
       $0.width.height.equalTo(24)
     }
 
     myPaceLabel.snp.makeConstraints {
-      $0.top.equalTo(infoBannerView.snp.bottom).offset(40)
+      $0.top.equalTo(infoBannerView.snp.bottom).offset(18)
       $0.centerX.equalToSuperview()
     }
 
     paceInputTextField.snp.makeConstraints {
-      $0.top.equalTo(myPaceLabel.snp.bottom).offset(10)
+      $0.top.equalTo(myPaceLabel.snp.bottom).offset(4)
       $0.centerX.equalToSuperview()
       $0.width.equalTo(250)
       $0.height.equalTo(80)
     }
 
     fixedPaceSlider.snp.makeConstraints {
-      $0.top.equalTo(paceInputTextField.snp.bottom).offset(20)
+      $0.top.equalTo(paceInputTextField.snp.bottom).offset(40)
       $0.leading.trailing.equalToSuperview().inset(30)
     }
 
