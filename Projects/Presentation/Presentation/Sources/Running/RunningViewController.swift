@@ -116,13 +116,15 @@ final class RunningViewController: BaseViewController, View {
   override func viewDidLoad() {
     super.viewDidLoad()
     setupUI()
-    bindUI()
   }
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     navigationController?.setNavigationBarHidden(true, animated: false)
-    playAnimationAndShowUI()
+
+    if let reactor = self.reactor {
+      playAnimationAndShowUI(reactor: reactor)
+    }
   }
 
   private func setupUI() {
@@ -216,36 +218,6 @@ final class RunningViewController: BaseViewController, View {
     }
   }
 
-  // MARK: - UI Binding
-  private func bindUI() {
-    isPausedState
-      .asDriver()
-      .drive(onNext: { [weak self] isPaused in
-        guard let self = self else { return }
-        self.updateUIForState(isPaused: isPaused)
-      })
-      .disposed(by: disposeBag)
-
-    mainActionButton.rx.tap
-      .subscribe(onNext: { [weak self] in
-        guard let self = self else { return }
-        self.isPausedState.accept(!self.isPausedState.value)
-      })
-      .disposed(by: disposeBag)
-
-    secondaryActionButton.rx.tap
-      .subscribe(with: self) { object, _ in
-        object.coordinator?.showRunningResult()
-      }
-      .disposed(by: disposeBag)
-
-    playButton.rx.tap
-      .subscribe(with: self) { object, _ in
-        object.isPausedState.accept(!object.isPausedState.value)
-      }
-      .disposed(by: disposeBag)
-  }
-
   private func updateUIForState(isPaused: Bool) {
     if isPaused {
       topBackgroundView.backgroundColor = FRColor.Bg.secondary
@@ -264,17 +236,50 @@ final class RunningViewController: BaseViewController, View {
     }
   }
 
-  // MARK: - Animation and UI Presentation
-  private func playAnimationAndShowUI() {
+  private func playAnimationAndShowUI(reactor: RunningReactor) {
     animationView.play { [weak self] _ in
       guard let self = self else { return }
       self.animationView.isHidden = true
       self.topBackgroundView.isHidden = false
       self.bottomContainerView.isHidden = false
+
+      reactor.action.onNext(.startTimer)
     }
   }
 
   func bind(reactor: RunningReactor) {
+    mainActionButton.rx.tap
+      .map { Reactor.Action.togglePaused }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
 
+    playButton.rx.tap
+      .map { Reactor.Action.togglePaused }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+
+    secondaryActionButton.rx.tap
+      .subscribe(with: self) { object, _ in
+        object.coordinator?.showRunningResult()
+      }
+      .disposed(by: disposeBag)
+
+    reactor.state.map(\.isPaused)
+      .distinctUntilChanged()
+      .bind(with: self) { this, isPaused in
+        this.updateUIForState(isPaused: isPaused)
+      }
+      .disposed(by: disposeBag)
+
+    reactor.state.map(\.elapsedTime)
+      .distinctUntilChanged()
+      .map { time -> String in
+        let hours = Int(time) / 3600
+        let minutes = (Int(time) % 3600) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+      }
+      .bind(to: timeValueLabel.rx.text)
+      .disposed(by: disposeBag)
   }
 }

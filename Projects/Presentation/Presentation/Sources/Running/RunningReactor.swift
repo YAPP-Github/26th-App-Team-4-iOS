@@ -7,20 +7,61 @@
 
 import ReactorKit
 import Foundation
+import RxSwift
 
 public final class RunningReactor: Reactor {
-  
-  // MARK: - Action
   public enum Action {
+    case startTimer
+    case togglePaused
+    case tick
   }
-  
-  // MARK: - Mutation
+
   public enum Mutation {
+    case setPaused(Bool)
+    case incrementTime
   }
-  
-  // MARK: - State
+
   public struct State {
+    var isPaused: Bool = false
+    var elapsedTime: TimeInterval = 0
   }
-  
-  public let initialState: State = State()
+
+  public let initialState = State()
+
+  private var timer: Timer?
+
+  public func mutate(action: Action) -> Observable<Mutation> {
+    switch action {
+    case .startTimer:
+      startTimer()
+      return .empty()
+
+    case .togglePaused:
+      return .just(.setPaused(!currentState.isPaused))
+
+    case .tick:
+      guard !currentState.isPaused else { return .empty() }
+      return .just(.incrementTime)
+    }
+  }
+
+  private func startTimer() {
+    timer?.invalidate()
+    timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+      self?.action.onNext(.tick)
+    }
+  }
+
+  public func reduce(state: State, mutation: Mutation) -> State {
+    var newState = state
+    switch mutation {
+    case let .setPaused(paused):
+      newState.isPaused = paused
+
+    case .incrementTime:
+      newState.elapsedTime += 1
+
+    }
+    return newState
+  }
 }
