@@ -46,5 +46,19 @@ public class DomainAssembly: Assembly {
       }
       return HomeUseCaseImpl(homeRepository: repository)
     }
+
+    container.register(RunningStartUseCaseType.self) { r in
+      guard let repository = r.resolve(RunningRepository.self) else {
+        fatalError("Failed to resolve RunningRepository for RunningStartUseCase.")
+      }
+      return RunningStartUseCase(runningRepository: repository)
+    }
+
+    container.register(RunningCompletionUseCaseType.self) { r in
+      guard let repository = r.resolve(RunningRepository.self) else {
+        fatalError("Failed to resolve RunningRepository for RunningCompletionUseCase.")
+      }
+      return RunningCompletionUseCase(runningRepository: repository)
+    }
   }
 }

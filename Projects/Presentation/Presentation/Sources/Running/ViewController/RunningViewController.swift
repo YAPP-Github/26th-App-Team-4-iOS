@@ -20,6 +20,10 @@ final class RunningViewController: BaseViewController, View {
 
   weak var coordinator: RunningCoordinator?
 
+  // MARK: - Properties
+
+  private let locationManager = CLLocationManager()
+
   private lazy var animationView = LottieAnimationView().then {
     $0.contentMode = .scaleAspectFit
     $0.loopMode = .playOnce
@@ -89,8 +93,8 @@ final class RunningViewController: BaseViewController, View {
     $0.backgroundColor = FRColor.Bg.Interactive.primary
     $0.layer.cornerRadius = 55
     let resizedImage = UIImage(systemName: "pause.fill")?
-            .resized(to: CGSize(width: 32, height: 32))?
-            .withRenderingMode(.alwaysTemplate)
+      .resized(to: CGSize(width: 32, height: 32))?
+      .withRenderingMode(.alwaysTemplate)
     $0.setImage(resizedImage, for: .normal)
     $0.tintColor = .white
     $0.imageView?.contentMode = .scaleAspectFit
@@ -100,8 +104,8 @@ final class RunningViewController: BaseViewController, View {
     $0.backgroundColor = FRColor.Bg.Interactive.secondary
     $0.layer.cornerRadius = 45
     let resizedImage = UIImage(systemName: "stop.fill")?
-            .resized(to: CGSize(width: 32, height: 32))?
-            .withRenderingMode(.alwaysTemplate)
+      .resized(to: CGSize(width: 32, height: 32))?
+      .withRenderingMode(.alwaysTemplate)
     $0.setImage(resizedImage, for: .normal)
     $0.tintColor = .white
     $0.imageView?.contentMode = .scaleAspectFit
@@ -112,8 +116,8 @@ final class RunningViewController: BaseViewController, View {
     $0.backgroundColor = FRColor.Bg.Interactive.primary
     $0.layer.cornerRadius = 45
     let resizedImage = UIImage(systemName: "play.fill")?
-            .resized(to: CGSize(width: 32, height: 32))?
-            .withRenderingMode(.alwaysTemplate)
+      .resized(to: CGSize(width: 32, height: 32))?
+      .withRenderingMode(.alwaysTemplate)
     $0.setImage(resizedImage, for: .normal)
     $0.tintColor = .white
     $0.imageView?.contentMode = .scaleAspectFit
@@ -122,20 +126,24 @@ final class RunningViewController: BaseViewController, View {
 
   private var isPausedState: BehaviorRelay<Bool> = BehaviorRelay(value: false)
 
+  // MARK: - View Life Cycle
+
   override func viewDidLoad() {
     super.viewDidLoad()
     setupUI()
+    setupLocationManager()
   }
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     navigationController?.setNavigationBarHidden(true, animated: false)
 
-    // reactor 필요 → 조건적 실행
     if let reactor = self.reactor {
       playAnimationAndShowUI(reactor: reactor)
     }
   }
+
+  // MARK: - UI Setup
 
   private func setupUI() {
     view.backgroundColor = .gray
@@ -228,6 +236,18 @@ final class RunningViewController: BaseViewController, View {
     }
   }
 
+  // MARK: - Location Manager
+
+  private func setupLocationManager() {
+    locationManager.delegate = self
+    locationManager.desiredAccuracy = kCLLocationAccuracyBest
+
+    // 위치 권한 요청
+    locationManager.requestWhenInUseAuthorization()
+  }
+
+  // MARK: - UI Logic
+
   private func updateUIForState(isPaused: Bool) {
     if isPaused {
       topBackgroundView.backgroundColor = FRColor.Bg.secondary
@@ -253,11 +273,20 @@ final class RunningViewController: BaseViewController, View {
       self.topBackgroundView.isHidden = false
       self.bottomContainerView.isHidden = false
 
-      reactor.action.onNext(.startTimer)
+      self.locationManager.startUpdatingLocation()
+
+      if let lastKnownLocation = self.locationManager.location {
+        reactor.action.onNext(.startRun(startLocation: lastKnownLocation))
+      } else {
+        reactor.action.onNext(.startRun(startLocation: nil))
+      }
     }
   }
 
+  // MARK: - Binding
+
   func bind(reactor: RunningReactor) {
+    // MARK: Action
     mainActionButton.rx.tap
       .map { Reactor.Action.togglePaused }
       .bind(to: reactor.action)
@@ -267,13 +296,13 @@ final class RunningViewController: BaseViewController, View {
       .map { Reactor.Action.togglePaused }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
-    
+
     secondaryActionButton.rx.tap
-      .subscribe(with: self) { object, _ in
-        object.coordinator?.showRunningResult()
-      }
+      .map { Reactor.Action.stopRun }
+      .bind(to: reactor.action)
       .disposed(by: disposeBag)
-    
+
+    // MARK: State
     reactor.state.map(\.isPaused)
       .distinctUntilChanged()
       .bind(with: self) { this, isPaused in
@@ -291,5 +320,51 @@ final class RunningViewController: BaseViewController, View {
       }
       .bind(to: timeValueLabel.rx.text)
       .disposed(by: disposeBag)
+
+    reactor.state.map(\.totalDistance)
+      .distinctUntilChanged()
+      .map { String(format: "%.2f", $0 / 1000) }
+      .bind(to: distanceLabel.rx.text)
+      .disposed(by: disposeBag)
+
+    reactor.state.map(\.sessionState)
+      .distinctUntilChanged()
+      .filter { $0 == .finished }
+      .bind(with: self) { this, _ in
+        this.coordinator?.showRunningResult()
+      }
+      .disposed(by: disposeBag)
+
+    reactor.state.map(\.isUploadSuccess)
+      .filter { $0 }
+      .distinctUntilChanged()
+      .bind(with: self) { this, _ in
+        this.coordinator?.showRunningResult()
+      }
+      .disposed(by: disposeBag)
+  }
+}
+
+// MARK: - CLLocationManagerDelegate
+
+extension RunningViewController: CLLocationManagerDelegate {
+  func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+    switch manager.authorizationStatus {
+    case .authorizedAlways, .authorizedWhenInUse:
+      manager.startUpdatingLocation()
+    case .notDetermined, .denied, .restricted:
+      // 권한이 없을 경우, 사용자에게 안내하는 로직 필요
+      print("Location access denied.")
+    @unknown default:
+      break
+    }
+  }
+
+  func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    guard let location = locations.last else { return }
+
+    if let reactor = self.reactor {
+      reactor.action.onNext(.updateLocation(location))
+    }
   }
 }

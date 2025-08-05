@@ -10,17 +10,26 @@ import Moya
 import CoreLocation
 
 public enum RunningAPI: BaseAPI {
-  case saveRunningRecord(recordId: String, metadata: Data, image: UIImage)
+  case startRun(lat: Double, lon: Double, timeStamp: String)
+  case completeRun(recordId: String, data: RunningCompletionRequestDTO)
+  case uploadImage(recordId: String, image: UIImage)
 
   public var path: String {
     switch self {
-    case .saveRunningRecord(let recordId, _, _): return "/running/\(recordId)"
+    case .startRun:
+      return "/running"
+    case .completeRun(let recordId, _):
+      return "/running/\(recordId)"
+    case .uploadImage(let recordId, _):
+      return "/running/\(recordId)/images"
     }
   }
-  
+
   public var method: Moya.Method {
     switch self {
-    case .saveRunningRecord: return .post
+    case .startRun: return .post
+    case .completeRun: return .post
+    case .uploadImage: return .post
     }
   }
 
@@ -28,26 +37,45 @@ public enum RunningAPI: BaseAPI {
     return CommonNetworkHeaders.runningAPI
   }
 
-//  public var task: Task {
-//    switch self {
-//    case .saveRunningRecord:
-//      return .requestParameters(parameters: [:], encoding: JSONEncoding.default)
-//    }
-//  }
   public var task: Task {
     switch self {
-    case let .saveRunningRecord(_, metadata, image):
-      guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-        return .uploadMultipart([])
-      }
+    case let .startRun(lat, lon, timeStamp):
+      return .requestParameters(
+        parameters: [
+          "timeStamp":timeStamp,
+          "lon": lon,
+          "lat": lat
+        ],
+        encoding: JSONEncoding.default
+      )
 
-      // image 파트
-      let imageDataPart = MultipartFormData(provider: .data(imageData), name: "image", fileName: "running_map.jpg", mimeType: "image/jpeg")
+    case let .completeRun(_, data):
+      return .requestJSONEncodable(data)
 
-      // metadata 파트 (JSON 데이터)
-      let metadataPart = MultipartFormData(provider: .data(metadata), name: "metadata", fileName: "metadata.json", mimeType: "application/json")
-
-      return .uploadMultipart([imageDataPart, metadataPart])
+    case .uploadImage(_, image: let image):
+      return .requestParameters(parameters: [:], encoding: JSONEncoding.default)
     }
   }
+}
+
+
+
+public struct RunningStartResponseDTO: Codable {
+  let recordId: Int
+}
+
+public struct RunningPointRequestDTO: Codable {
+  let timeStamp: String
+  let totalRunningTimeMills: Int64
+  let lon: Double
+  let lat: Double
+}
+
+public struct RunningCompletionRequestDTO: Codable {
+  let runningPoints: [RunningPointRequestDTO]
+  let totalTime: Int64
+  let totalCalories: Int
+  let averagePace: Int64
+  let totalDistance: Double
+  let startAt: String
 }

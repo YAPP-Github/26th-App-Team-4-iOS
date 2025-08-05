@@ -24,6 +24,7 @@ public final class AuthRepositoryImpl: AuthRepository {
     return networkService.requestKakaoLogin(idToken: idToken)
       .map { remoteLoginResult in
         let domainResult = remoteLoginResult.toDomain()
+        print(">>>domainResult", domainResult)
         self.tokenStorage.saveAccessToken(domainResult.tokenResponse.accessToken)
         self.tokenStorage.saveRefreshToken(domainResult.tokenResponse.refreshToken)
         return domainResult
@@ -45,10 +46,32 @@ public final class AuthRepositoryImpl: AuthRepository {
   }
 
   public func hasValidAuthSession() -> Single<Bool> {
-    guard let accessToken = tokenStorage.getAccessToken(), !accessToken.isEmpty else {
+    if let accessToken = tokenStorage.getAccessToken(), !accessToken.isEmpty {
+      return .just(true)
+    }
+
+    return refreshToken()
+      .map { didRefresh in
+        return didRefresh
+      }
+      .catchAndReturn(false)
+  }
+
+  public func refreshToken() -> Single<Bool> {
+    guard let refreshToken = tokenStorage.getRefreshToken(), !refreshToken.isEmpty else {
       return .just(false)
     }
 
-    return .just(true)
+    return networkService.requestRefreshToken(refreshToken: refreshToken)
+      .map { [weak self] remoteLoginResult in
+        guard let self = self else { return false }
+        self.tokenStorage.saveAccessToken(remoteLoginResult.accessToken)
+        self.tokenStorage.saveRefreshToken(remoteLoginResult.refreshToken)
+        return true
+      }
+      .catch { error in
+        print("Failed to refresh token: \(error.localizedDescription)")
+        return .just(false)
+      }
   }
 }

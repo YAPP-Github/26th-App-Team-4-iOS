@@ -51,5 +51,10 @@ public class DataAssembly: Assembly {
     container.register(HomeRepository.self) { r in
       return HomeRepositoryImpl()
     }
+
+    // Running
+    container.register(RunningRepository.self) { r in
+      return RunningRepositoryImpl()
+    }
   }
 }

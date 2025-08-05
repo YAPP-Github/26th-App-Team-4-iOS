@@ -13,6 +13,7 @@ import Domain
 public protocol AuthNetworkService {
   func requestAppleLogin(idToken: String) -> Single<LoginResultDTO>
   func requestKakaoLogin(idToken: String) -> Single<LoginResultDTO>
+  func requestRefreshToken(refreshToken: String) -> Single<TokenResponseDTO>
 }
 
 public final class AuthNetworkServiceImpl: AuthNetworkService {
@@ -44,6 +45,19 @@ public final class AuthNetworkServiceImpl: AuthNetworkService {
           return .just(result)
         } else {
           return .error(NetworkError.serverError(message: "ERROR: requestKakaoLogin"))
+        }
+      }
+  }
+
+  public func requestRefreshToken(refreshToken: String) -> RxSwift.Single<Domain.TokenResponseDTO> {
+    return provider.rx.request(.refreshToken(refreshToken: refreshToken))
+      .filterSuccessfulStatusCodes()
+      .map(APIResponse<TokenResponseDTO>.self)
+      .flatMap { response in
+        if response.code == "SUCCESS", let result = response.result {
+          return .just(result)
+        } else {
+          return .error(NetworkError.serverError(message: "ERROR: request refreshToken"))
         }
       }
   }

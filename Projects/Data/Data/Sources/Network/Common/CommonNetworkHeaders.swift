@@ -35,4 +35,17 @@ public struct CommonNetworkHeaders {
 
     return headers
   }
+
+  public static var refreshToken: [String: String] {
+    var headers: [String: String] = [
+      "Content-Type": "application/json"
+    ]
+
+    // TODO: - AuthTokenStorageType 을 구현한 싱글톤 또는 DI 컨테이너에서 가져오세요.
+    if let token = AuthTokenStorageImpl().getRefreshToken() {
+      headers["Authorization"] = "Bearer \(token)"
+    }
+
+    return headers
+  }
 }
