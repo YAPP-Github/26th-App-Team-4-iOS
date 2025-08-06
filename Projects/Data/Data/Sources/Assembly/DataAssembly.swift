@@ -61,5 +61,10 @@ public class DataAssembly: Assembly {
     container.register(AudioRepository.self) { r in
       return AudioRepositoryImpl()
     }
+
+    // Goal
+    container.register(GoalRepository.self) { r in
+      return GoalRepositoryImpl()
+    }
   }
 }

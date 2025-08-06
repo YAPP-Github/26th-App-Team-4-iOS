@@ -35,7 +35,7 @@ public class DomainAssembly: Assembly {
 
       container.register(GoalUseCase.self) { r in
       guard let repository = r.resolve(GoalRepository.self) else {
-        fatalError("Failed to resolve OnboardingRepository for OnboardingUseCase.")
+        fatalError("Failed to resolve GoalRepository for GoalUseCase.")
       }
       return GoalUseCaseImpl(goalRepository: repository)
     }

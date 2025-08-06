@@ -282,6 +282,7 @@ final class RunningViewController: BaseViewController, View {
     animationView.play { [weak self] _ in
       guard let self = self else { return }
       self.locationManager.startUpdatingLocation()
+      reactor.action.onNext(.startRun(startLocation: self.locationManager.location))
     }
   }
 
@@ -317,15 +318,15 @@ final class RunningViewController: BaseViewController, View {
       .bind(to: timeValueLabel.rx.text)
       .disposed(by: disposeBag)
 
-    reactor.state.map { $0.averagePaceString }
-      .distinctUntilChanged()
-      .bind(to: paceValueLabel.rx.text)
-      .disposed(by: disposeBag)
-
     reactor.state.map(\.totalDistance)
       .distinctUntilChanged()
       .map { String(format: "%.2f", $0 / 1000) }
       .bind(to: distanceLabel.rx.text)
+      .disposed(by: disposeBag)
+
+    reactor.state.map(\.averagePaceString)
+      .distinctUntilChanged()
+      .bind(to: paceValueLabel.rx.text)
       .disposed(by: disposeBag)
 
     reactor.state.map(\.sessionState)
@@ -411,7 +412,7 @@ extension RunningViewController: CLLocationManagerDelegate {
     case .authorizedAlways, .authorizedWhenInUse:
       manager.startUpdatingLocation()
     case .notDetermined, .denied, .restricted:
-      // 권한이 없을 경우, 사용자에게 안내하는 로직 필요
+      // TODO: - 권한이 없을 경우, 사용자에게 안내하는 로직 필요
       print("Location access denied.")
     @unknown default:
       break
@@ -421,10 +422,15 @@ extension RunningViewController: CLLocationManagerDelegate {
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
     guard let location = locations.last else { return }
 
+//    if let reactor = self.reactor {
+//      if reactor.currentState.sessionState == .idle {
+//        reactor.action.onNext(.startRun(startLocation: location))
+//      } else {
+//        reactor.action.onNext(.updateLocation(location))
+//      }
+//    }
     if let reactor = self.reactor {
-      if reactor.currentState.sessionState == .idle {
-        reactor.action.onNext(.startRun(startLocation: location))
-      } else {
+      if reactor.currentState.sessionState == .inProgress || reactor.currentState.sessionState == .paused {
         reactor.action.onNext(.updateLocation(location))
       }
     }
