@@ -18,7 +18,7 @@ public final class RunnerTypeViewController: BaseViewController {
   weak var coordinator: OnboardingCoordinator?
 
   public var runnerType: String = "워밍업"
-  
+
   private let typeTitleLabel = UILabel().then {
     $0.text = "체력 분석완료\n나는 워밍업 러너에 가까워요"
     $0.font = .systemFont(ofSize: 24, weight: .bold)
@@ -26,7 +26,7 @@ public final class RunnerTypeViewController: BaseViewController {
     $0.numberOfLines = 0
     $0.textAlignment = .center
   }
-  
+
   private let typeDescriptionLabel = UILabel().then {
     $0.text = "이제 딱 맞는 러닝 목표를 추천해 드릴게요!\n지금 목표 설정을 완료하고 가볍게 시작해볼까요?"
     $0.font = .systemFont(ofSize: 14, weight: .regular)
@@ -34,42 +34,42 @@ public final class RunnerTypeViewController: BaseViewController {
     $0.numberOfLines = 0
     $0.textAlignment = .center
   }
-  
+
   private let imageView = UIImageView().then {
     $0.image = UIImage(named: "RunnerType", in: Bundle.module, compatibleWith: nil)
     $0.contentMode = .scaleAspectFit
   }
-  
+
   private let goToHomeButton = UIButton().then {
     $0.setTitle("홈으로", for: .normal)
     $0.tintColor = .white
     $0.backgroundColor = FRColor.Bg.Interactive.primary
     $0.layer.cornerRadius = 16
   }
-  
+
   public override func initUI() {
     super.initUI()
-    
+
     view.addSubview(typeTitleLabel)
     typeTitleLabel.text = "체력 분석완료\n나는 \(runnerType) 러너에 가까워요"
     typeTitleLabel.snp.makeConstraints { make in
       make.top.equalTo(view.safeAreaLayoutGuide).offset(72)
       make.centerX.equalToSuperview()
     }
-    
+
     view.addSubview(typeDescriptionLabel)
     typeDescriptionLabel.snp.makeConstraints { make in
       make.top.equalTo(typeTitleLabel.snp.bottom).offset(16)
       make.centerX.equalToSuperview()
     }
-    
+
     view.addSubview(imageView)
     imageView.snp.makeConstraints { make in
       make.top.equalTo(typeDescriptionLabel.snp.bottom).offset(32)
       make.centerX.equalToSuperview()
       make.size.equalTo(230) // Adjust size as needed
     }
-    
+
     view.addSubview(goToHomeButton)
     goToHomeButton.snp.makeConstraints { make in
       make.leading.trailing.equalToSuperview().inset(16)
@@ -77,12 +77,14 @@ public final class RunnerTypeViewController: BaseViewController {
       make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-12)
     }
   }
-  
+
   public override func action() {
     super.action()
-    
+
     goToHomeButton.rx.tap
       .subscribe(with: self) { object, _ in
+        // TODO: - UserDefaults 관리
+        UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
         object.coordinator?.showMainTab()
       }
       .disposed(by: disposeBag)

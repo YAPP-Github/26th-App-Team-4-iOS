@@ -1,8 +1,8 @@
 //
-//  AuthRepositoryImpl.swift
-//  Data
+//  AuthRepositoryImpl.swift
+//  Data
 //
-//  Created by dong eun shin on 7/7/25.
+//  Created by dong eun shin on 7/7/25.
 //
 
 import Foundation
@@ -13,21 +13,46 @@ public final class AuthRepositoryImpl: AuthRepository {
   private let kakaoLoginService: SocialLoginService
   private let networkService: AuthNetworkService
   private let tokenStorage: AuthTokenStorage
+  private let userDefaults: UserDefaults
 
-  public init(kakaoLoginService: SocialLoginService, networkService: AuthNetworkService, tokenStorage: AuthTokenStorage) {
+  public init(
+    kakaoLoginService: SocialLoginService,
+    networkService: AuthNetworkService,
+    tokenStorage: AuthTokenStorage,
+    userDefaults: UserDefaults = .standard
+  ) {
     self.kakaoLoginService = kakaoLoginService
     self.networkService = networkService
     self.tokenStorage = tokenStorage
+    self.userDefaults = userDefaults
   }
+
 
   public func kakaoLogin(idToken: String) -> Single<LoginResult> {
     return networkService.requestKakaoLogin(idToken: idToken)
       .map { remoteLoginResult in
         let domainResult = remoteLoginResult.toDomain()
-        print(">>>domainResult", domainResult)
         self.tokenStorage.saveAccessToken(domainResult.tokenResponse.accessToken)
         self.tokenStorage.saveRefreshToken(domainResult.tokenResponse.refreshToken)
+        self.tokenStorage.saveIdToken(idToken)
+        self.userDefaults.set(SocialLoginType.kakao.rawValue, forKey: "loginType")
         return domainResult
+      }
+      .catch { [weak self] error in
+        guard let self = self,
+              let authError = error as? AuthError,
+              case .tokenExpired = authError else {
+          return .error(error)
+        }
+
+        return self.refreshToken()
+          .flatMap { didRefresh in
+            if didRefresh {
+              return self.kakaoLogin(idToken: idToken)
+            } else {
+              return .error(authError)
+            }
+          }
       }
   }
 
@@ -37,7 +62,25 @@ public final class AuthRepositoryImpl: AuthRepository {
         let domainResult = remoteLoginResult.toDomain()
         self.tokenStorage.saveAccessToken(domainResult.tokenResponse.accessToken)
         self.tokenStorage.saveRefreshToken(domainResult.tokenResponse.refreshToken)
+        self.tokenStorage.saveIdToken(idToken)
+        self.userDefaults.set(SocialLoginType.apple.rawValue, forKey: "loginType")
         return domainResult
+      }
+      .catch { [weak self] error in
+        guard let self = self,
+              let authError = error as? AuthError,
+              case .tokenExpired = authError else {
+          return .error(error)
+        }
+
+        return self.refreshToken()
+          .flatMap { didRefresh in
+            if didRefresh {
+              return self.appleLogin(idToken: idToken)
+            } else {
+              return .error(authError)
+            }
+          }
       }
   }
 
@@ -45,19 +88,25 @@ public final class AuthRepositoryImpl: AuthRepository {
     return kakaoLoginService.login()
   }
 
-  public func hasValidAuthSession() -> Single<Bool> {
-    if let accessToken = tokenStorage.getAccessToken(), !accessToken.isEmpty {
-      return .just(true)
+  public func attemptAutoLogin() -> Single<LoginResult> {
+    guard
+      let loginTypeRaw = userDefaults.string(forKey: "loginType"),
+      let loginType = SocialLoginType(rawValue: loginTypeRaw),
+      let idToken = tokenStorage.getIdToken()
+    else {
+      return .error(AuthError.invalidSession)
     }
 
-    return refreshToken()
-      .map { didRefresh in
-        return didRefresh
-      }
-      .catchAndReturn(false)
+    switch loginType {
+    case .apple:
+      return appleLogin(idToken: idToken)
+
+    case .kakao:
+      return kakaoLogin(idToken: idToken)
+    }
   }
 
-  public func refreshToken() -> Single<Bool> {
+  private func refreshToken() -> Single<Bool> {
     guard let refreshToken = tokenStorage.getRefreshToken(), !refreshToken.isEmpty else {
       return .just(false)
     }

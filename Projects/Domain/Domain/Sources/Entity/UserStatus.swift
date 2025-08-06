@@ -8,6 +8,7 @@
 import Foundation
 
 public enum UserStatus: Equatable {
-  case needsWalkthrough  
   case loggedIn
+  case needsLogin
+  case needsWalkthrough
 }

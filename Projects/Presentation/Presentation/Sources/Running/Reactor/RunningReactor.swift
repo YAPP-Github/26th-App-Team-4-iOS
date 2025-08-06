@@ -67,6 +67,14 @@ public final class RunningReactor: Reactor {
       let seconds = Int(elapsedTime) % 60
       return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
+
+    var averagePaceString: String {
+      guard totalDistance > 0 else { return "00'00\"" }
+      let paceInSecondsPerKm = (elapsedTime / (totalDistance / 1000.0))
+      let minutes = Int(paceInSecondsPerKm / 60)
+      let seconds = Int(paceInSecondsPerKm.truncatingRemainder(dividingBy: 60))
+      return String(format: "%02d'%02d\"", minutes, seconds)
+    }
   }
 
   public let initialState: State
@@ -114,7 +122,8 @@ public final class RunningReactor: Reactor {
       guard !currentState.isPaused else { return .empty() }
 
       let runningPoint = RunningPoint(coordinate: location.coordinate, timestamp: location.timestamp)
-      let distance = location.distance(from: currentState.runningPoints.last?.coordinate.location ?? location)
+      let lastLocation = currentState.runningPoints.last?.coordinate.location ?? location
+      let distance = location.distance(from: lastLocation)
 
       let distanceFeedbackMutation = checkDistanceFeedback(distance: distance)
 

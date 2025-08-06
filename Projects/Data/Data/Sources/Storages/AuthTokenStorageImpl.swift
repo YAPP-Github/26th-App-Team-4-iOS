@@ -8,6 +8,8 @@
 import Foundation
 
 public protocol AuthTokenStorage {
+  func saveIdToken(_ token: String)
+  func getIdToken() -> String?
   func saveAccessToken(_ token: String)
   func getAccessToken() -> String?
   func saveRefreshToken(_ token: String)
@@ -17,6 +19,14 @@ public protocol AuthTokenStorage {
 
 public class AuthTokenStorageImpl: AuthTokenStorage {
   public init() {}
+  public func saveIdToken(_ token: String) {
+    UserDefaults.standard.set(token, forKey: "idToken")
+  }
+
+  public func getIdToken() -> String? {
+    return UserDefaults.standard.string(forKey: "idToken")
+  }
+
   public func saveAccessToken(_ token: String) {
     UserDefaults.standard.set(token, forKey: "accessToken")
   }

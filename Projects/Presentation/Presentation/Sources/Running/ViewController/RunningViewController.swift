@@ -1,8 +1,8 @@
 //
-//  RunningViewController.swift
-//  Presentation
+//  RunningViewController.swift
+//  Presentation
 //
-//  Created by dong eun shin on 7/20/25.
+//  Created by dong eun shin on 7/20/25.
 //
 
 import UIKit
@@ -127,7 +127,11 @@ final class RunningViewController: BaseViewController, View {
     $0.isHidden = true
   }
 
-  private var isPausedState: BehaviorRelay<Bool> = BehaviorRelay(value: false)
+  private let loadingIndicator = UIActivityIndicatorView(style: .large).then {
+    $0.color = .orange
+    $0.hidesWhenStopped = true
+    $0.isHidden = true
+  }
 
   // MARK: - View Life Cycle
 
@@ -154,6 +158,7 @@ final class RunningViewController: BaseViewController, View {
     view.addSubview(topBackgroundView)
     view.addSubview(bottomContainerView)
     view.addSubview(animationView)
+    view.addSubview(loadingIndicator)
 
     topBackgroundView.addSubview(distanceLabel)
     topBackgroundView.addSubview(unitLabel)
@@ -237,6 +242,10 @@ final class RunningViewController: BaseViewController, View {
       $0.width.height.equalTo(90)
       $0.centerX.equalToSuperview().offset(90 / 2 + 25.5)
     }
+
+    loadingIndicator.snp.makeConstraints { make in
+      make.center.equalToSuperview()
+    }
   }
 
   // MARK: - Location Manager
@@ -272,17 +281,7 @@ final class RunningViewController: BaseViewController, View {
   private func playAnimationAndShowUI(reactor: RunningReactor) {
     animationView.play { [weak self] _ in
       guard let self = self else { return }
-      self.animationView.isHidden = true
-      self.topBackgroundView.isHidden = false
-      self.bottomContainerView.isHidden = false
-
       self.locationManager.startUpdatingLocation()
-
-      if let lastKnownLocation = self.locationManager.location {
-        reactor.action.onNext(.startRun(startLocation: lastKnownLocation))
-      } else {
-        reactor.action.onNext(.startRun(startLocation: nil))
-      }
     }
   }
 
@@ -318,10 +317,52 @@ final class RunningViewController: BaseViewController, View {
       .bind(to: timeValueLabel.rx.text)
       .disposed(by: disposeBag)
 
+    reactor.state.map { $0.averagePaceString }
+      .distinctUntilChanged()
+      .bind(to: paceValueLabel.rx.text)
+      .disposed(by: disposeBag)
+
     reactor.state.map(\.totalDistance)
       .distinctUntilChanged()
       .map { String(format: "%.2f", $0 / 1000) }
       .bind(to: distanceLabel.rx.text)
+      .disposed(by: disposeBag)
+
+    reactor.state.map(\.sessionState)
+      .distinctUntilChanged()
+      .bind(with: self) { this, sessionState in
+        switch sessionState {
+        case .idle:
+          this.animationView.isHidden = false
+          this.topBackgroundView.isHidden = true
+          this.bottomContainerView.isHidden = true
+          this.loadingIndicator.stopAnimating()
+          this.loadingIndicator.isHidden = true
+        case .inProgress:
+          this.animationView.isHidden = true
+          this.topBackgroundView.isHidden = false
+          this.bottomContainerView.isHidden = false
+          this.loadingIndicator.stopAnimating()
+          this.loadingIndicator.isHidden = true
+          this.updateUIForState(isPaused: false)
+        case .paused:
+          this.animationView.isHidden = true
+          this.topBackgroundView.isHidden = false
+          this.bottomContainerView.isHidden = false
+          this.loadingIndicator.stopAnimating()
+          this.loadingIndicator.isHidden = true
+          this.updateUIForState(isPaused: true)
+        case .uploading:
+          this.animationView.isHidden = true
+          this.topBackgroundView.isHidden = true
+          this.bottomContainerView.isHidden = true
+          this.loadingIndicator.isHidden = false
+          this.loadingIndicator.startAnimating()
+        case .finished, .error:
+          this.loadingIndicator.stopAnimating()
+          this.loadingIndicator.isHidden = true
+        }
+      }
       .disposed(by: disposeBag)
 
     reactor.state.map(\.sessionState)
@@ -345,7 +386,7 @@ final class RunningViewController: BaseViewController, View {
       .distinctUntilChanged()
       .compactMap { $0 }
       .subscribe(onNext: { [weak self] audioData in
-          self?.playAudio(with: audioData)
+        self?.playAudio(with: audioData)
       })
       .disposed(by: disposeBag)
   }
@@ -381,7 +422,11 @@ extension RunningViewController: CLLocationManagerDelegate {
     guard let location = locations.last else { return }
 
     if let reactor = self.reactor {
-      reactor.action.onNext(.updateLocation(location))
+      if reactor.currentState.sessionState == .idle {
+        reactor.action.onNext(.startRun(startLocation: location))
+      } else {
+        reactor.action.onNext(.updateLocation(location))
+      }
     }
   }
 }

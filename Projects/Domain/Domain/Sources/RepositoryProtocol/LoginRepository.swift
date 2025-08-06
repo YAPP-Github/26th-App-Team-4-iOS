@@ -15,7 +15,5 @@ public protocol AuthRepository {
 
   func performKakaoSocialLogin() -> Single<String>
 
-  func hasValidAuthSession() -> Single<Bool>
-
-  func refreshToken() -> Single<Bool>
+  func attemptAutoLogin() -> Single<LoginResult>
 }
