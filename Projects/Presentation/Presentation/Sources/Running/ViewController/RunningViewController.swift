@@ -14,6 +14,7 @@ import RxCocoa
 import ReactorKit
 import Lottie
 import CoreLocation
+import AVFoundation
 
 final class RunningViewController: BaseViewController, View {
   typealias Reactor = RunningReactor
@@ -23,6 +24,8 @@ final class RunningViewController: BaseViewController, View {
   // MARK: - Properties
 
   private let locationManager = CLLocationManager()
+
+  private var audioPlayer: AVAudioPlayer?
 
   private lazy var animationView = LottieAnimationView().then {
     $0.contentMode = .scaleAspectFit
@@ -310,14 +313,8 @@ final class RunningViewController: BaseViewController, View {
       }
       .disposed(by: disposeBag)
 
-    reactor.state.map(\.elapsedTime)
+    reactor.state.map { $0.elapsedTimeString }
       .distinctUntilChanged()
-      .map { time -> String in
-        let hours = Int(time) / 3600
-        let minutes = (Int(time) % 3600) / 60
-        let seconds = Int(time) % 60
-        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-      }
       .bind(to: timeValueLabel.rx.text)
       .disposed(by: disposeBag)
 
@@ -342,6 +339,26 @@ final class RunningViewController: BaseViewController, View {
         this.coordinator?.showRunningResult()
       }
       .disposed(by: disposeBag)
+
+    reactor.state
+      .map { $0.audioToPlay }
+      .distinctUntilChanged()
+      .compactMap { $0 }
+      .subscribe(onNext: { [weak self] audioData in
+          self?.playAudio(with: audioData)
+      })
+      .disposed(by: disposeBag)
+  }
+
+  private func playAudio(with data: Data) {
+    do {
+      audioPlayer = try AVAudioPlayer(data: data)
+      audioPlayer?.delegate = self
+      audioPlayer?.play()
+    } catch {
+      print("Error playing audio: \(error.localizedDescription)")
+      self.reactor?.action.onNext(.audioPlayed)
+    }
   }
 }
 
@@ -366,5 +383,13 @@ extension RunningViewController: CLLocationManagerDelegate {
     if let reactor = self.reactor {
       reactor.action.onNext(.updateLocation(location))
     }
+  }
+}
+
+// MARK: - AVAudioPlayerDelegate
+
+extension RunningViewController: AVAudioPlayerDelegate {
+  func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+    self.reactor?.action.onNext(.audioPlayed)
   }
 }

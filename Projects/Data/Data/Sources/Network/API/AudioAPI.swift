@@ -7,11 +7,12 @@
 
 import Foundation
 import Moya
+import Domain
 
 public enum AudioAPI: BaseAPI {
   case coach
   case runningInfo(paceMills: String)
-  case distance(type: String)
+  case distance(type: DistanceFeedbackType)
   case paceFeedback(type: String)
   case timeFeedback(type: String)
 
@@ -41,7 +42,7 @@ public enum AudioAPI: BaseAPI {
     case .runningInfo(let paceMills):
       return .requestParameters(parameters: ["paceMills": paceMills], encoding: URLEncoding.default)
     case .distance(let type):
-      return .requestParameters(parameters: ["type": type], encoding: URLEncoding.default)
+      return .requestParameters(parameters: ["type": type.rawValue], encoding: URLEncoding.default)
     case .paceFeedback(let type):
       return .requestParameters(parameters: ["type": type], encoding: URLEncoding.default)
     case .timeFeedback(let type):

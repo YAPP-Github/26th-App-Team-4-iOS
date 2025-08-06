@@ -10,14 +10,14 @@ import CoreLocation
 import Domain
 import ReactorKit
 import RxSwift
+
 public final class RunningReactor: Reactor {
   public enum SessionState {
-    case idle // 초기 상태
-    case starting // API 호출 중
-    case inProgress // 달리기 시작
-    case paused // 일시 정지
-    case finished // 종료
-    case uploading // 업로드 중
+    case idle
+    case inProgress
+    case paused
+    case finished
+    case uploading
     case error
   }
 
@@ -27,7 +27,7 @@ public final class RunningReactor: Reactor {
     case tick
     case stopRun
     case updateLocation(CLLocation)
-    case uploadComplete
+    case audioPlayed
   }
 
   public enum Mutation {
@@ -36,9 +36,11 @@ public final class RunningReactor: Reactor {
     case addRunningPoint(RunningPoint)
     case setSessionState(SessionState)
     case setUploadSuccess(Bool)
-    case setStartRunInfo(recordId: Int, serverStartTime: Date, localStartTime: Date)
-    case setRunData(totalTime: TimeInterval, totalDistance: Double, averagePace: TimeInterval)
+    case setStartRunInfo(localStartTime: Date)
+    case setRunData(totalTime: TimeInterval, totalDistance: Double)
     case updateTotalDistance(Double)
+    case setLastDistanceFeedbackKm(Int)
+    case setAudioToPlay(Data?)
   }
 
   public struct State {
@@ -48,61 +50,56 @@ public final class RunningReactor: Reactor {
     var sessionState: SessionState = .idle
     var isUploadSuccess: Bool = false
 
-    var recordId: String?
+    var recordId: String? = nil
     var totalTime: TimeInterval = 0
     var totalDistance: Double = 0
-    var totalCalories: Int = 0
-    var averagePace: TimeInterval = 0
-    var localStartTime: Date?
-    var serverStartTime: Date?
+    var localStartTime: Date? = nil
 
     var runningPath: [CLLocationCoordinate2D] = []
+
+    var goalDistance: Double? = nil
+    var lastDistanceFeedbackKm: Int = 0
+    var audioToPlay: Data? = nil
+
+    var elapsedTimeString: String {
+      let hours = Int(elapsedTime) / 3600
+      let minutes = (Int(elapsedTime) % 3600) / 60
+      let seconds = Int(elapsedTime) % 60
+      return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+    }
   }
 
-  public let initialState = State()
+  public let initialState: State
   private let runningStartUseCase: RunningStartUseCaseType
   private let runningCompletionUseCase: RunningCompletionUseCaseType
+  private let audioUseCase: AudioUseCase
   private var timer: Timer?
 
-  public init(runningStartUseCase: RunningStartUseCaseType, runningCompletionUseCase: RunningCompletionUseCaseType) {
+  public init(
+    runningStartUseCase: RunningStartUseCaseType,
+    runningCompletionUseCase: RunningCompletionUseCaseType,
+    audioUseCase: AudioUseCase,
+    goalDistance: Double? = nil
+  ) {
     self.runningStartUseCase = runningStartUseCase
     self.runningCompletionUseCase = runningCompletionUseCase
+    self.audioUseCase = audioUseCase
+    self.initialState = State(goalDistance: goalDistance)
   }
 
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case let .startRun(startLocation):
+      guard let location = startLocation else { return .empty() }
       let localStartTime = Date()
-      guard let location = startLocation else {
-        print("Initial location not available. Starting without API call.")
-        self.startTimer()
-        return .concat([
-          .just(.setStartRunInfo(recordId: 0, serverStartTime: localStartTime, localStartTime: localStartTime)),
-          .just(.setSessionState(.inProgress))
-        ])
-      }
+
+      let runningPoint = RunningPoint(coordinate: location.coordinate, timestamp: localStartTime)
+      self.startTimer()
 
       return .concat([
-        .just(.setSessionState(.starting)),
-        runningStartUseCase.execute(startLocation: location, timeStamp: localStartTime)
-          .asObservable()
-          .flatMap { recordId -> Observable<Mutation> in
-            guard let recordId = recordId else {
-              print("Error: Failed to get recordId.>>>>> \(recordId)")
-              return .just(.setSessionState(.finished))
-            }
-            self.startTimer()
-            let runningPoint = RunningPoint(coordinate: location.coordinate, timestamp: localStartTime)
-            return .concat([
-              .just(.addRunningPoint(runningPoint)),
-              .just(.setStartRunInfo(recordId: recordId, serverStartTime: localStartTime, localStartTime: localStartTime)),
-              .just(.setSessionState(.inProgress))
-            ])
-          }
-          .catch { error -> Observable<Mutation> in
-            print("Error: Failed to start run. \(error.localizedDescription)")
-            return .just(.setSessionState(.finished))
-          }
+        .just(.setStartRunInfo(localStartTime: localStartTime)),
+        .just(.addRunningPoint(runningPoint)),
+        .just(.setSessionState(.inProgress))
       ])
 
     case .togglePaused:
@@ -113,12 +110,18 @@ public final class RunningReactor: Reactor {
       guard !currentState.isPaused else { return .empty() }
       return .just(.incrementTime)
 
-    case .updateLocation(let location):
+    case let .updateLocation(location):
       guard !currentState.isPaused else { return .empty() }
+
       let runningPoint = RunningPoint(coordinate: location.coordinate, timestamp: location.timestamp)
+      let distance = location.distance(from: currentState.runningPoints.last?.coordinate.location ?? location)
+
+      let distanceFeedbackMutation = checkDistanceFeedback(distance: distance)
+
       return .concat([
         .just(.addRunningPoint(runningPoint)),
-        .just(.updateTotalDistance(location.distance(from: currentState.runningPoints.last?.coordinate.location ?? location)))
+        .just(.updateTotalDistance(distance)),
+        distanceFeedbackMutation
       ])
 
     case .stopRun:
@@ -126,43 +129,64 @@ public final class RunningReactor: Reactor {
 
       let totalTime = currentState.elapsedTime
       let totalDistance = currentState.totalDistance
-      let averagePace = totalDistance > 0 ? totalTime / (totalDistance / 1000) : 0
 
-      guard let recordId = currentState.recordId,
-            let serverStartTime = currentState.serverStartTime else {
-        print("recordId or serverStartTime is not available, skipping upload.")
+      let displayDataMutation: Observable<Mutation> = .just(.setRunData(totalTime: totalTime, totalDistance: totalDistance))
+
+      guard let startLocation = currentState.runningPoints.first?.coordinate.location,
+            let localStartTime = currentState.localStartTime else {
+        print("Start location or time is missing, cannot upload. Finishing run.")
         return .concat([
-          .just(.setRunData(totalTime: totalTime, totalDistance: totalDistance, averagePace: averagePace)),
+          displayDataMutation,
           .just(.setSessionState(.finished))
         ])
       }
 
-      // TODO: 임시 칼로리 값
-      let totalCalories = 0
-
       return .concat([
-        .just(.setRunData(totalTime: totalTime, totalDistance: totalDistance, averagePace: averagePace)),
+        displayDataMutation,
         .just(.setSessionState(.uploading)),
-        runningCompletionUseCase.execute(
-          recordId: recordId,
-          startAt: serverStartTime,
-          runningPoints: currentState.runningPoints,
-          totalTime: totalTime,
-          totalDistance: totalDistance,
-          averagePace: averagePace,
-          totalCalories: totalCalories
-        )
-        .asObservable()
-          .flatMap { success -> Observable<Mutation> in
+
+        self.runningStartUseCase.execute(startLocation: startLocation, timeStamp: localStartTime)
+          .asObservable()
+          .flatMap { recordId -> Observable<Mutation> in
+            guard let recordId = recordId else {
+              print("Error: Failed to get recordId. Finishing without completion API.")
+              return .concat([
+                .just(.setSessionState(.finished)),
+                .just(.setUploadSuccess(false))
+              ])
+            }
+
+            let totalCalories = 0
+            let averagePace = totalDistance > 0 ? totalTime / (totalDistance / 1000) : 0
+
+            return self.runningCompletionUseCase.execute(
+              recordId: String(recordId),
+              startAt: localStartTime,
+              runningPoints: self.currentState.runningPoints,
+              totalTime: totalTime,
+              totalDistance: totalDistance,
+              averagePace: averagePace,
+              totalCalories: totalCalories
+            )
+            .asObservable()
+            .flatMap { success -> Observable<Mutation> in
+              return .concat([
+                .just(.setUploadSuccess(success)),
+                .just(.setSessionState(.finished))
+              ])
+            }
+          }
+          .catch { error -> Observable<Mutation> in
+            print("Error in API calls: \(error.localizedDescription)")
             return .concat([
-              .just(.setUploadSuccess(success)),
+              .just(.setUploadSuccess(false)),
               .just(.setSessionState(.finished))
             ])
           }
       ])
 
-    case .uploadComplete:
-      return .just(.setSessionState(.finished))
+    case .audioPlayed:
+      return .just(.setAudioToPlay(nil))
     }
   }
 
@@ -173,38 +197,89 @@ public final class RunningReactor: Reactor {
     }
   }
 
+  private func checkDistanceFeedback(distance: Double) -> Observable<Mutation> {
+    let state = currentState
+    guard state.sessionState == .inProgress else { return .empty() }
+
+    var audioObservables: [Observable<Data>] = []
+
+    let lastKm = Int(state.totalDistance / 1000)
+    let currentKm = Int((state.totalDistance + distance) / 1000)
+
+    if currentKm > lastKm {
+      switch currentKm {
+      case 1:
+        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass1Km).asObservable())
+      case 2:
+        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass2Km).asObservable())
+      case 3:
+        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass3Km).asObservable())
+      case 4:
+        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass4Km).asObservable())
+      case 5:
+        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass5Km).asObservable())
+      case 6:
+        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass6Km).asObservable())
+      case 7:
+        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass7Km).asObservable())
+      case 8:
+        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass8Km).asObservable())
+      case 9:
+        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass9Km).asObservable())
+      case 10:
+        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass10Km).asObservable())
+      default:
+        break
+      }
+    }
+
+    if let goalDistance = state.goalDistance {
+      if (state.totalDistance + distance) >= goalDistance - 1000 && state.totalDistance < goalDistance - 1000 {
+        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .left1Km).asObservable())
+      }
+      if (state.totalDistance + distance) >= goalDistance && state.totalDistance < goalDistance {
+        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .finish).asObservable())
+      }
+    }
+
+    guard !audioObservables.isEmpty else { return .empty() }
+
+    return Observable.concat(audioObservables.map { audioObs in
+      audioObs
+        .delay(.milliseconds(500), scheduler: MainScheduler.instance)
+        .flatMap { audioData -> Observable<Mutation> in
+          return .just(.setAudioToPlay(audioData))
+        }
+        .catch { _ in .empty() }
+    })
+  }
+
   public func reduce(state: State, mutation: Mutation) -> State {
     var newState = state
     switch mutation {
     case let .setPaused(paused):
       newState.isPaused = paused
-
     case .incrementTime:
       newState.elapsedTime += 1
-
     case let .addRunningPoint(runningPoint):
       newState.runningPoints.append(runningPoint)
       newState.runningPath.append(runningPoint.coordinate)
-
     case let .updateTotalDistance(distance):
       newState.totalDistance += distance
-
     case let .setSessionState(sessionState):
       newState.sessionState = sessionState
       newState.isPaused = (sessionState == .paused)
-
-    case let .setStartRunInfo(recordId, serverStartTime, localStartTime):
-      newState.recordId = String(recordId)
-      newState.serverStartTime = serverStartTime
+    case let .setStartRunInfo(localStartTime):
       newState.localStartTime = localStartTime
-
-    case let .setRunData(totalTime, totalDistance, averagePace):
+    case let .setRunData(totalTime, totalDistance):
       newState.totalTime = totalTime
       newState.totalDistance = totalDistance
-      newState.averagePace = averagePace
-
     case let .setUploadSuccess(success):
       newState.isUploadSuccess = success
+    case let .setLastDistanceFeedbackKm(km):
+      newState.lastDistanceFeedbackKm = km
+    case let .setAudioToPlay(data):
+      newState.audioToPlay = data
     }
     return newState
   }

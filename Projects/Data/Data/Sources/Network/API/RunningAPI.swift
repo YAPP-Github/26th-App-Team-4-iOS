@@ -33,10 +33,6 @@ public enum RunningAPI: BaseAPI {
     }
   }
 
-  public var headers: [String: String]? {
-    return CommonNetworkHeaders.runningAPI
-  }
-
   public var task: Task {
     switch self {
     case let .startRun(lat, lon, timeStamp):

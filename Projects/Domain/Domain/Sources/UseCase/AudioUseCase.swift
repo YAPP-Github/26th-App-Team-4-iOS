@@ -11,7 +11,7 @@ import RxSwift
 public protocol AudioUseCase {
   func getCoachAudio() -> Single<Data>
   func getRunningInfoAudio(paceMills: String) -> Single<Data>
-  func getDistanceFeedbackAudio(type: String) -> Single<Data>
+  func getDistanceFeedbackAudio(type: DistanceFeedbackType) -> Single<Data>
   func getPaceFeedbackAudio(type: String) -> Single<Data>
   func getTimeFeedbackAudio(type: String) -> Single<Data>
 }
@@ -31,7 +31,7 @@ public final class AudioUseCaseImpl: AudioUseCase {
     return audioRepository.fetchRunningInfo(paceMills: paceMills)
   }
 
-  public func getDistanceFeedbackAudio(type: String) -> Single<Data> {
+  public func getDistanceFeedbackAudio(type: DistanceFeedbackType) -> Single<Data> {
     return audioRepository.fetchDistanceAudio(type: type)
   }
 

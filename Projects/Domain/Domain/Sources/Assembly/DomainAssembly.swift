@@ -60,5 +60,12 @@ public class DomainAssembly: Assembly {
       }
       return RunningCompletionUseCase(runningRepository: repository)
     }
+
+    container.register(AudioUseCase.self) { r in
+      guard let repository = r.resolve(AudioRepository.self) else {
+        fatalError("Failed to resolve AudioRepository for AudioUseCase.")
+      }
+      return AudioUseCaseImpl(audioRepository: repository)
+    }
   }
 }

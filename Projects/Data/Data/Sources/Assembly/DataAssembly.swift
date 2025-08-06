@@ -56,5 +56,10 @@ public class DataAssembly: Assembly {
     container.register(RunningRepository.self) { r in
       return RunningRepositoryImpl()
     }
+
+    // Audio
+    container.register(AudioRepository.self) { r in
+      return AudioRepositoryImpl()
+    }
   }
 }

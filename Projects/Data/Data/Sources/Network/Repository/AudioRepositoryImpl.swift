@@ -25,7 +25,7 @@ public final class AudioRepositoryImpl: AudioRepository {
     return provider.rx.request(.runningInfo(paceMills: paceMills)).map { $0.data }
   }
 
-  public func fetchDistanceAudio(type: String) -> Single<Data> {
+  public func fetchDistanceAudio(type: DistanceFeedbackType) -> Single<Data> {
     return provider.rx.request(.distance(type: type)).map { $0.data }
   }
 
