@@ -62,4 +62,17 @@ public final class GoalRepositoryImpl: GoalRepository {
       .map { $0.code == "SUCCESS" }
       .asSingle()
   }
+
+  public func getRunningGoal() -> Single<RunningGoal> {
+    return provider.request(.goal)
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<GoalDTO>.self)
+      .map { response in
+        guard let dto = response.result else {
+          throw NSError(domain: "GoalRepositoryImpl", code: 0, userInfo: [NSLocalizedDescriptionKey: "No result found"])
+        }
+        return dto.toRunningGoal()
+      }
+      .asSingle()
+  }
 }
