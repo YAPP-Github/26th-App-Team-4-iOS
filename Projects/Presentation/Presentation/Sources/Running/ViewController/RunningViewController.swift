@@ -24,6 +24,7 @@ final class RunningViewController: BaseViewController, View {
   // MARK: - Properties
 
   private let locationManager = CLLocationManager()
+  private var lastKnownLocation: CLLocation?
 
   private var audioPlayer: AVAudioPlayer?
 
@@ -252,30 +253,12 @@ final class RunningViewController: BaseViewController, View {
 
   private func setupLocationManager() {
     locationManager.delegate = self
-    locationManager.desiredAccuracy = kCLLocationAccuracyBest
+    locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+    locationManager.distanceFilter = kCLDistanceFilterNone
+    locationManager.allowsBackgroundLocationUpdates = true
+    locationManager.activityType = .fitness
 
-    // 위치 권한 요청
     locationManager.requestWhenInUseAuthorization()
-  }
-
-  // MARK: - UI Logic
-
-  private func updateUIForState(isPaused: Bool) {
-    if isPaused {
-      topBackgroundView.backgroundColor = FRColor.Bg.secondary
-      distanceLabel.textColor = FRColor.Fg.Text.primary
-
-      mainActionButton.isHidden = true
-      secondaryActionButton.isHidden = false
-      playButton.isHidden = false
-    } else {
-      topBackgroundView.backgroundColor = FRColor.Bg.Interactive.secondaryPressed
-      distanceLabel.textColor = FRColor.Fg.Text.Interactive.inverse
-
-      mainActionButton.isHidden = false
-      secondaryActionButton.isHidden = true
-      playButton.isHidden = true
-    }
   }
 
   private func playAnimationAndShowUI(reactor: RunningReactor) {
@@ -306,12 +289,6 @@ final class RunningViewController: BaseViewController, View {
       .disposed(by: disposeBag)
 
     // MARK: State
-    reactor.state.map(\.isPaused)
-      .distinctUntilChanged()
-      .bind(with: self) { this, isPaused in
-        this.updateUIForState(isPaused: isPaused)
-      }
-      .disposed(by: disposeBag)
 
     reactor.state.map { $0.elapsedTimeString }
       .distinctUntilChanged()
@@ -335,33 +312,51 @@ final class RunningViewController: BaseViewController, View {
         switch sessionState {
         case .idle:
           this.animationView.isHidden = false
+          this.animationView.isUserInteractionEnabled = true
           this.topBackgroundView.isHidden = true
           this.bottomContainerView.isHidden = true
           this.loadingIndicator.stopAnimating()
           this.loadingIndicator.isHidden = true
+          this.locationManager.stopUpdatingLocation()
         case .inProgress:
           this.animationView.isHidden = true
+          this.animationView.isUserInteractionEnabled = false
           this.topBackgroundView.isHidden = false
           this.bottomContainerView.isHidden = false
           this.loadingIndicator.stopAnimating()
           this.loadingIndicator.isHidden = true
-          this.updateUIForState(isPaused: false)
+          this.topBackgroundView.backgroundColor = FRColor.Bg.Interactive.secondaryPressed
+          this.distanceLabel.textColor = FRColor.Fg.Text.Interactive.inverse
+          this.mainActionButton.isHidden = false
+          this.secondaryActionButton.isHidden = true
+          this.playButton.isHidden = true
+          this.locationManager.startUpdatingLocation()
         case .paused:
           this.animationView.isHidden = true
+          this.animationView.isUserInteractionEnabled = false
           this.topBackgroundView.isHidden = false
           this.bottomContainerView.isHidden = false
           this.loadingIndicator.stopAnimating()
           this.loadingIndicator.isHidden = true
-          this.updateUIForState(isPaused: true)
+          this.topBackgroundView.backgroundColor = FRColor.Bg.secondary
+          this.distanceLabel.textColor = FRColor.Fg.Text.primary
+          this.mainActionButton.isHidden = true
+          this.secondaryActionButton.isHidden = false
+          this.playButton.isHidden = false
         case .uploading:
           this.animationView.isHidden = true
+          this.animationView.isUserInteractionEnabled = false
           this.topBackgroundView.isHidden = true
           this.bottomContainerView.isHidden = true
           this.loadingIndicator.isHidden = false
           this.loadingIndicator.startAnimating()
+          this.locationManager.stopUpdatingLocation()
         case .finished, .error:
+          this.animationView.isHidden = true
+          this.animationView.isUserInteractionEnabled = false
           this.loadingIndicator.stopAnimating()
           this.loadingIndicator.isHidden = true
+          this.locationManager.stopUpdatingLocation()
         }
       }
       .disposed(by: disposeBag)
@@ -410,9 +405,8 @@ extension RunningViewController: CLLocationManagerDelegate {
   func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
     switch manager.authorizationStatus {
     case .authorizedAlways, .authorizedWhenInUse:
-      manager.startUpdatingLocation()
+      break
     case .notDetermined, .denied, .restricted:
-      // TODO: - 권한이 없을 경우, 사용자에게 안내하는 로직 필요
       print("Location access denied.")
     @unknown default:
       break
@@ -421,13 +415,20 @@ extension RunningViewController: CLLocationManagerDelegate {
 
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
     guard let location = locations.last else { return }
+
+    self.lastKnownLocation = location
+
     if let reactor = self.reactor {
       if reactor.currentState.sessionState == .idle {
-        reactor.action.onNext(.startRun(startLocation: self.locationManager.location))
+        reactor.action.onNext(.startRun(startLocation: location))
       } else {
         reactor.action.onNext(.updateLocation(location))
       }
     }
+  }
+
+  func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    print("Location manager failed with error: \(error.localizedDescription)")
   }
 }
 

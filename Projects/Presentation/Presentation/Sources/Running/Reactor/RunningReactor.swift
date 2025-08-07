@@ -31,7 +31,6 @@ public final class RunningReactor: Reactor {
   }
 
   public enum Mutation {
-    case setPaused(Bool)
     case incrementTime
     case addRunningPoint(RunningPoint)
     case setSessionState(SessionState)
@@ -41,10 +40,10 @@ public final class RunningReactor: Reactor {
     case updateTotalDistance(Double)
     case setLastDistanceFeedbackKm(Int)
     case setAudioToPlay(Data?)
+    case setLastKnownLocation(CLLocation?)
   }
 
   public struct State {
-    var isPaused: Bool = false
     var elapsedTime: TimeInterval = 0
     var runningPoints: [RunningPoint] = []
     var sessionState: SessionState = .idle
@@ -60,6 +59,7 @@ public final class RunningReactor: Reactor {
     var goalDistance: Double? = nil
     var lastDistanceFeedbackKm: Int = 0
     var audioToPlay: Data? = nil
+    var lastKnownLocation: CLLocation? = nil
 
     var elapsedTimeString: String {
       let hours = Int(elapsedTime) / 3600
@@ -98,40 +98,56 @@ public final class RunningReactor: Reactor {
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case let .startRun(startLocation):
-      guard let location = startLocation else { return .empty() }
       let localStartTime = Date()
-
-      let runningPoint = RunningPoint(coordinate: location.coordinate, timestamp: localStartTime)
       self.startTimer()
 
-      return .concat([
+      var mutations: [Observable<Mutation>] = [
         .just(.setStartRunInfo(localStartTime: localStartTime)),
-        .just(.addRunningPoint(runningPoint)),
         .just(.setSessionState(.inProgress))
-      ])
+      ]
+
+      if let location = startLocation {
+        mutations.append(.just(.setLastKnownLocation(location)))
+        let runningPoint = RunningPoint(coordinate: location.coordinate, timestamp: localStartTime)
+        mutations.append(.just(.addRunningPoint(runningPoint)))
+      }
+
+      return .concat(mutations)
 
     case .togglePaused:
-      let nextState: SessionState = currentState.isPaused ? .inProgress : .paused
+      let nextState: SessionState = currentState.sessionState == .paused ? .inProgress : .paused
+      if nextState == .inProgress {
+        self.startTimer()
+      } else {
+        timer?.invalidate()
+      }
       return .just(.setSessionState(nextState))
 
     case .tick:
-      guard !currentState.isPaused else { return .empty() }
-      return .just(.incrementTime)
+      guard currentState.sessionState != .paused else { return .empty() }
+
+      var mutations: [Observable<Mutation>] = [.just(.incrementTime)]
+
+      if let currentLocation = currentState.lastKnownLocation {
+        let timestamp = Date()
+        let newRunningPoint = RunningPoint(coordinate: currentLocation.coordinate, timestamp: timestamp)
+
+        var distanceTraveled = 0.0
+        if let lastPoint = currentState.runningPoints.last {
+          distanceTraveled = currentLocation.distance(from: lastPoint.coordinate.location)
+        }
+
+        mutations.append(.just(.addRunningPoint(newRunningPoint)))
+        mutations.append(.just(.updateTotalDistance(distanceTraveled)))
+
+        let feedbackMutations = checkDistanceFeedback(distance: distanceTraveled)
+        mutations.append(feedbackMutations)
+      }
+
+      return .concat(mutations)
 
     case let .updateLocation(location):
-      guard !currentState.isPaused else { return .empty() }
-
-      let runningPoint = RunningPoint(coordinate: location.coordinate, timestamp: location.timestamp)
-      let lastLocation = currentState.runningPoints.last?.coordinate.location ?? location
-      let distance = location.distance(from: lastLocation)
-
-      let distanceFeedbackMutation = checkDistanceFeedback(distance: distance)
-
-      return .concat([
-        .just(.addRunningPoint(runningPoint)),
-        .just(.updateTotalDistance(distance)),
-        distanceFeedbackMutation
-      ])
+      return .just(.setLastKnownLocation(location))
 
     case .stopRun:
       timer?.invalidate()
@@ -202,7 +218,8 @@ public final class RunningReactor: Reactor {
   private func startTimer() {
     timer?.invalidate()
     timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-      self?.action.onNext(.tick)
+      guard let self = self, self.currentState.sessionState == .inProgress else { return }
+      self.action.onNext(.tick)
     }
   }
 
@@ -210,64 +227,79 @@ public final class RunningReactor: Reactor {
     let state = currentState
     guard state.sessionState == .inProgress else { return .empty() }
 
-    var audioObservables: [Observable<Data>] = []
+    var mutationsToEmit: [Observable<Mutation>] = []
 
-    let lastKm = Int(state.totalDistance / 1000)
-    let currentKm = Int((state.totalDistance + distance) / 1000)
+    let oldTotalDistance = state.totalDistance
+    let newTotalDistance = state.totalDistance + distance
 
-    if currentKm > lastKm {
-      switch currentKm {
-      case 1:
-        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass1Km).asObservable())
-      case 2:
-        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass2Km).asObservable())
-      case 3:
-        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass3Km).asObservable())
-      case 4:
-        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass4Km).asObservable())
-      case 5:
-        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass5Km).asObservable())
-      case 6:
-        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass6Km).asObservable())
-      case 7:
-        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass7Km).asObservable())
-      case 8:
-        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass8Km).asObservable())
-      case 9:
-        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass9Km).asObservable())
-      case 10:
-        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .pass10Km).asObservable())
-      default:
-        break
+    let currentKmReached = Int(newTotalDistance / 1000)
+
+    if currentKmReached > state.lastDistanceFeedbackKm {
+      let kmToFeedback = currentKmReached
+
+      var audioType: DistanceFeedbackType? = nil
+      switch kmToFeedback {
+      case 1: audioType = .pass1Km
+      case 2: audioType = .pass2Km
+      case 3: audioType = .pass3Km
+      case 4: audioType = .pass4Km
+      case 5: audioType = .pass5Km
+      case 6: audioType = .pass6Km
+      case 7: audioType = .pass7Km
+      case 8: audioType = .pass8Km
+      case 9: audioType = .pass9Km
+      case 10: audioType = .pass10Km
+      default: break
       }
+
+      if let type = audioType {
+        let audioObs = audioUseCase.getDistanceFeedbackAudio(type: type)
+          .asObservable()
+          .delay(.milliseconds(500), scheduler: MainScheduler.instance)
+          .compactMap { data -> Mutation? in
+            return .setAudioToPlay(data)
+          }
+          .catch { error -> Observable<Mutation> in
+            print("Error getting audio data: \(error.localizedDescription)")
+            return .empty()
+          }
+        mutationsToEmit.append(audioObs)
+      }
+
+      mutationsToEmit.append(.just(.setLastDistanceFeedbackKm(kmToFeedback)))
     }
 
     if let goalDistance = state.goalDistance {
-      if (state.totalDistance + distance) >= goalDistance - 1000 && state.totalDistance < goalDistance - 1000 {
-        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .left1Km).asObservable())
+      if newTotalDistance >= goalDistance - 1000 && oldTotalDistance < goalDistance - 1000 {
+        let audioObs = audioUseCase.getDistanceFeedbackAudio(type: .left1Km)
+          .asObservable()
+          .delay(.milliseconds(500), scheduler: MainScheduler.instance)
+          .compactMap { data -> Mutation? in
+            return .setAudioToPlay(data)
+          }
+          .catch { _ in .empty() }
+        mutationsToEmit.append(audioObs)
       }
-      if (state.totalDistance + distance) >= goalDistance && state.totalDistance < goalDistance {
-        audioObservables.append(audioUseCase.getDistanceFeedbackAudio(type: .finish).asObservable())
+      if newTotalDistance >= goalDistance && oldTotalDistance < goalDistance {
+        let audioObs = audioUseCase.getDistanceFeedbackAudio(type: .finish)
+          .asObservable()
+          .delay(.milliseconds(500), scheduler: MainScheduler.instance)
+          .compactMap { data -> Mutation? in
+            return .setAudioToPlay(data)
+          }
+          .catch { _ in .empty() }
+        mutationsToEmit.append(audioObs)
       }
     }
 
-    guard !audioObservables.isEmpty else { return .empty() }
+    guard !mutationsToEmit.isEmpty else { return .empty() }
 
-    return Observable.concat(audioObservables.map { audioObs in
-      audioObs
-        .delay(.milliseconds(500), scheduler: MainScheduler.instance)
-        .flatMap { audioData -> Observable<Mutation> in
-          return .just(.setAudioToPlay(audioData))
-        }
-        .catch { _ in .empty() }
-    })
+    return Observable.concat(mutationsToEmit)
   }
 
   public func reduce(state: State, mutation: Mutation) -> State {
     var newState = state
     switch mutation {
-    case let .setPaused(paused):
-      newState.isPaused = paused
     case .incrementTime:
       newState.elapsedTime += 1
     case let .addRunningPoint(runningPoint):
@@ -277,7 +309,6 @@ public final class RunningReactor: Reactor {
       newState.totalDistance += distance
     case let .setSessionState(sessionState):
       newState.sessionState = sessionState
-      newState.isPaused = (sessionState == .paused)
     case let .setStartRunInfo(localStartTime):
       newState.localStartTime = localStartTime
     case let .setRunData(totalTime, totalDistance):
@@ -289,6 +320,8 @@ public final class RunningReactor: Reactor {
       newState.lastDistanceFeedbackKm = km
     case let .setAudioToPlay(data):
       newState.audioToPlay = data
+    case let .setLastKnownLocation(location):
+      newState.lastKnownLocation = location
     }
     return newState
   }
