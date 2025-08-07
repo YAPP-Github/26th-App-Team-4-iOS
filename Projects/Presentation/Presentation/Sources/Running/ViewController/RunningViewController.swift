@@ -421,16 +421,10 @@ extension RunningViewController: CLLocationManagerDelegate {
 
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
     guard let location = locations.last else { return }
-
-//    if let reactor = self.reactor {
-//      if reactor.currentState.sessionState == .idle {
-//        reactor.action.onNext(.startRun(startLocation: location))
-//      } else {
-//        reactor.action.onNext(.updateLocation(location))
-//      }
-//    }
     if let reactor = self.reactor {
-      if reactor.currentState.sessionState == .inProgress || reactor.currentState.sessionState == .paused {
+      if reactor.currentState.sessionState == .idle {
+        reactor.action.onNext(.startRun(startLocation: self.locationManager.location))
+      } else {
         reactor.action.onNext(.updateLocation(location))
       }
     }

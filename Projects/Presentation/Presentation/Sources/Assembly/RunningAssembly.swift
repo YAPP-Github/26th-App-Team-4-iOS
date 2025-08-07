@@ -42,10 +42,10 @@ public final class RunningAssembly: Assembly {
 
     container.register(FirstRunningGoalSettingViewController.self) { (r, type: GoalInputType) in
       guard let reactor = r.resolve(FirstRunningGoalSettingReactor.self) else {
-        fatalError("Failed to resolve HomeReactor.")
+        fatalError("Failed to resolve FirstRunningGoalSettingReactor.")
       }
       let viewController = FirstRunningGoalSettingViewController(inputType: type)
-//      viewController.reactor = reactor
+      viewController.reactor = reactor
       return viewController
     }
 
