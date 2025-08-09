@@ -138,6 +138,7 @@ final class RunningViewController: BaseViewController, View {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    setupAudioSession()
     setupUI()
     setupLocationManager()
   }
@@ -148,6 +149,17 @@ final class RunningViewController: BaseViewController, View {
 
     if let reactor = self.reactor {
       playAnimationAndShowUI(reactor: reactor)
+    }
+  }
+
+  // MARK: - Audio Session Setup
+  private func setupAudioSession() {
+    do {
+      try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.duckOthers])
+      try AVAudioSession.sharedInstance().setActive(true)
+      print("🔊 [ViewController] 오디오 세션 설정 완료.")
+    } catch {
+      print("❌ [ViewController] 오디오 세션 설정 오류.")
     }
   }
 
@@ -261,7 +273,9 @@ final class RunningViewController: BaseViewController, View {
     locationManager.requestWhenInUseAuthorization()
   }
 
-  private func playAnimationAndShowUI(reactor: RunningReactor) {
+  // MARK: - UI Logic
+
+  private func playAnimationAndShowUI(reactor: Reactor) {
     animationView.play { [weak self] _ in
       guard let self = self else { return }
       self.locationManager.startUpdatingLocation()
@@ -271,8 +285,7 @@ final class RunningViewController: BaseViewController, View {
 
   // MARK: - Binding
 
-  func bind(reactor: RunningReactor) {
-    // MARK: Action
+  func bind(reactor: Reactor) {
     mainActionButton.rx.tap
       .map { Reactor.Action.togglePaused }
       .bind(to: reactor.action)
@@ -287,8 +300,6 @@ final class RunningViewController: BaseViewController, View {
       .map { Reactor.Action.stopRun }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
-
-    // MARK: State
 
     reactor.state.map { $0.elapsedTimeString }
       .distinctUntilChanged()
@@ -377,25 +388,51 @@ final class RunningViewController: BaseViewController, View {
       }
       .disposed(by: disposeBag)
 
-    reactor.state
-      .map { $0.audioToPlay }
-      .distinctUntilChanged()
-      .compactMap { $0 }
-      .subscribe(onNext: { [weak self] audioData in
-        self?.playAudio(with: audioData)
-      })
-      .disposed(by: disposeBag)
+    // audioToPlay 상태가 변경될 때마다 오디오를 재생합니다.
+    //    reactor.state
+    //      .map { $0.audioToPlay }
+    //      .distinctUntilChanged { oldTuple, newTuple in
+    //          // UUID를 비교하여 실제 변경이 있는지 확인합니다.
+    //          let isEqual = oldTuple?.0 == newTuple?.0
+    //        print("🔍 [ViewController] distinctUntilChanged 비교: 이전 UUID: \(oldTuple?.0.uuidString ?? "nil"), 새 UUID: \(newTuple?.0.uuidString ?? "nil"), 동일 여부: \(isEqual)")
+    //          return isEqual
+    //      }
+    //      .compactMap { $0?.1 } // 튜플에서 Data만 추출합니다.
+    //      .subscribe(onNext: { [weak self] audioData in
+    //        self?.playAudio(with: audioData)
+    //      })
+    //      .disposed(by: disposeBag)
   }
 
   private func playAudio(with data: Data) {
-    do {
-      audioPlayer = try AVAudioPlayer(data: data)
-      audioPlayer?.delegate = self
-      audioPlayer?.play()
-    } catch {
-      print("Error playing audio: \(error.localizedDescription)")
-      self.reactor?.action.onNext(.audioPlayed)
-    }
+    //    print("🔊 [ViewController] 오디오 재생 요청됨. 데이터 크기: \(data.count) 바이트")
+    //    do {
+    //      // 기존 플레이어가 있다면 중지하고 nil로 설정하여 새로운 플레이어 생성
+    //      if audioPlayer != nil {
+    //          audioPlayer?.stop()
+    //          audioPlayer = nil
+    //      }
+    //
+    //      audioPlayer = try AVAudioPlayer(data: data)
+    //      // CRITICAL: Ensure audioPlayer is not nil after initialization
+    //      guard let player = audioPlayer else {
+    //          print("❌ [ViewController] AVAudioPlayer 생성 실패 (nil).")
+    //          self.reactor?.action.onNext(.audioPlayed) // Signal completion to move queue
+    //          return
+    //      }
+    //
+    //      player.delegate = self
+    //      player.volume = 1.0 // Ensure volume is not zero
+    //      player.prepareToPlay()
+    //      let success = player.play()
+    //      print("▶️ [ViewController] 오디오 재생 시작: \(success ? "성공" : "실패"). 현재 재생 중: \(player.isPlaying). 오디오 길이: \(player.duration)초")
+    //      if !success {
+    //          self.reactor?.action.onNext(.audioPlayed)
+    //      }
+    //    } catch {
+    //      print("❌ [ViewController] 오디오 생성 또는 재생 오류: \(error.localizedDescription)") // Re-add error description
+    //      self.reactor?.action.onNext(.audioPlayed)
+    //    }
   }
 }
 
@@ -415,7 +452,6 @@ extension RunningViewController: CLLocationManagerDelegate {
 
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
     guard let location = locations.last else { return }
-
     self.lastKnownLocation = location
 
     if let reactor = self.reactor {
@@ -428,14 +464,24 @@ extension RunningViewController: CLLocationManagerDelegate {
   }
 
   func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-    print("Location manager failed with error: \(error.localizedDescription)")
+    print("위치 관리자 오류 발생: \(error.localizedDescription)")
   }
 }
 
 // MARK: - AVAudioPlayerDelegate
 
-extension RunningViewController: AVAudioPlayerDelegate {
-  func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-    self.reactor?.action.onNext(.audioPlayed)
-  }
-}
+//extension RunningViewController: AVAudioPlayerDelegate {
+//  func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+//    print("✅ [ViewController] 오디오 재생 완료.")
+//    // 재생 완료 후 플레이어 인스턴스를 해제하여 리소스 확보
+//    self.audioPlayer = nil
+//    self.reactor?.action.onNext(.audioPlayed)
+//  }
+//
+//  func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+//      print("❌ [ViewController] 오디오 디코딩 오류 발생.")
+//      // 디코딩 오류 시에도 재생 완료 처리하여 큐 진행
+//      self.audioPlayer = nil // 오류 발생 시에도 플레이어 인스턴스 해제
+//      self.reactor?.action.onNext(.audioPlayed)
+//  }
+//}

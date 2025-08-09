@@ -29,6 +29,7 @@ public final class GoalUseCaseImpl: GoalUseCase {
   
   public func savePace(second: Int) -> RxSwift.Single<Bool> {
     let paceGoalMS = second * 1000
+    print(">>>>paceGoalMS", paceGoalMS)
     return goalRepository.savePaceGoal(paceGoalMS: paceGoalMS)
   }
   
@@ -41,6 +42,6 @@ public final class GoalUseCaseImpl: GoalUseCase {
   }
 
   public func saveGoalDistance(distance: Int) -> RxSwift.Single<Bool> {
-    return goalRepository.saveGoalDistance(distance: distance)
+    return goalRepository.saveGoalDistance(distance: distance * 1000)
   }
 }

@@ -56,7 +56,7 @@ public final class GoalRepositoryImpl: GoalRepository {
   }
 
   public func saveGoalDistance(distance: Int) -> Single<Bool> {
-    return provider.request(.saveGoalDistance(distance: distance))
+    return provider.request(.editGoalDistance(distance: distance))
       .filter(statusCodes: 200..<300)
       .map(APIResponse<GoalDTO>.self)
       .map { $0.code == "SUCCESS" }
@@ -71,6 +71,7 @@ public final class GoalRepositoryImpl: GoalRepository {
         guard let dto = response.result else {
           throw NSError(domain: "GoalRepositoryImpl", code: 0, userInfo: [NSLocalizedDescriptionKey: "No result found"])
         }
+        print(">>>>dto", dto)
         return dto.toRunningGoal()
       }
       .asSingle()

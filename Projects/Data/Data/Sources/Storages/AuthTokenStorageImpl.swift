@@ -28,18 +28,22 @@ public class AuthTokenStorageImpl: AuthTokenStorage {
   }
 
   public func saveAccessToken(_ token: String) {
+    print(">saveAccessToken", token)
     UserDefaults.standard.set(token, forKey: "accessToken")
   }
 
   public func getAccessToken() -> String? {
+    print(">getAccessToken", UserDefaults.standard.string(forKey: "accessToken"))
     return UserDefaults.standard.string(forKey: "accessToken")
   }
 
   public func saveRefreshToken(_ token: String) {
+    print(">saveRefreshToken", token)
     UserDefaults.standard.set(token, forKey: "refreshToken")
   }
 
   public func getRefreshToken() -> String? {
+    print(">getRefreshToken", UserDefaults.standard.string(forKey: "refreshToken"))
     return UserDefaults.standard.string(forKey: "refreshToken")
   }
 

@@ -49,8 +49,14 @@ public final class RunningAssembly: Assembly {
       return viewController
     }
 
+    container.autoregister(RunningPaceSettingReactor.self, initializer: RunningPaceSettingReactor.init)
+
     container.register(RunningPaceSettingViewController.self) { r in
+      guard let reactor = r.resolve(RunningPaceSettingReactor.self) else {
+        fatalError("Failed to resolve RunningPaceSettingReactor.")
+      }
       let viewController = RunningPaceSettingViewController()
+      viewController.reactor = reactor
       return viewController
     }
 
