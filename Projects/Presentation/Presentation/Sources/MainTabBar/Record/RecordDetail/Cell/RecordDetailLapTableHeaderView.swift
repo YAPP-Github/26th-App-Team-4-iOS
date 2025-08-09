@@ -69,5 +69,9 @@ public class RecordDetailLapTableHeaderView: BaseView {
     kmPaceStackView.snp.makeConstraints {
       $0.height.equalTo(20)
     }
+    
+    kmLabel.snp.makeConstraints {
+      $0.width.equalTo(55)
+    }
   }
 }
