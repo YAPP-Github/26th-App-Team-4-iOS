@@ -11,6 +11,7 @@ import Core
 import ReactorKit
 import NMapsMap
 import Domain
+import Kingfisher
 
 public class RecordListTableCell: BaseTableViewCell {
   
@@ -73,7 +74,9 @@ public class RecordListTableCell: BaseTableViewCell {
   
   private let CourseImageView = UIImageView().then {
     $0.backgroundColor = UIColor(hex: "#D9D9D9")
-    $0.contentMode = .scaleAspectFit
+    $0.contentMode = .scaleAspectFill
+    $0.layer.cornerRadius = 8
+    $0.clipsToBounds = true
   }
   
   private lazy var paceTimeStack = UIStackView(
@@ -121,6 +124,25 @@ public class RecordListTableCell: BaseTableViewCell {
     $0.text = "hh:mm:ss"
     $0.font = .systemFont(ofSize: 20, weight: .bold)
     $0.textColor = FRColor.Fg.Text.tertiary
+  }
+  
+  func setData(
+    title: String,
+    distance: Double,
+    pace: TimeInterval,
+    time: TimeInterval,
+    imageURL: String?
+  ) {
+    titleLabel.text = title
+    distanceLabel.text = String(format: "%.1f", distance)
+    paceValueLabel.text = pace.minuteSecondFormatted
+    timeValueLabel.text = time.hourMinuteSecondFormatted
+    
+    if let url = URL(string: imageURL ?? "") {
+      CourseImageView.kf.setImage(with: url)
+    } else {
+      CourseImageView.image = nil
+    }
   }
   
   public override func initUI() {
