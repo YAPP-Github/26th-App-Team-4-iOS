@@ -11,7 +11,7 @@ import RxSwift
 import Domain
 
 public final class GoalRepositoryImpl: GoalRepository {
-  
+
   private let provider: NetworkProvider<GoalAPI>
   
   public init(provider: NetworkProvider<GoalAPI> = .init()) {
@@ -44,6 +44,36 @@ public final class GoalRepositoryImpl: GoalRepository {
       .filter(statusCodes: 200..<300)
       .map(APIResponse<GoalDTO>.self)
       .map { $0.code == "SUCCESS" }
+      .asSingle()
+  }
+
+  public func saveGoalTime(time: Int) -> Single<Bool> {
+    return provider.request(.saveGoalTime(time: time))
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<GoalDTO>.self)
+      .map { $0.code == "SUCCESS" }
+      .asSingle()
+  }
+
+  public func saveGoalDistance(distance: Int) -> Single<Bool> {
+    return provider.request(.editGoalDistance(distance: distance))
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<GoalDTO>.self)
+      .map { $0.code == "SUCCESS" }
+      .asSingle()
+  }
+
+  public func getRunningGoal() -> Single<RunningGoal> {
+    return provider.request(.goal)
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<GoalDTO>.self)
+      .map { response in
+        guard let dto = response.result else {
+          throw NSError(domain: "GoalRepositoryImpl", code: 0, userInfo: [NSLocalizedDescriptionKey: "No result found"])
+        }
+        print(">>>>dto", dto)
+        return dto.toRunningGoal()
+      }
       .asSingle()
   }
 }

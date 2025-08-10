@@ -32,4 +32,12 @@ extension GoalDTO {
       paceGoal: paceGoal.map { Int(TimeInterval($0) / 1000) }
     )
   }
+
+  public func toRunningGoal() -> RunningGoal {
+    return RunningGoal(
+      paceGoal: paceGoal,
+      distanceMeterGoal: distanceMeterGoal,
+      timeGoal: timeGoal
+    )
+  }
 }

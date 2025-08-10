@@ -12,49 +12,55 @@ import Then
 import RxSwift
 import RxCocoa
 import Lottie
+import ReactorKit
 
-final class RunningPaceSettingViewController: BaseViewController {
-
+final class RunningPaceSettingViewController: BaseViewController, View {
+  typealias Reactor = RunningPaceSettingReactor
+  
   // MARK: - Properties
-
+  
   weak var coordinator: RunningCoordinator?
-
+  
+  private var toastTimer: Timer?
+  
+  private var previousPaceIndex: Int?
+  
   // TODO: - 서버로 부터 값 받도록 수정
-  private let challengerPace: Float = 10 * 60
+  private let challengerPace: Float = 5 * 60
   private let routinePace: Float = 7 * 60
-  private let warmUpPace: Float = 5 * 60
-
-  private lazy var paceValues: [Float] = [challengerPace, routinePace, warmUpPace]
-
+  private let warmUpPace: Float = 9 * 60
+  
+  private lazy var paceValues: [Float] = [warmUpPace, routinePace, challengerPace]
+  
   // MARK: - UI Elements
-
+  
   private let backButton = UIButton().then {
     $0.setImage(UIImage(systemName: "chevron.left"), for: .normal)
     $0.tintColor = .black
   }
-
-  private let infoBannerView = UIView().then {
-    $0.backgroundColor = FRColor.Fg.Nuetral.gray1000
+  
+  private let toastView = UIView().then {
+    $0.backgroundColor = .black.withAlphaComponent(0.7)
     $0.layer.cornerRadius = 8
+    $0.alpha = 0.0
   }
-
-  private let infoBannerLabel = UILabel().then {
-    $0.text = "슬라이더로 조절하거나 직접 입력할 수 있어요!"
+  
+  private let toastIconImageView = UIImageView().then {
+    $0.image = UIImage(systemName: "exclamationmark.circle.fill")
+    $0.tintColor = FRColor.Fg.Icon.Interactive.primary
+  }
+  
+  private let toastLabel = UILabel().then {
     $0.font = UIFont.systemFont(ofSize: 14)
     $0.textColor = .white
   }
-
-  private let infoBannerCloseButton = UIButton().then {
-    $0.setImage(UIImage(systemName: "xmark"), for: .normal)
-    $0.tintColor = .black
-  }
-
+  
   private let myPaceLabel = UILabel().then {
     $0.text = "나의 페이스는"
     $0.font = UIFont.systemFont(ofSize: 16)
     $0.textColor = FRColor.Fg.Text.secondary
   }
-
+  
   private lazy var paceInputTextField = UITextField().then {
     $0.text = "7'00''"
     $0.textAlignment = .center
@@ -65,58 +71,79 @@ final class RunningPaceSettingViewController: BaseViewController {
     $0.tintColor = .clear
     $0.delegate = self
   }
-
+  
+  private let underlineView = UIView().then {
+    $0.backgroundColor = FRColor.Bg.Interactive.primary
+    $0.isHidden = true
+  }
+  
   private let fixedPaceSlider = UISlider().then {
     $0.minimumValue = 0
     $0.maximumValue = 2
     $0.value = 1
-    $0.isContinuous = true
+    $0.isContinuous = false
     $0.minimumTrackTintColor = FRColor.Fg.Nuetral.gray1000
     $0.maximumTrackTintColor = FRColor.Fg.Nuetral.gray300
     $0.thumbTintColor = FRColor.Fg.Nuetral.gray1000
   }
-
+  
   private let warmUpLabel = UILabel().then {
     $0.text = "워밍업"
     $0.font = UIFont.systemFont(ofSize: 14)
     $0.textColor = FRColor.Fg.Text.tertiary
   }
-
+  
   private let routineLabel = UILabel().then {
     $0.text = "루틴"
     $0.font = UIFont.systemFont(ofSize: 14)
     $0.textColor = FRColor.Fg.Text.primary
   }
-
+  
   private let challengerLabel = UILabel().then {
     $0.text = "챌린저"
     $0.font = UIFont.systemFont(ofSize: 14)
     $0.textColor = FRColor.Fg.Text.tertiary
   }
-
+  
+  private let infoBannerView = UIView().then {
+    $0.backgroundColor = FRColor.Fg.Nuetral.gray1000
+    $0.layer.cornerRadius = 8
+  }
+  
+  private let infoBannerLabel = UILabel().then {
+    $0.text = "슬라이더로 조절하거나 직접 입력할 수 있어요!"
+    $0.font = UIFont.systemFont(ofSize: 14)
+    $0.textColor = .white
+  }
+  
+  private let infoBannerCloseButton = UIButton().then {
+    $0.setImage(UIImage(systemName: "xmark"), for: .normal)
+    $0.tintColor = .white
+  }
+  
   private let infoBoxView = UIView().then {
     $0.backgroundColor = FRColor.Fg.Nuetral.gray200
     $0.layer.cornerRadius = 10
   }
-
+  
   private let infoIcon = UIImageView().then {
     $0.image = UIImage(systemName: "questionmark.circle.fill")
     $0.tintColor = FRColor.Fg.Nuetral.gray800
   }
-
+  
   private let infoTitleLabel = UILabel().then {
     $0.text = "페이스"
     $0.font = UIFont.systemFont(ofSize: 16, weight: .bold)
     $0.textColor = FRColor.Fg.Text.secondary
   }
-
+  
   private let infoDescriptionLabel = UILabel().then {
     $0.text = "러닝에서 '페이스'는 1km당 걸리는 시간으로,\n나의 러닝 속도를 나타내는 기준이에요.\n처음 달린 기록을 토대로 추천 페이스를 알려주고 있어요."
     $0.font = UIFont.systemFont(ofSize: 14)
     $0.textColor = FRColor.Fg.Text.tertiary
     $0.numberOfLines = 0
   }
-
+  
   private let confirmButton = UIButton().then {
     $0.setTitle("설정하기", for: .normal)
     $0.backgroundColor = FRColor.Bg.Interactive.primary
@@ -124,7 +151,7 @@ final class RunningPaceSettingViewController: BaseViewController {
     $0.layer.cornerRadius = 10
     $0.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
   }
-
+  
   private let animationView = LottieAnimationView().then {
     $0.contentMode = .scaleAspectFit
     $0.loopMode = .playOnce
@@ -132,218 +159,337 @@ final class RunningPaceSettingViewController: BaseViewController {
     $0.animation = LottieAnimation.named("toast_completed", bundle: .module)
     $0.isHidden = true
   }
-
+  
   private var confirmButtonBottomConstraint: Constraint?
-
+  
   // MARK: - Lifecycle
-
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     setupUI()
     setupLayout()
-    bind()
     setupKeyboardNotifications()
     setupTapGestureForDismissKeyboard()
-
-    setSliderAndUI(toIndex: 1)
+    
+    if let initialIndex = reactor?.initialState.currentPaceIndex {
+      previousPaceIndex = initialIndex
+      setSliderAndUI(toIndex: initialIndex)
+    }
   }
-
+  
   deinit {
     NotificationCenter.default.removeObserver(self)
   }
-
+  
   // MARK: - UI Setup
-
+  
   private func setupUI() {
     view.addSubview(backButton)
-    view.addSubview(infoBannerView)
-    infoBannerView.addSubview(infoBannerLabel)
-    infoBannerView.addSubview(infoBannerCloseButton)
     view.addSubview(myPaceLabel)
     view.addSubview(paceInputTextField)
+    view.addSubview(underlineView)
     view.addSubview(fixedPaceSlider)
     view.addSubview(warmUpLabel)
     view.addSubview(routineLabel)
     view.addSubview(challengerLabel)
+    view.addSubview(infoBannerView)
+    infoBannerView.addSubview(infoBannerLabel)
+    infoBannerView.addSubview(infoBannerCloseButton)
     view.addSubview(infoBoxView)
     infoBoxView.addSubview(infoIcon)
     infoBoxView.addSubview(infoTitleLabel)
     infoBoxView.addSubview(infoDescriptionLabel)
+    view.addSubview(toastView)
+    toastView.addSubview(toastIconImageView)
+    toastView.addSubview(toastLabel)
     view.addSubview(confirmButton)
     view.addSubview(animationView)
   }
-
+  
   // MARK: - Layout
-
+  
   private func setupLayout() {
     backButton.snp.makeConstraints { make in
       make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(6)
       make.leading.equalToSuperview().offset(6)
       make.width.height.equalTo(44)
     }
-
-    infoBannerView.snp.makeConstraints {
-      $0.top.equalTo(backButton.snp.bottom).offset(20)
+    
+    toastView.snp.makeConstraints {
+      $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(72)
       $0.leading.trailing.equalToSuperview().inset(20)
-      $0.height.equalTo(44)
+      $0.height.equalTo(48)
     }
-
-    infoBannerLabel.snp.makeConstraints {
+    
+    toastIconImageView.snp.makeConstraints {
       $0.leading.equalToSuperview().offset(16)
-      $0.centerY.equalToSuperview()
-    }
-
-    infoBannerCloseButton.snp.makeConstraints {
-      $0.trailing.equalToSuperview().offset(-16)
       $0.centerY.equalToSuperview()
       $0.width.height.equalTo(24)
     }
-
+    
+    toastLabel.snp.makeConstraints {
+      $0.leading.equalTo(toastIconImageView.snp.trailing).offset(8)
+      $0.centerY.equalToSuperview()
+      $0.trailing.lessThanOrEqualToSuperview().offset(-16)
+    }
+    
     myPaceLabel.snp.makeConstraints {
-      $0.top.equalTo(infoBannerView.snp.bottom).offset(40)
+      $0.top.equalTo(infoBannerView.snp.bottom).offset(18)
       $0.centerX.equalToSuperview()
     }
-
+    
     paceInputTextField.snp.makeConstraints {
-      $0.top.equalTo(myPaceLabel.snp.bottom).offset(10)
+      $0.top.equalTo(myPaceLabel.snp.bottom).offset(4)
       $0.centerX.equalToSuperview()
       $0.width.equalTo(250)
       $0.height.equalTo(80)
     }
-
+    
+    underlineView.snp.makeConstraints {
+      $0.centerX.equalTo(paceInputTextField)
+      $0.top.equalTo(paceInputTextField.snp.bottom)
+      $0.width.equalTo(200)
+      $0.height.equalTo(2)
+    }
+    
     fixedPaceSlider.snp.makeConstraints {
-      $0.top.equalTo(paceInputTextField.snp.bottom).offset(20)
+      $0.top.equalTo(paceInputTextField.snp.bottom).offset(40)
       $0.leading.trailing.equalToSuperview().inset(30)
     }
-
-    challengerLabel.snp.makeConstraints {
+    
+    warmUpLabel.snp.makeConstraints {
       $0.top.equalTo(fixedPaceSlider.snp.bottom).offset(8)
       $0.centerX.equalTo(fixedPaceSlider.snp.leading)
     }
-
+    
     routineLabel.snp.makeConstraints {
       $0.top.equalTo(fixedPaceSlider.snp.bottom).offset(8)
       $0.centerX.equalTo(fixedPaceSlider.snp.centerX)
     }
-
-    warmUpLabel.snp.makeConstraints {
+    
+    challengerLabel.snp.makeConstraints {
       $0.top.equalTo(fixedPaceSlider.snp.bottom).offset(8)
       $0.centerX.equalTo(fixedPaceSlider.snp.trailing)
     }
-
+    
+    infoBannerView.snp.makeConstraints {
+      $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(112)
+      $0.leading.trailing.equalToSuperview().inset(42.5)
+      $0.height.equalTo(34)
+    }
+    
+    infoBannerLabel.snp.makeConstraints {
+      $0.leading.equalToSuperview().offset(12)
+      $0.centerY.equalToSuperview()
+    }
+    
+    infoBannerCloseButton.snp.makeConstraints {
+      $0.trailing.equalToSuperview().offset(-8)
+      $0.centerY.equalToSuperview()
+      $0.width.height.equalTo(18)
+    }
+    
     infoBoxView.snp.makeConstraints {
       $0.leading.trailing.equalToSuperview().inset(20)
       $0.height.greaterThanOrEqualTo(120)
       $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-104)
     }
-
+    
     infoIcon.snp.makeConstraints {
       $0.top.leading.equalToSuperview().offset(16)
       $0.width.height.equalTo(20)
     }
-
+    
     infoTitleLabel.snp.makeConstraints {
       $0.top.equalTo(infoIcon.snp.top)
       $0.leading.equalTo(infoIcon.snp.trailing).offset(8)
     }
-
+    
     infoDescriptionLabel.snp.makeConstraints {
       $0.top.equalTo(infoTitleLabel.snp.bottom).offset(8)
       $0.leading.trailing.bottom.equalToSuperview().inset(16)
     }
-
+    
     confirmButton.snp.makeConstraints {
       $0.leading.trailing.equalToSuperview().inset(20)
       self.confirmButtonBottomConstraint = $0.bottom.equalTo(view.snp.bottom).offset(-46).constraint
       $0.height.equalTo(50)
     }
-
+    
     animationView.snp.makeConstraints {
       $0.center.equalToSuperview()
       $0.width.equalTo(174)
       $0.height.equalTo(208)
     }
   }
-
+  
   // MARK: - Reactive Binding
-
-  private func bind() {
+  
+  func bind(reactor: RunningPaceSettingReactor) {
     backButton.rx.tap
-      .subscribe(onNext: { [weak self] in
-        self?.coordinator?.pop()
-      })
+      .map { Reactor.Action.backButtonTapped }
+      .bind(to: reactor.action)
       .disposed(by: disposeBag)
-
+    
     infoBannerCloseButton.rx.tap
-      .asDriver()
-      .drive(onNext: { [weak self] in
-        self?.infoBannerView.isHidden = true
-      })
+      .map { Reactor.Action.closeInfoBanner }
+      .bind(to: reactor.action)
       .disposed(by: disposeBag)
-
+    
     fixedPaceSlider.rx.value
       .skip(1)
       .distinctUntilChanged()
-      .subscribe(onNext: { [weak self] rawValue in
-        guard let self = self else { return }
-
-        let snappedIndex = Int(rawValue.rounded())
-
-        if abs(self.fixedPaceSlider.value - Float(snappedIndex)) > 0.01 {
-          UIView.animate(withDuration: 0.1) {
-            self.fixedPaceSlider.value = Float(snappedIndex)
-          }
+      .debounce(.milliseconds(100), scheduler: MainScheduler.instance)
+      .map { value in
+        let roundedValue = round(value)
+        UIView.animate(withDuration: 0.1) {
+          self.fixedPaceSlider.setValue(roundedValue, animated: true)
         }
-
-        self.setSliderAndUI(toIndex: snappedIndex)
-      })
+        return Int(roundedValue)
+      }
+      .distinctUntilChanged()
+      .map { Reactor.Action.sliderValueDidChange($0) }
+      .bind(to: reactor.action)
       .disposed(by: disposeBag)
-
+    
     paceInputTextField.rx.controlEvent(.editingDidEnd)
-      .asDriver()
-      .drive(onNext: { [weak self] in
-        guard let self = self, let text = self.paceInputTextField.text else { return }
-        if let totalSeconds = self.parsePace(text: text) {
-          self.setSliderAndUI(toPace: totalSeconds)
-        } else {
-          self.showInvalidInputAlert()
-          let currentIndex = Int(self.fixedPaceSlider.value.rounded())
-          self.setSliderAndUI(toIndex: currentIndex)
-        }
-      })
+      .compactMap { [weak self] _ in
+        self?.paceInputTextField.text
+      }
+      .map { Reactor.Action.paceInputDidChange($0) }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+    
+    confirmButton.rx.tap
+      .map { Reactor.Action.confirmButtonTapped }
+      .bind(to: reactor.action)
       .disposed(by: disposeBag)
 
-    confirmButton.rx.tap
-      .subscribe(with: self) { object, _ in
-        object.paceInputTextField.resignFirstResponder()
-
-        object.view.isUserInteractionEnabled = false
-
-        // TODO: - API 연결
-        let finalIndex = Int(object.fixedPaceSlider.value.rounded())
-        let finalPace = object.paceValues[finalIndex]
-
-
-        object.animationView.isHidden = false
-        object.animationView.play { finished in
+    reactor.state
+      .map { $0.currentPace }
+      .distinctUntilChanged()
+      .bind { [weak self] pace in
+        self?.paceInputTextField.text = self?.formatPace(seconds: pace)
+        self?.updatePaceLabelsTextColor(for: pace)
+      }
+      .disposed(by: disposeBag)
+    
+    reactor.state
+      .map { $0.currentPaceIndex }
+      .distinctUntilChanged()
+      .bind { [weak self] index in
+        self?.showToastForIndex(index)
+      }
+      .disposed(by: disposeBag)
+    
+    reactor.state
+      .map { $0.isInfoBannerVisible }
+      .distinctUntilChanged()
+      .bind(to: infoBannerView.rx.isHidden)
+      .disposed(by: disposeBag)
+    
+    reactor.state
+      .map { $0.isLoading }
+      .distinctUntilChanged()
+      .map { !$0 }
+      .bind(to: view.rx.isUserInteractionEnabled)
+      .disposed(by: disposeBag)
+    
+    reactor.state
+      .compactMap { $0.isSaveSuccess }
+      .distinctUntilChanged()
+      .filter { $0 == true }
+      .bind { [weak self] _ in
+        self?.paceInputTextField.resignFirstResponder()
+        self?.animationView.isHidden = false
+        self?.animationView.play { finished in
           if finished {
-            object.animationView.isHidden = true
-
-            object.view.isUserInteractionEnabled = true
-
-            object.coordinator?.pop()
+            self?.reactor?.action.onNext(.didFinishAnimation)
           }
         }
       }
       .disposed(by: disposeBag)
+    
+    reactor.state
+      .map { $0.didFinishAnimation }
+      .distinctUntilChanged()
+      .filter { $0 == true }
+      .bind { [weak self] _ in
+        self?.animationView.isHidden = true
+        self?.coordinator?.pop()
+      }
+      .disposed(by: disposeBag)
+    
+    paceInputTextField.rx.controlEvent(.editingDidBegin)
+      .subscribe(onNext: { [weak self] in
+        self?.animateUnderline(isVisible: true)
+      })
+      .disposed(by: disposeBag)
+    
+    paceInputTextField.rx.controlEvent(.editingDidEnd)
+      .subscribe(onNext: { [weak self] in
+        self?.animateUnderline(isVisible: false)
+      })
+      .disposed(by: disposeBag)
   }
-
+  
+  // MARK: - Toast View Logic
+  
+  private func showToastForIndex(_ index: Int) {
+    if previousPaceIndex != index {
+      switch index {
+      case 0:
+        showToast(with: "나에게 살짝 여유로운 페이스일 수 있어요.")
+      case 1:
+        showToast(with: "나에게 적절한 페이스에요.")
+      case 2:
+        showToast(with: "아직은 조금 벅찰 수 있는 페이스일 수 있어요.")
+      default:
+        hideToast()
+      }
+      previousPaceIndex = index
+    }
+  }
+  
+  private func showToast(with message: String) {
+    toastTimer?.invalidate()
+    toastTimer = nil
+    toastLabel.text = message
+    if toastView.alpha > 0.0 {
+      startToastHideTimer()
+    } else {
+      UIView.animate(withDuration: 0.2, animations: {
+        self.toastView.alpha = 1.0
+      }) { _ in
+        self.startToastHideTimer()
+      }
+    }
+  }
+  
+  private func startToastHideTimer() {
+    toastTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { [weak self] _ in
+      UIView.animate(withDuration: 0.2) {
+        self?.toastView.alpha = 0.0
+      }
+    }
+  }
+  
+  private func hideToast() {
+    toastTimer?.invalidate()
+    toastTimer = nil
+    if toastView.alpha > 0.0 {
+      UIView.animate(withDuration: 0.2) {
+        self.toastView.alpha = 0.0
+      }
+    }
+  }
+  
   // MARK: - Slider Index & UI Sync Helpers
-
+  
   private func closestIndex(for pace: Float) -> Int {
     var closestIndex = 0
     var minDifference = Float.greatestFiniteMagnitude
-
+    
     for (index, targetPace) in paceValues.enumerated() {
       let difference = abs(pace - targetPace)
       if difference < minDifference {
@@ -353,121 +499,139 @@ final class RunningPaceSettingViewController: BaseViewController {
     }
     return closestIndex
   }
-
+  
   private func setSliderAndUI(toIndex index: Int) {
     let clampedIndex = max(0, min(paceValues.count - 1, index))
+    
     fixedPaceSlider.value = Float(clampedIndex)
     let currentPace = paceValues[clampedIndex]
     paceInputTextField.text = formatPace(seconds: currentPace)
     updatePaceLabelsTextColor(for: currentPace)
+    showToastForIndex(clampedIndex)
   }
-
+  
   private func setSliderAndUI(toPace paceInSeconds: Float) {
     let index = closestIndex(for: paceInSeconds)
     setSliderAndUI(toIndex: index)
   }
-
+  
   // MARK: - UI Update for Pace Labels
   private func updatePaceLabelsTextColor(for currentPace: Float) {
     challengerLabel.textColor = (abs(currentPace - challengerPace) < 0.1) ? FRColor.Fg.Text.primary : FRColor.Fg.Text.tertiary
     routineLabel.textColor = (abs(currentPace - routinePace) < 0.1) ? FRColor.Fg.Text.primary : FRColor.Fg.Text.tertiary
     warmUpLabel.textColor = (abs(currentPace - warmUpPace) < 0.1) ? FRColor.Fg.Text.primary : FRColor.Fg.Text.tertiary
   }
-
+  
   // MARK: - Pace Formatting and Parsing
-
+  
   private func formatPace(seconds: Float) -> String {
     let minutes = Int(seconds) / 60
     let remainingSeconds = Int(seconds) % 60
     return String(format: "%d'%02d''", minutes, remainingSeconds)
   }
-
+  
   private func parsePace(text: String) -> Float? {
     let cleanedDigits = text.filter(\.isWholeNumber)
-
-    guard cleanedDigits.count >= 1 else { return nil }
-
-    let minutes = Float(cleanedDigits.prefix(1)) ?? 0
-    let secondsString = String(cleanedDigits.suffix(from: cleanedDigits.index(cleanedDigits.startIndex, offsetBy: 1)))
+    
+    guard cleanedDigits.count >= 3 else { return nil }
+    
+    let minutesString = cleanedDigits.count == 4 ? cleanedDigits.prefix(2) : cleanedDigits.prefix(1)
+    let minutes = Float(minutesString) ?? 0
+    let secondsString = cleanedDigits.suffix(2)
     let seconds = Float(secondsString) ?? 0
-
-    if seconds >= 60 { return nil }
-
+    
     return minutes * 60 + seconds
   }
-
-
+  
+  
   private func showInvalidInputAlert() {
     let alert = UIAlertController(title: "오류", message: "올바른 페이스 형식을 입력해주세요", preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
     present(alert, animated: true, completion: nil)
   }
-
+  
   // MARK: - Keyboard Handling for Confirm Button
-
+  
   private func setupKeyboardNotifications() {
     NotificationCenter.default.rx.notification(UIResponder.keyboardWillShowNotification)
       .subscribe(onNext: { [weak self] notification in
         self?.handleKeyboard(notification: notification, willShow: true)
       })
       .disposed(by: disposeBag)
-
+    
     NotificationCenter.default.rx.notification(UIResponder.keyboardWillHideNotification)
       .subscribe(onNext: { [weak self] notification in
         self?.handleKeyboard(notification: notification, willShow: false)
       })
       .disposed(by: disposeBag)
   }
-
+  
   private func handleKeyboard(notification: Notification, willShow: Bool) {
     guard let userInfo = notification.userInfo,
           let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
           let animationDuration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
-
+    
     let keyboardHeight = keyboardFrame.height
     let bottomInset = willShow ? -(keyboardHeight + 12) : -46
-
+    
     UIView.animate(withDuration: animationDuration) {
       self.confirmButtonBottomConstraint?.update(offset: bottomInset)
       self.view.layoutIfNeeded()
     }
   }
-
+  
   // MARK: - Dismiss Keyboard on Tap Outside
-
+  
   private func setupTapGestureForDismissKeyboard() {
     let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
     tapGesture.cancelsTouchesInView = false
     view.addGestureRecognizer(tapGesture)
   }
-
+  
   @objc private func dismissKeyboard() {
     view.endEditing(true)
+  }
+  
+  private func animateUnderline(isVisible: Bool) {
+    if isVisible {
+      self.underlineView.transform = CGAffineTransform(scaleX: 0.01, y: 1.0)
+      self.underlineView.isHidden = false
+      UIView.animate(withDuration: 0.25) {
+        self.underlineView.transform = .identity
+      }
+    } else {
+      UIView.animate(withDuration: 0.25, animations: {
+        self.underlineView.transform = CGAffineTransform(scaleX: 0.01, y: 1.0)
+      }) { _ in
+        self.underlineView.isHidden = true
+        self.underlineView.transform = .identity
+      }
+    }
   }
 }
 
 // MARK: - UITextFieldDelegate
 
 extension RunningPaceSettingViewController: UITextFieldDelegate {
-
+  
   func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
     guard let currentText = textField.text else { return false }
-
-    let existingDigits = currentText.filter(\.isNumber)
-    let newDigits = string.filter(\.isNumber)
-
+    
+    let existingDigits = currentText.filter(\.isWholeNumber)
+    let newDigits = string.filter(\.isWholeNumber)
+    
     var updatedDigits = existingDigits
-
+    
     if string.isEmpty {
       if !updatedDigits.isEmpty {
         updatedDigits.removeLast()
       }
     } else {
-      if updatedDigits.count < 3 {
+      if updatedDigits.count < 4 {
         updatedDigits.append(contentsOf: newDigits)
       }
     }
-
+    
     let formatted: String
     switch updatedDigits.count {
     case 0:
@@ -476,31 +640,30 @@ extension RunningPaceSettingViewController: UITextFieldDelegate {
       formatted = "\(updatedDigits)'"
     case 2:
       let sec = updatedDigits.suffix(1)
-      formatted = "\(updatedDigits.prefix(1))'\(sec)'"
+      formatted = "\(updatedDigits.prefix(1))'\(sec)''"
     case 3:
       let min = updatedDigits.prefix(1)
       let sec = updatedDigits.suffix(2)
       formatted = "\(min)'\(sec)''"
 
-      if let totalSeconds = parsePace(text: formatted) {
-        setSliderAndUI(toPace: totalSeconds)
-      }
+      reactor?.action.onNext(.paceInputDidChange(formatted))
+    case 4:
+      let min = updatedDigits.prefix(2)
+      let sec = updatedDigits.suffix(2)
+      formatted = "\(min)'\(sec)''"
+      
+      reactor?.action.onNext(.paceInputDidChange(formatted))
     default:
       formatted = ""
     }
-
+    
     textField.text = formatted
     return false
   }
-
-
+  
   func textFieldDidEndEditing(_ textField: UITextField) {
-    if let text = textField.text, let totalSeconds = parsePace(text: text) {
-      setSliderAndUI(toPace: totalSeconds)
-    } else {
-      showInvalidInputAlert()
-      let currentIndex = Int(fixedPaceSlider.value.rounded())
-      setSliderAndUI(toIndex: currentIndex)
-    }
+    guard let text = textField.text, (parsePace(text: text) == nil) else { return }
+    showInvalidInputAlert()
+    reactor?.action.onNext(.sliderValueDidChange(1))
   }
 }

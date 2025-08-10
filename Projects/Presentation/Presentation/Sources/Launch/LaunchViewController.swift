@@ -16,7 +16,7 @@ public final class LaunchViewController: BaseViewController, View {
   private let logoImageView = UIImageView().then {
     $0.image = UIImage(named: "LaunchScreenLogo", in: Bundle.module, compatibleWith: nil)
   }
-  
+
   public override func initUI() {
     super.initUI()
     view.backgroundColor = UIColor(hex: "#FF6600")
@@ -25,21 +25,22 @@ public final class LaunchViewController: BaseViewController, View {
       $0.center.equalToSuperview()
     }
   }
-  
+
   public func bind(reactor: LaunchReactor) {
     self.rx.viewDidAppear
       .subscribe(with: self) { object, _ in
         reactor.action.onNext(.checkUserStatus)
       }
       .disposed(by: disposeBag)
-    
+
     reactor.state.map { $0.userStatus }
       .observe(on: MainScheduler.instance)
       .distinctUntilChanged()
       .compactMap { $0 }
       .subscribe(with: self) { object, status in
         switch status {
-        case .needsWalkthrough:
+          // TODO: - needsLogin시 로그인으로 보내야할지 논의 필요
+        case .needsWalkthrough, .needsLogin:
           object.coordinator?.showWalkthrough()
         case .loggedIn:
           object.coordinator?.showMainTabBar()

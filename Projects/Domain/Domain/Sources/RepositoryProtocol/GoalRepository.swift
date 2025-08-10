@@ -15,5 +15,11 @@ public protocol GoalRepository {
   func savePaceGoal(paceGoalMS: Int) -> Single<Bool>
   
   func saveRunningCount(count: Int) -> Single<Bool>
+
+  func saveGoalTime(time: Int) -> Single<Bool>
+
+  func saveGoalDistance(distance: Int) -> Single<Bool>
+
+  func getRunningGoal() -> Single<RunningGoal>
 }
 

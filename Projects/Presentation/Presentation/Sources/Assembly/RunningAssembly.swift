@@ -38,13 +38,25 @@ public final class RunningAssembly: Assembly {
       return viewController
     }
 
+    container.autoregister(FirstRunningGoalSettingReactor.self, initializer: FirstRunningGoalSettingReactor.init)
+
     container.register(FirstRunningGoalSettingViewController.self) { (r, type: GoalInputType) in
+      guard let reactor = r.resolve(FirstRunningGoalSettingReactor.self) else {
+        fatalError("Failed to resolve FirstRunningGoalSettingReactor.")
+      }
       let viewController = FirstRunningGoalSettingViewController(inputType: type)
+      viewController.reactor = reactor
       return viewController
     }
 
+    container.autoregister(RunningPaceSettingReactor.self, initializer: RunningPaceSettingReactor.init)
+
     container.register(RunningPaceSettingViewController.self) { r in
+      guard let reactor = r.resolve(RunningPaceSettingReactor.self) else {
+        fatalError("Failed to resolve RunningPaceSettingReactor.")
+      }
       let viewController = RunningPaceSettingViewController()
+      viewController.reactor = reactor
       return viewController
     }
 

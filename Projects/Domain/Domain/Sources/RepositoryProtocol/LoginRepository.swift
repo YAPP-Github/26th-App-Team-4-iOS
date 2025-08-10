@@ -10,9 +10,10 @@ import RxSwift
 
 public protocol AuthRepository {
   func kakaoLogin(idToken: String) -> Single<LoginResult>
+
   func appleLogin(idToken: String) -> Single<LoginResult>
 
   func performKakaoSocialLogin() -> Single<String>
 
-  func hasValidAuthSession() -> Single<Bool>
+  func attemptAutoLogin() -> Single<LoginResult>
 }
