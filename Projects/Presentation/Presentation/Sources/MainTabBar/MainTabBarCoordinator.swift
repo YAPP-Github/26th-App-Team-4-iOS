@@ -13,11 +13,13 @@ import Core
 enum TabBarPage: Int, CaseIterable {
   case home = 0
   case record
+  case myPage
 
   var pageTitle: String {
     switch self {
     case .home: return "홈"
     case .record: return "기록"
+    case .myPage: return "마이페이지"
     }
   }
 
@@ -25,6 +27,7 @@ enum TabBarPage: Int, CaseIterable {
     switch self {
     case .home: return UIImage(systemName: "house.fill")
     case .record: return UIImage(systemName: "list.bullet")
+    case .myPage: return UIImage(systemName: "person")
     }
   }
 }
@@ -93,6 +96,14 @@ public class MainTabBarCoordinatorImpl: NSObject, MainTabBarCoordinator {
       recordCoord.finishDelegate = self
       childCoordinators.append(recordCoord)
       recordCoord.start()
+      
+    case .myPage:
+      guard let coordinator = resolver.resolve(MyPageCoordinator.self, argument: navController) else {
+        fatalError("Failed to resolve MyPageCoordinator. Ensure it is registered correctly in Swinject.")
+      }
+      coordinator.finishDelegate = self
+      childCoordinators.append(coordinator)
+      coordinator.start()
     }
     return navController
   }
