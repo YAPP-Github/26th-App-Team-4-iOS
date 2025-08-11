@@ -37,6 +37,7 @@ public enum CoordinatorType {
   case home
   case running
   case record
+  case myPage
 }
 
 public protocol AppCoordinator: Coordinator {
