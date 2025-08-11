@@ -138,7 +138,7 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
   
   // 모든 섹션 푸터 없애기
   public func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-    return UIView()
+    return MyPageMenuTableFooterView()
   }
   
   public func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
