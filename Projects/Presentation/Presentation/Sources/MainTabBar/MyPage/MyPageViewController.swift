@@ -19,6 +19,19 @@ public final class MyPageViewController: BaseViewController {
     case setting
     case service
     
+    var displayName: String {
+      switch self {
+      case .userInfo:
+        return ""
+      case .goal:
+        return "러닝 목표"
+      case .setting:
+        return "설정"
+      case .service:
+        return "서비스"
+      }
+    }
+    
     var item: [Item] {
       switch self {
       case .userInfo:
@@ -101,11 +114,12 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
   }
   
   public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-    switch Section(rawValue: section) {
+    let section = Section(rawValue: section)
+    switch section {
     case .userInfo:
       return nil
     case .goal, .setting, .service:
-      return UIView()
+      return MyPageMenuTableHeaderView(title: section!.displayName)
     case .none:
       return nil
     }
