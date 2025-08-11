@@ -78,6 +78,8 @@ public final class MyPageViewController: BaseViewController {
     $0.sectionHeaderTopPadding = 0
 
     $0.registerCell(ofType: MyUserInfoTableCell.self)
+    $0.registerCell(ofType: MyPageGoalTableCell.self)
+    $0.registerCell(ofType: MyPageMenuTableCell.self)
     
     $0.delegate = self
     $0.dataSource = self
@@ -157,21 +159,35 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
     case .userInfo:
       return dequeueUserInfoCell(for: indexPath)
     case .goal:
-     return dequeueUserInfoCell(for: indexPath)
+     return dequeueGoalCell(for: indexPath)
     case .setting:
-      return dequeueUserInfoCell(for: indexPath)
+      return dequeueMenuCell(for: indexPath)
     case .service:
-      return dequeueUserInfoCell(for: indexPath)
+      return dequeueMenuCell(for: indexPath)
     case .none:
       return UITableViewCell()
     }
   }
   
-  private func dequeueUserInfoCell(for indexPath: IndexPath) -> UITableViewCell {
+  private func dequeueUserInfoCell(for indexPath: IndexPath) -> MyUserInfoTableCell {
     let cell = tableView.dequeueReusableCell(
       withIdentifier: MyUserInfoTableCell.identifier, for: indexPath
     ) as! MyUserInfoTableCell
-    cell.selectionStyle = .none
     return cell
   }
+  
+  private func dequeueGoalCell(for indexPath: IndexPath) -> MyPageGoalTableCell {
+    let cell = tableView.dequeueReusableCell(
+      withIdentifier: MyPageGoalTableCell.identifier, for: indexPath
+    ) as! MyPageGoalTableCell
+    return cell
+  }
+  
+  private func dequeueMenuCell(for indexPath: IndexPath) -> MyPageMenuTableCell {
+    let cell = tableView.dequeueReusableCell(
+      withIdentifier: MyPageMenuTableCell.identifier, for: indexPath
+    ) as! MyPageMenuTableCell
+    return cell
+  }
+
 }
