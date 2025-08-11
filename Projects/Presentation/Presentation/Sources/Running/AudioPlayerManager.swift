@@ -10,20 +10,21 @@ import AVFoundation
 import RxSwift
 import Domain
 
-public enum DistanceFeedbackType: String {
-  case pass1Km = "DISTANCE_PASS_1KM"
-  case pass2Km = "DISTANCE_PASS_2KM"
-  case pass3Km = "DISTANCE_PASS_3KM"
-  case pass4Km = "DISTANCE_PASS_4KM"
-  case pass5Km = "DISTANCE_PASS_5KM"
-  case pass6Km = "DISTANCE_PASS_6KM"
-  case pass7Km = "DISTANCE_PASS_7KM"
-  case pass8Km = "DISTANCE_PASS_8KM"
-  case pass9Km = "DISTANCE_PASS_9KM"
-  case pass10Km = "DISTANCE_PASS_10KM"
+public enum DistanceFeedbackType: Equatable {
+  case passKm(Int)
+  case left1Km
+  case finish
 
-  case left1Km = "DISTANCE_LEFT_1KM"
-  case finish = "DISTANCE_FINISH"
+  var serverRequestValue: String {
+    switch self {
+    case .passKm(let km):
+      return "DISTANCE_PASS_\(km)KM"
+    case .left1Km:
+      return "DISTANCE_LEFT_1KM"
+    case .finish:
+      return "DISTANCE_FINISH"
+    }
+  }
 }
 
 public enum PaceFeedbackType: String {
@@ -76,7 +77,8 @@ final class AudioPlayerManager: NSObject, AudioPlayerManagerType, AVAudioPlayerD
     var fetchAudioObservable: Single<Data>
     switch event {
     case .distance(let type):
-      fetchAudioObservable = audioUseCase.getDistanceFeedbackAudio(type: type.rawValue)
+      let audioTypeString = type.serverRequestValue
+      fetchAudioObservable = audioUseCase.getDistanceFeedbackAudio(type: audioTypeString)
     case .pace(let type):
       fetchAudioObservable = audioUseCase.getPaceFeedbackAudio(type: type.rawValue)
     case .time(let type):

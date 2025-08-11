@@ -350,30 +350,15 @@ public final class RunningReactor: Reactor {
     let lastKmReached = state.lastDistanceFeedbackKm
     let currentKmReached = Int(newTotalDistance / 1000.0)
 
-    if currentKmReached > 0 && currentKmReached > lastKmReached {
+    if currentKmReached > lastKmReached {
       let kmToFeedback = currentKmReached
 
-      var audioType: DistanceFeedbackType? = nil
-      switch kmToFeedback {
-      case 1: audioType = .pass1Km
-      case 2: audioType = .pass2Km
-      case 3: audioType = .pass3Km
-      case 4: audioType = .pass4Km
-      case 5: audioType = .pass5Km
-      case 6: audioType = .pass6Km
-      case 7: audioType = .pass7Km
-      case 8: audioType = .pass8Km
-      case 9: audioType = .pass9Km
-      case 10: audioType = .pass10Km
-      default:
-        break
+      if (1...42).contains(kmToFeedback) {
+        let audioType = DistanceFeedbackType.passKm(kmToFeedback)
+        print(" 📏 거리 피드백 트리거됨: \(kmToFeedback)km (\(audioType))")
+        mutations.append(.just(.enqueueAudio(.distance(audioType))))
+        mutations.append(.just(.setLastDistanceFeedbackKm(kmToFeedback)))
       }
-
-      if let type = audioType {
-        print("  📏 거리 피드백 트리거됨: \(kmToFeedback)km (\(type))")
-        mutations.append(.just(.enqueueAudio(.distance(type))))
-      }
-      mutations.append(.just(.setLastDistanceFeedbackKm(kmToFeedback)))
     }
 
     if let goalDistance = state.goalDistance {
