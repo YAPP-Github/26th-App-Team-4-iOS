@@ -50,7 +50,7 @@ public final class RecordDetailViewController: BaseViewController, View {
 //    $0.isHidden = true
     $0.onConfirm = { [weak self] in
       guard let self = self else { return }
-      self.coordinator?.showRunningPaceSetting()
+//      self.coordinator?.showRunningPaceSetting()
     }
   }
     override init() {
@@ -102,7 +102,7 @@ public final class RecordDetailViewController: BaseViewController, View {
   private func bind() {
     backButton.rx.tap
       .subscribe(with: self) { object, _ in
-        object.coordinator?.dismissRunningFlow()
+//        object.coordinator?.dismissRunningFlow()
       }
       .disposed(by: disposeBag)
   }
