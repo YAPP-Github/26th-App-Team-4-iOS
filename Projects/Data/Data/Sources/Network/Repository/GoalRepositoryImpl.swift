@@ -17,7 +17,20 @@ public final class GoalRepositoryImpl: GoalRepository {
   public init(provider: NetworkProvider<GoalAPI> = .init()) {
     self.provider = provider
   }
-    
+
+  public func getRecommendPace() -> Single<RecommendPace> {
+    return provider.request(.goal)
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<RecommendPaceDTO>.self)
+      .map { response in
+        guard let dto = response.result else {
+          throw NSError(domain: "GoalRepositoryImpl", code: 0, userInfo: [NSLocalizedDescriptionKey: "No result found"])
+        }
+        return dto.toDomain()
+      }
+      .asSingle()
+  }
+
   public func fetchPaceRunningCount() -> Single<PaceRunningCount> {
     return provider.request(.goal)
       .filter(statusCodes: 200..<300)
@@ -71,7 +84,6 @@ public final class GoalRepositoryImpl: GoalRepository {
         guard let dto = response.result else {
           throw NSError(domain: "GoalRepositoryImpl", code: 0, userInfo: [NSLocalizedDescriptionKey: "No result found"])
         }
-        print(">>>>dto", dto)
         return dto.toRunningGoal()
       }
       .asSingle()

@@ -423,14 +423,6 @@ final class RunningViewController: BaseViewController, View {
       }
       .disposed(by: disposeBag)
 
-    reactor.state.map(\.sessionState)
-      .distinctUntilChanged()
-      .filter { $0 == .finished }
-      .bind(with: self) { this, _ in
-        this.coordinator?.showRunningResult()
-      }
-      .disposed(by: disposeBag)
-
     reactor.state.map(\.isUploadSuccess)
       .filter { $0 }
       .distinctUntilChanged()

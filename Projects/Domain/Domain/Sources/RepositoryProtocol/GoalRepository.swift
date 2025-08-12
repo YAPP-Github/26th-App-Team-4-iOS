@@ -21,5 +21,7 @@ public protocol GoalRepository {
   func saveGoalDistance(distance: Int) -> Single<Bool>
 
   func getRunningGoal() -> Single<RunningGoal>
+
+  func getRecommendPace() -> Single<RecommendPace>
 }
 
