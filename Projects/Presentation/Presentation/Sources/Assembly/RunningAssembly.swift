@@ -8,6 +8,7 @@
 import UIKit
 import Swinject
 import SwinjectAutoregistration
+import Domain
 
 public final class RunningAssembly: Assembly {
   public init() {}
@@ -38,16 +39,15 @@ public final class RunningAssembly: Assembly {
       return viewController
     }
 
-    container.autoregister(FirstRunningGoalSettingReactor.self, initializer: FirstRunningGoalSettingReactor.init)
-
     container.register(FirstRunningGoalSettingViewController.self) { (r, type: GoalInputType) in
-      guard let reactor = r.resolve(FirstRunningGoalSettingReactor.self) else {
-        fatalError("Failed to resolve FirstRunningGoalSettingReactor.")
+      guard let goalUseCase = r.resolve(GoalUseCase.self) else {
+        fatalError("Failed to resolve GoalUseCase.")
       }
-      let viewController = FirstRunningGoalSettingViewController(inputType: type)
+      let reactor = FirstRunningGoalSettingReactor(goalUseCase: goalUseCase, inputType: type)
+      let viewController = FirstRunningGoalSettingViewController()
       viewController.reactor = reactor
       return viewController
-    }
+            }
 
     container.autoregister(RunningPaceSettingReactor.self, initializer: RunningPaceSettingReactor.init)
 

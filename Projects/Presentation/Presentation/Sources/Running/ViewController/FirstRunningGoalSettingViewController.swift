@@ -72,7 +72,6 @@ final class FirstRunningGoalSettingViewController: BaseViewController, View {
 
   weak var coordinator: RunningCoordinator?
 
-  private var inputType: GoalInputType
   private let keyboardHeight = BehaviorRelay<CGFloat>(value: 0)
   private let currentGoalValue = BehaviorRelay<Int>(value: 0) // 현재 입력된 목표 값 (분 또는 km)
 
@@ -143,27 +142,6 @@ final class FirstRunningGoalSettingViewController: BaseViewController, View {
   }
 
   private var setAndRunButtonBottomConstraint: Constraint?
-
-
-  // MARK: - Initialization
-
-  init(inputType: GoalInputType) {
-    self.inputType = inputType
-    super.init()
-    setupInitialUIForInputType()
-  }
-
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-
-  private func setupInitialUIForInputType() {
-    titleLabel.text = inputType.title
-    subTitleLabel.text = inputType.subTitle
-    unitLabel.text = inputType.unit
-    currentGoalValue.accept(inputType.initialGoalValue)
-    goalValueTextField.text = String(currentGoalValue.value)
-  }
 
   // MARK: - Lifecycle
 
@@ -400,6 +378,19 @@ final class FirstRunningGoalSettingViewController: BaseViewController, View {
         case .showRunning:
           self.coordinator?.showRunning()
         }
+      })
+      .disposed(by: disposeBag)
+
+    reactor.state.map { $0.inputType }
+      .distinctUntilChanged()
+      .observe(on: MainScheduler.instance)
+      .subscribe(onNext: { [weak self] inputType in
+        guard let self = self else { return }
+        titleLabel.text = inputType.title
+        subTitleLabel.text = inputType.subTitle
+        unitLabel.text = inputType.unit
+        currentGoalValue.accept(inputType.initialGoalValue)
+        goalValueTextField.text = String(currentGoalValue.value)
       })
       .disposed(by: disposeBag)
 

@@ -69,7 +69,7 @@ public final class GoalRepositoryImpl: GoalRepository {
   }
 
   public func saveGoalDistance(distance: Int) -> Single<Bool> {
-    return provider.request(.editGoalDistance(distance: distance))
+    return provider.request(.saveGoalDistance(distance: distance))
       .filter(statusCodes: 200..<300)
       .map(APIResponse<GoalDTO>.self)
       .map { $0.code == "SUCCESS" }
