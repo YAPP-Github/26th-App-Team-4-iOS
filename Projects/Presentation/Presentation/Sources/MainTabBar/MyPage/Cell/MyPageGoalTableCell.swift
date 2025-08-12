@@ -53,10 +53,19 @@ class MyPageGoalTableCell: BaseTableViewCell {
     $0.text = "설정되지 않았어요"
   }
   
-  private let arrowButtonImageView = UIImageView(image: .init(systemName: "chevron.right")).then {
+  private let arrowButtonImageView = UIImageView(
+    image: UIImage(named: "chevron_right", in: Bundle.module, compatibleWith: nil)
+  ).then {
     $0.contentMode = .scaleAspectFill
     $0.tintColor = FRColor.Fg.Icon.secondary
   } // 24
+  
+  
+  func setData(item: MyPageViewController.Item, value: String) {
+    iconImageView.image = item.image
+    titleLabel.text = item.title
+    valueLabel.text = value
+  }
   
   public override func initUI() {
     super.initUI()
@@ -74,6 +83,13 @@ class MyPageGoalTableCell: BaseTableViewCell {
     iconImageContainerView.snp.makeConstraints {
       $0.width.height.equalTo(44)
     }
+    
+    iconImageView.snp.makeConstraints {
+      $0.edges.equalToSuperview()
+    }
+    
+    arrowButtonImageView.snp.makeConstraints {
+      $0.size.equalTo(24)
+    }
   }
-
 }

@@ -22,7 +22,9 @@ class MyPageMenuTableCell: BaseTableViewCell {
     $0.text = "러닝 설정"
   }
 
-  private let arrowButtonImageView = UIImageView(image: .init(systemName: "chevron.right")).then {
+  private let arrowButtonImageView = UIImageView(
+    image: UIImage(named: "chevron_right", in: Bundle.module, compatibleWith: nil)
+  ).then {
     $0.contentMode = .scaleAspectFill
     $0.tintColor = FRColor.Fg.Icon.secondary
   } // 24
@@ -32,6 +34,13 @@ class MyPageMenuTableCell: BaseTableViewCell {
     $0.textColor = FRColor.Fg.Text.tertiary
     $0.text = "러닝 설정"
     $0.isHidden = true
+  }
+  
+  func setData(title: String, version: String? = nil) {
+    titleLabel.text = title
+    versionLabel.text = version
+    versionLabel.isHidden = version == nil
+    arrowButtonImageView.isHidden = version != nil
   }
   
   public override func initUI() {
@@ -55,6 +64,7 @@ class MyPageMenuTableCell: BaseTableViewCell {
     arrowButtonImageView.snp.makeConstraints {
       $0.trailing.equalToSuperview().inset(16)
       $0.centerY.equalToSuperview()
+      $0.size.equalTo(24)
     }
     
     containerView.addSubview(versionLabel)

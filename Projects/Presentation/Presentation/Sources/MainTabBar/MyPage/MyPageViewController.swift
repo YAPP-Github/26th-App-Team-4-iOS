@@ -18,6 +18,7 @@ public final class MyPageViewController: BaseViewController {
     case goal
     case setting
     case service
+    case footer
     
     var displayName: String {
       switch self {
@@ -29,6 +30,8 @@ public final class MyPageViewController: BaseViewController {
         return "설정"
       case .service:
         return "서비스"
+      case .footer:
+        return ""
       }
     }
     
@@ -42,6 +45,8 @@ public final class MyPageViewController: BaseViewController {
         return [.runningSetting, .notificationSetting, .acessibilitySetting]
       case .service:
         return [.termOfService, .serviceGuide, .version]
+      case .footer:
+        return [.footer]
       }
     }
   }
@@ -61,6 +66,56 @@ public final class MyPageViewController: BaseViewController {
     case termOfService
     case serviceGuide
     case version
+    
+    case footer
+    
+    var title: String {
+      switch self {
+      case .userInfo:
+        return ""
+        
+      case .goalDistance:
+        return "목표 거리"
+      case .goalTime:
+        return "목표 시간"
+      case .goalPace:
+        return "목표 페이스"
+      case .runningCount:
+        return "러닝 횟수"
+        
+      case .runningSetting:
+        return "러닝 설정"
+      case .notificationSetting:
+        return "알림 설정"
+      case .acessibilitySetting:
+        return "권한 설정"
+        
+      case .termOfService:
+        return "약관관리"
+      case .serviceGuide:
+        return "서비스 이용 안내"
+      case .version:
+        return "앱 버전 정보"
+        
+      case .footer:
+        return ""
+      }
+    }
+    
+    var image: UIImage? {
+      switch self {
+      case .goalDistance:
+        return UIImage(named: "MyPageTrack", in: Bundle.module, compatibleWith: nil)
+      case .goalTime:
+        return UIImage(named: "MyPageClock", in: Bundle.module, compatibleWith: nil)
+      case .goalPace:
+        return UIImage(named: "MyPageTarget", in: Bundle.module, compatibleWith: nil)
+      case .runningCount:
+        return UIImage(named: "MyPageRun", in: Bundle.module, compatibleWith: nil)
+      default:
+        return nil
+      }
+    }
   }
   
   var coordinator: MyPageCoordinator?
@@ -80,6 +135,7 @@ public final class MyPageViewController: BaseViewController {
     $0.registerCell(ofType: MyUserInfoTableCell.self)
     $0.registerCell(ofType: MyPageGoalTableCell.self)
     $0.registerCell(ofType: MyPageMenuTableCell.self)
+    $0.registerCell(ofType: MyPageFooterTableCell.self)
     
     $0.delegate = self
     $0.dataSource = self
@@ -118,7 +174,7 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
   public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
     let section = Section(rawValue: section)
     switch section {
-    case .userInfo:
+    case .userInfo, .footer:
       return nil
     case .goal, .setting, .service:
       return MyPageMenuTableHeaderView(title: section!.displayName)
@@ -129,7 +185,7 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
   
   public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
     switch Section(rawValue: section) {
-    case .userInfo:
+    case .userInfo, .footer:
       return 0
     case .goal, .setting, .service:
       return 92
@@ -145,7 +201,7 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
   
   public func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
     switch Section(rawValue: section) {
-    case .userInfo:
+    case .userInfo, .footer:
       return 0
     case .goal, .setting, .service:
       return 16
@@ -164,6 +220,8 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
       return dequeueMenuCell(for: indexPath)
     case .service:
       return dequeueMenuCell(for: indexPath)
+    case .footer:
+      return dequeueFooterCell(for: indexPath)
     case .none:
       return UITableViewCell()
     }
@@ -180,6 +238,7 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
     let cell = tableView.dequeueReusableCell(
       withIdentifier: MyPageGoalTableCell.identifier, for: indexPath
     ) as! MyPageGoalTableCell
+    cell.setData(item: Section.allCases[indexPath.section].item[indexPath.row], value: "설정되지 않았어요")
     return cell
   }
   
@@ -187,7 +246,21 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
     let cell = tableView.dequeueReusableCell(
       withIdentifier: MyPageMenuTableCell.identifier, for: indexPath
     ) as! MyPageMenuTableCell
+    let item = Section.allCases[indexPath.section].item[indexPath.row]
+    if item == .version {
+      let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+      cell.setData(title: item.title, version: version)
+    } else {
+      cell.setData(title: item.title)
+    }
     return cell
   }
 
+  
+  private func dequeueFooterCell(for indexPath: IndexPath) -> MyPageFooterTableCell {
+    let cell = tableView.dequeueReusableCell(
+      withIdentifier: MyPageFooterTableCell.identifier, for: indexPath
+    ) as! MyPageFooterTableCell
+    return cell
+  }
 }
