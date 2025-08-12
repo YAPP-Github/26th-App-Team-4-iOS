@@ -12,4 +12,6 @@ public struct RunningGoal {
   public let distanceMeterGoal: Double?
   /// 시간 목표 (밀리초)
   public let timeGoal: Int?
+  /// 러너 타입
+  public let runnerType: String?
 }

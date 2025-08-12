@@ -40,7 +40,7 @@ public final class RunningReactor: Reactor {
     case updateTotalDistance(Double)
     case setLastDistanceFeedbackKm(Int)
     case setLastKnownLocation(CLLocation?)
-    case setRunningGoals(paceGoal: TimeInterval?, distanceGoal: Double?, timeGoal: TimeInterval?)
+    case setRunningGoals(paceGoal: TimeInterval?, distanceGoal: Double?, timeGoal: TimeInterval?, runnerType: String?)
     case setGoalsLoaded(Bool)
     case setLastTimeFeedback50PercentGiven(Bool)
     case setLastTimeFeedback5MinBeforeGiven(Bool)
@@ -69,6 +69,7 @@ public final class RunningReactor: Reactor {
     var goalTime: TimeInterval? = nil
     var goalPace: TimeInterval? = nil
     var goalsLoaded: Bool = false
+    var runnerType: String? = nil
 
     var lastDistanceFeedbackKm: Int = 0
     var lastTimeFeedback50PercentGiven: Bool = false
@@ -141,9 +142,10 @@ public final class RunningReactor: Reactor {
           let serverPaceGoalSecondsPerKm = goal.paceGoal.map { TimeInterval($0) }
           let serverTimeGoalSeconds = goal.timeGoal.map { TimeInterval($0) }
           let serverDistanceGoalMeters = goal.distanceMeterGoal
+          let runnerType = goal.runnerType
 
           return .concat([
-            .just(.setRunningGoals(paceGoal: serverPaceGoalSecondsPerKm, distanceGoal: serverDistanceGoalMeters, timeGoal: serverTimeGoalSeconds)),
+            .just(.setRunningGoals(paceGoal: serverPaceGoalSecondsPerKm, distanceGoal: serverDistanceGoalMeters, timeGoal: serverTimeGoalSeconds, runnerType: runnerType)),
             .just(.setGoalsLoaded(true))
           ])
         }
@@ -315,7 +317,8 @@ public final class RunningReactor: Reactor {
     let hasDistanceGoal = state.goalDistance != nil
     let hasTimeGoal = state.goalTime != nil
 
-    // 목표 설정에 따라 피드백 로직을 분기
+    allFeedbackMutations.append(_generateRunnerTypeFeedback(totalDistance: totalDistance))
+
     if hasDistanceGoal && hasPaceGoal {
       allFeedbackMutations.append(_generateDistanceFeedback(totalDistance: totalDistance))
       allFeedbackMutations.append(_generatePaceFeedback())
@@ -341,6 +344,39 @@ public final class RunningReactor: Reactor {
       return .empty()
     }
     return Observable.concat(allFeedbackMutations)
+  }
+
+  private func _generateRunnerTypeFeedback(totalDistance: Double) -> Observable<Mutation> {
+      let state = currentState
+      var mutations: [Observable<Mutation>] = []
+
+      let lastKmReached = state.lastDistanceFeedbackKm
+      let currentKmReached = Int(totalDistance / 1000.0)
+
+      guard currentKmReached > lastKmReached else {
+          return .empty()
+      }
+
+      var feedbackInterval = 1
+      if let runnerType = state.runnerType {
+          switch runnerType {
+          case "BEGINNER": feedbackInterval = 1
+          case "INTERMEDIATE": feedbackInterval = 3
+          case "EXPERT": feedbackInterval = 5
+          default: feedbackInterval = 1
+          }
+      }
+
+      // 1km를 넘었고, 피드백 주기(interval)에 도달했을 때 피드백 추가
+      if currentKmReached > 0 && currentKmReached % feedbackInterval == 0 && currentKmReached > lastKmReached {
+          let audioType = DistanceFeedbackType.passKm(currentKmReached)
+          print(" 📏 runnerType 피드백 트리거됨: \(currentKmReached)km (\(audioType))")
+          mutations.append(.just(.enqueueAudio(.distance(audioType))))
+          mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
+      }
+
+      guard !mutations.isEmpty else { return .empty() }
+      return Observable.concat(mutations)
   }
 
   private func _generateDistanceFeedback(totalDistance: Double) -> Observable<Mutation> {
@@ -480,10 +516,11 @@ public final class RunningReactor: Reactor {
       newState.lastDistanceFeedbackKm = km
     case let .setLastKnownLocation(location):
       newState.lastKnownLocation = location
-    case let .setRunningGoals(paceGoal, distanceGoal, timeGoal):
+    case let .setRunningGoals(paceGoal, distanceGoal, timeGoal, runnerType):
       newState.goalPace = paceGoal
       newState.goalDistance = distanceGoal
       newState.goalTime = timeGoal
+      newState.runnerType = runnerType
     case let .setGoalsLoaded(loaded):
       newState.goalsLoaded = loaded
     case let .setLastTimeFeedback50PercentGiven(given):

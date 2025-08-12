@@ -39,7 +39,8 @@ extension GoalDTO {
     return RunningGoal(
       paceGoal: paceGoal,
       distanceMeterGoal: distanceMeterGoal,
-      timeGoal: timeGoal
+      timeGoal: timeGoal,
+      runnerType: runnerType
     )
   }
 }
