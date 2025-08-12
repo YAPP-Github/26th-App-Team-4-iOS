@@ -22,7 +22,7 @@ public final class LaunchViewController: BaseViewController, View {
     view.backgroundColor = UIColor(hex: "#FF6600")
     view.addSubview(logoImageView)
     logoImageView.snp.makeConstraints {
-      $0.center.equalToSuperview()
+      $0.center.equalTo(view.safeAreaLayoutGuide)
     }
   }
 

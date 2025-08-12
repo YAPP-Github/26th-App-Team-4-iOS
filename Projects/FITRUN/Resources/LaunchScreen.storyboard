@@ -16,16 +16,30 @@
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" misplaced="YES" image="Logo Full Lockup" translatesAutoresizingMaskIntoConstraints="NO" id="xA1-Q6-NhG">
+                                <rect key="frame" x="96" y="388" width="200" height="77"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="200" id="0Sc-2M-SDw"/>
+                                    <constraint firstAttribute="height" constant="77" id="GXb-1f-1Bf"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="RedOrange600"/>
+                        <constraints>
+                            <constraint firstItem="xA1-Q6-NhG" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="Jhd-1j-i8Z"/>
+                            <constraint firstItem="xA1-Q6-NhG" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="jYa-ar-SS3"/>
+                        </constraints>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="53" y="375"/>
+            <point key="canvasLocation" x="52.671755725190835" y="374.64788732394368"/>
         </scene>
     </scenes>
     <resources>
+        <image name="Logo Full Lockup" width="601" height="231"/>
         <namedColor name="RedOrange600">
             <color red="1" green="0.40000000000000002" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
