@@ -45,7 +45,6 @@ public final class RunningReactor: Reactor {
     case enqueueAudio(AudioFeedbackEvent)
     case dequeueAudio(AudioFeedbackEvent)
     case setAudioFeedbackEnabled(Bool)
-    // ✅ 추가: 목표 거리 피드백 상태를 위한 Mutation
     case setGoalFeedbackFor1KmLeftGiven(Bool)
     case setGoalFeedbackForFinishGiven(Bool)
   }
@@ -76,7 +75,6 @@ public final class RunningReactor: Reactor {
     var lastPaceFeedbackCategory: PaceFeedbackType? = nil
     var lastPaceFeedbackTriggerDistance: Double = 0.0
 
-    // ✅ 추가: 목표 거리 피드백 상태를 위한 새로운 변수
     var goalFeedbackFor1KmLeftGiven: Bool = false
     var goalFeedbackForFinishGiven: Bool = false
 
@@ -124,7 +122,7 @@ public final class RunningReactor: Reactor {
     self.initialState = State()
 
     self.state.map { $0.audioQueue }
-//      .distinctUntilChanged()
+      .distinctUntilChanged()
       .observe(on: MainScheduler.instance)
       .subscribe(onNext: { [weak self] _ in
         self?.playNextAudioIfNeeded()
@@ -298,27 +296,30 @@ public final class RunningReactor: Reactor {
   }
 
   private func playNextAudioIfNeeded() {
-    guard !currentState.audioQueue.isEmpty, !audioManager.isPlaying else { return }
+    guard !currentState.audioQueue.isEmpty,
+          !audioManager.isPlaying else { return }
 
     let nextEvent = currentState.audioQueue.first!
-    print("▶️ 총\(currentState.audioQueue.count)개. 오디오 큐에서 다음 항목 재생: \(nextEvent)")
+    print("▶️ playNextAudioIfNeeded 총\(currentState.audioQueue.count)개. 오디오 큐에서 다음 항목 재생: \(nextEvent)")
 
     audioManager.playAudio(for: nextEvent) { [weak self] success in
       guard let self = self, success else { return }
       self.action.onNext(.dequeueAudio(nextEvent))
+      print("▶️▶️▶️▶️ 재생 후 총\(currentState.audioQueue.count)개\n", currentState.audioQueue, "\n\n\n")
+      self.playNextAudioIfNeeded()
     }
   }
+
 
   private func generateFeedbackMutations(totalDistance: Double) -> Observable<Mutation> {
     let state = currentState
     var allFeedbackMutations: [Observable<Mutation>] = []
 
-    guard state.isAudioFeedbackEnabled else {
-      return .empty()
-    }
-
-    guard state.goalsLoaded else {
-      return .empty()
+    guard
+      state.audioQueue.isEmpty,
+      state.isAudioFeedbackEnabled,
+      state.goalsLoaded else {
+        return .empty()
     }
 
     let hasPaceGoal = state.goalPace != nil
@@ -341,8 +342,6 @@ public final class RunningReactor: Reactor {
       allFeedbackMutations.append(_generatePaceFeedback())
     }
     else if hasDistanceGoal && hasTimeGoal {
-      // 주석: 여기에서 페이스 피드백을 추가하는 것이 맞을까요?
-      // 목표가 거리와 시간인 경우 페이스 피드백을 제공
       allFeedbackMutations.append(_generatePaceFeedback())
     }
     else if hasPaceGoal {
@@ -378,7 +377,7 @@ public final class RunningReactor: Reactor {
       default: feedbackInterval = 1
       }
     }
-    print(">>>>", feedbackInterval, state.runnerType, currentKmReached > 0 && currentKmReached % feedbackInterval == 0 && currentKmReached > lastKmReached)
+
     if currentKmReached > 0 && currentKmReached % feedbackInterval == 0 && currentKmReached > lastKmReached {
       let audioType = DistanceFeedbackType.passKm(currentKmReached)
       print(" 📏 runnerType 피드백 트리거됨: \(currentKmReached)km (\(audioType))")
@@ -549,11 +548,7 @@ public final class RunningReactor: Reactor {
     case let .dequeueAudio(event):
       if newState.audioQueue.first == event {
         newState.audioQueue.removeFirst()
-      } else {
-        print("⚠️ [Queue Error] 큐의 첫 번째 항목이 예상과 다릅니다. 현재 큐 상태: \(newState.audioQueue)")
-        newState.audioQueue.removeFirst() // 
       }
-      print(">>\n", newState.audioQueue)
     case let .setAudioFeedbackEnabled(isEnabled):
       newState.isAudioFeedbackEnabled = isEnabled
       print("🔊 오디오 피드백 상태 변경: \(isEnabled ? "활성화" : "비활성화")")
