@@ -22,6 +22,8 @@ public struct GoalDTO: Codable {
   public let distanceMeterGoal: Double?
   /// 시간 목표 (밀리초)
   public let timeGoal: Int?
+  /// 러너 타입
+  public let runnerType: String?
 }
 
 extension GoalDTO {
@@ -37,7 +39,8 @@ extension GoalDTO {
     return RunningGoal(
       paceGoal: paceGoal,
       distanceMeterGoal: distanceMeterGoal,
-      timeGoal: timeGoal
+      timeGoal: timeGoal,
+      runnerType: runnerType
     )
   }
 }

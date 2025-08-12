@@ -33,7 +33,7 @@ public class AuthTokenStorageImpl: AuthTokenStorage {
   }
 
   public func getAccessToken() -> String? {
-    print(">getAccessToken", UserDefaults.standard.string(forKey: "accessToken"))
+//    print(">getAccessToken", UserDefaults.standard.string(forKey: "accessToken"))
     return UserDefaults.standard.string(forKey: "accessToken")
   }
 

@@ -21,7 +21,6 @@ public final class CheckLoginStatusUseCaseImpl: CheckLoginStatusUseCase {
     self.userDefaults = userDefaults
   }
 
-
   public func execute() -> Single<UserStatus> {
     return authRepository.attemptAutoLogin()
       .map { _ in

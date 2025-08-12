@@ -1,10 +1,3 @@
-//
-//  RunningReactor.swift
-//  Presentation
-//
-//  Created by dong eun shin on 7/23/25.
-//
-
 import UIKit
 import CoreLocation
 import Domain
@@ -27,6 +20,8 @@ public final class RunningReactor: Reactor {
     case tick
     case stopRun
     case updateLocation(CLLocation)
+    case dequeueAudio(AudioFeedbackEvent)
+    case toggleAudioFeedback
   }
 
   public enum Mutation {
@@ -39,14 +34,19 @@ public final class RunningReactor: Reactor {
     case updateTotalDistance(Double)
     case setLastDistanceFeedbackKm(Int)
     case setLastKnownLocation(CLLocation?)
-    case setRunningGoals(paceGoal: TimeInterval?, distanceGoal: Double?, timeGoal: TimeInterval?)
-    case setGoalsLoaded(Bool) // 목표 로딩 완료 여부 추적
+    case setRunningGoals(paceGoal: TimeInterval?, distanceGoal: Double?, timeGoal: TimeInterval?, runnerType: String?)
+    case setGoalsLoaded(Bool)
     case setLastTimeFeedback50PercentGiven(Bool)
     case setLastTimeFeedback5MinBeforeGiven(Bool)
     case setLastTimeFeedback100PercentGiven(Bool)
     case setLastPaceFeedbackCategory(PaceFeedbackType?)
     case setLastPaceFeedbackTriggerDistance(Double)
     case setAveragePace(TimeInterval)
+    case enqueueAudio(AudioFeedbackEvent)
+    case dequeueAudio(AudioFeedbackEvent)
+    case setAudioFeedbackEnabled(Bool)
+    case setGoalFeedbackFor1KmLeftGiven(Bool)
+    case setGoalFeedbackForFinishGiven(Bool)
   }
 
   public struct State {
@@ -62,13 +62,12 @@ public final class RunningReactor: Reactor {
 
     var runningPath: [CLLocationCoordinate2D] = []
 
-    // 목표 관련 상태
     var goalDistance: Double? = nil
-    var goalTime: TimeInterval? = nil // 초 단위
-    var goalPace: TimeInterval? = nil // 초/km 단위
-    var goalsLoaded: Bool = false // 목표 로딩 완료 여부
+    var goalTime: TimeInterval? = nil
+    var goalPace: TimeInterval? = nil
+    var goalsLoaded: Bool = false
+    var runnerType: String? = nil
 
-    // 피드백 상태 추적
     var lastDistanceFeedbackKm: Int = 0
     var lastTimeFeedback50PercentGiven: Bool = false
     var lastTimeFeedback5MinBeforeGiven: Bool = false
@@ -76,10 +75,13 @@ public final class RunningReactor: Reactor {
     var lastPaceFeedbackCategory: PaceFeedbackType? = nil
     var lastPaceFeedbackTriggerDistance: Double = 0.0
 
+    var goalFeedbackFor1KmLeftGiven: Bool = false
+    var goalFeedbackForFinishGiven: Bool = false
+
     var lastKnownLocation: CLLocation? = nil
 
-    var averagePaceInSeconds: TimeInterval = 0.0 // 초/km 단위로 직접 저장
-    var averagePaceString: String { // 계산된 값을 사용하여 문자열만 반환
+    var averagePaceInSeconds: TimeInterval = 0.0
+    var averagePaceString: String {
       guard averagePaceInSeconds > 0 else { return "00'00\"" }
       let minutes = Int(averagePaceInSeconds / 60)
       let seconds = Int(averagePaceInSeconds.truncatingRemainder(dividingBy: 60))
@@ -92,6 +94,9 @@ public final class RunningReactor: Reactor {
       let seconds = Int(elapsedTime) % 60
       return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
+
+    var audioQueue: [AudioFeedbackEvent] = []
+    var isAudioFeedbackEnabled: Bool = true
   }
 
   public let initialState: State
@@ -99,6 +104,8 @@ public final class RunningReactor: Reactor {
   private let runningCompletionUseCase: RunningCompletionUseCaseType
   private let audioUseCase: AudioUseCase
   private let runningGoalUseCase: RunningGoalUseCase
+  private let audioManager: AudioPlayerManagerType
+  private var disposeBag = DisposeBag()
   private var timer: Timer?
 
   public init(
@@ -111,7 +118,16 @@ public final class RunningReactor: Reactor {
     self.runningCompletionUseCase = runningCompletionUseCase
     self.audioUseCase = audioUseCase
     self.runningGoalUseCase = runningGoalUseCase
+    self.audioManager = AudioPlayerManager(audioUseCase: audioUseCase)
     self.initialState = State()
+
+    self.state.map { $0.audioQueue }
+      .distinctUntilChanged()
+      .observe(on: MainScheduler.instance)
+      .subscribe(onNext: { [weak self] _ in
+        self?.playNextAudioIfNeeded()
+      })
+      .disposed(by: disposeBag)
   }
 
   public func mutate(action: Action) -> Observable<Mutation> {
@@ -123,38 +139,13 @@ public final class RunningReactor: Reactor {
       let fetchGoalMutation = runningGoalUseCase.getRunningGoal()
         .asObservable()
         .flatMap { goal -> Observable<Mutation> in
-          print("🔍 원시 목표 값 확인:")
-          print("  - 원시 페이스 목표 (밀리초): \(goal.paceGoal != nil ? "\(goal.paceGoal!)" : "nil")")
-          print("  - 원시 거리 목표 (미터): \(goal.distanceMeterGoal != nil ? "\(goal.distanceMeterGoal!)" : "nil")")
-          print("  - 원시 시간 목표 (밀리초): \(goal.timeGoal != nil ? "\(goal.timeGoal!)" : "nil")")
-
-          let serverPaceGoalSecondsPerKm = goal.paceGoal.map { TimeInterval($0) / 1000.0 }
-          let serverTimeGoalSeconds = goal.timeGoal.map { TimeInterval($0) / 1000.0 }
+          let serverPaceGoalSecondsPerKm = goal.paceGoal.map { TimeInterval($0) }
+          let serverTimeGoalSeconds = goal.timeGoal.map { TimeInterval($0) }
           let serverDistanceGoalMeters = goal.distanceMeterGoal
-
-          if let paceGoalMs = goal.paceGoal {
-            let totalSeconds = TimeInterval(paceGoalMs) / 1000.0
-            let minutes = Int(totalSeconds / 60)
-            let seconds = Int(totalSeconds.truncatingRemainder(dividingBy: 60))
-            print("  - 목표 페이스 (분'초\"): \(String(format: "%02d'%02d\"", minutes, seconds))")
-          } else {
-            print("  - 목표 페이스 (분'초\"): 설정 안됨")
-          }
-
-          if let distanceGoalM = goal.distanceMeterGoal {
-            let distanceKm = distanceGoalM / 1000.0
-            print("  - 목표 거리 (km): \(String(format: "%.2fkm", distanceKm))")
-          } else {
-            print("  - 목표 거리 (km): 설정 안됨")
-          }
-
-          print("📊 목표 불러오기 완료 (서버 값 사용):")
-          print("  - 목표 페이스: \(serverPaceGoalSecondsPerKm != nil ? String(format: "%.2f", serverPaceGoalSecondsPerKm!) + "초/km" : "설정 안됨")")
-          print("  - 목표 거리: \(serverDistanceGoalMeters != nil ? String(format: "%.2f", serverDistanceGoalMeters!) + "m" : "설정 안됨")")
-          print("  - 목표 시간: \(serverTimeGoalSeconds != nil ? String(format: "%.2f", serverTimeGoalSeconds!) + "초" : "설정 안됨")")
+          let runnerType = goal.runnerType
 
           return .concat([
-            .just(.setRunningGoals(paceGoal: serverPaceGoalSecondsPerKm, distanceGoal: serverDistanceGoalMeters, timeGoal: serverTimeGoalSeconds)),
+            .just(.setRunningGoals(paceGoal: serverPaceGoalSecondsPerKm, distanceGoal: serverDistanceGoalMeters, timeGoal: serverTimeGoalSeconds, runnerType: runnerType)),
             .just(.setGoalsLoaded(true))
           ])
         }
@@ -212,12 +203,18 @@ public final class RunningReactor: Reactor {
         } else {
           mutations.append(.just(.setAveragePace(0.0)))
         }
-
-        let feedbackMutations = generateFeedbackMutations(distanceTraveled: distanceTraveled)
-        mutations.append(feedbackMutations)
       }
 
-      return .concat(mutations)
+      return .concat(mutations).flatMap { mutation -> Observable<Mutation> in
+        if case let .updateTotalDistance(distanceTraveled) = mutation {
+          let newTotalDistance = self.currentState.totalDistance + distanceTraveled
+          return .concat(
+            .just(mutation),
+            self.generateFeedbackMutations(totalDistance: newTotalDistance)
+          )
+        }
+        return .just(mutation)
+      }
 
     case let .updateLocation(location):
       return .just(.setLastKnownLocation(location))
@@ -283,6 +280,10 @@ public final class RunningReactor: Reactor {
             ])
           }
       ])
+    case .toggleAudioFeedback:
+      return .just(.setAudioFeedbackEnabled(!currentState.isAudioFeedbackEnabled))
+    case let .dequeueAudio(event):
+      return .just(.dequeueAudio(event))
     }
   }
 
@@ -294,46 +295,58 @@ public final class RunningReactor: Reactor {
     }
   }
 
-  private func generateFeedbackMutations(distanceTraveled: Double) -> Observable<Mutation> {
+  private func playNextAudioIfNeeded() {
+    guard !currentState.audioQueue.isEmpty,
+          !audioManager.isPlaying else { return }
+
+    let nextEvent = currentState.audioQueue.first!
+    print("▶️ playNextAudioIfNeeded 총\(currentState.audioQueue.count)개. 오디오 큐에서 다음 항목 재생: \(nextEvent)")
+
+    audioManager.playAudio(for: nextEvent) { [weak self] success in
+      guard let self = self, success else { return }
+      self.action.onNext(.dequeueAudio(nextEvent))
+      print("▶️▶️▶️▶️ 재생 후 총\(currentState.audioQueue.count)개\n", currentState.audioQueue, "\n\n\n")
+      self.playNextAudioIfNeeded()
+    }
+  }
+
+
+  private func generateFeedbackMutations(totalDistance: Double) -> Observable<Mutation> {
     let state = currentState
     var allFeedbackMutations: [Observable<Mutation>] = []
 
-    // 목표가 로드되지 않았다면 피드백을 생성하지 않습니다.
-    guard state.goalsLoaded else {
-      return .empty()
+    guard
+      state.audioQueue.isEmpty,
+      state.isAudioFeedbackEnabled,
+      state.goalsLoaded else {
+        return .empty()
     }
 
     let hasPaceGoal = state.goalPace != nil
     let hasDistanceGoal = state.goalDistance != nil
     let hasTimeGoal = state.goalTime != nil
 
-    // 7. 거리 & 시간 & 페이스 목표를 설정한 경우, 페이스 오디오 피드백이 나간다.
-    if hasDistanceGoal && hasTimeGoal && hasPaceGoal {
+    // runnerType 피드백은 항상 처리
+    allFeedbackMutations.append(_generateRunnerTypeFeedback(totalDistance: totalDistance))
+
+    // 목표 설정에 따라 피드백 로직 실행
+    if hasDistanceGoal && hasPaceGoal {
+      allFeedbackMutations.append(_generateDistanceFeedback(totalDistance: totalDistance))
       allFeedbackMutations.append(_generatePaceFeedback())
     }
-    // 5. 거리 & 페이스 목표를 설정한 경우, 거리 & 페이스 피드백이 나간다.
-    else if hasDistanceGoal && hasPaceGoal {
-      allFeedbackMutations.append(_generateDistanceFeedback(distanceTraveled: distanceTraveled))
-      allFeedbackMutations.append(_generatePaceFeedback())
+    else if hasDistanceGoal {
+      allFeedbackMutations.append(_generateDistanceFeedback(totalDistance: totalDistance))
     }
-    // 6. 시간 & 페이스 목표를 설정한 경우, 시간 & 페이스 피드백이 나간다.
     else if hasTimeGoal && hasPaceGoal {
       allFeedbackMutations.append(_generateTimeFeedback())
       allFeedbackMutations.append(_generatePaceFeedback())
     }
-    // 4. 거리 & 시간 목표를 설정한 경우, 페이스 오디오 피드백이 나간다.
     else if hasDistanceGoal && hasTimeGoal {
       allFeedbackMutations.append(_generatePaceFeedback())
     }
-    // 1. 페이스 목표만 설정한 경우, 페이스 오디오 피드백이 나간다.
     else if hasPaceGoal {
       allFeedbackMutations.append(_generatePaceFeedback())
     }
-    // 2. 거리 목표만 설정한 경우, 거리 오디오 피드백이 나간다.
-    else if hasDistanceGoal {
-      allFeedbackMutations.append(_generateDistanceFeedback(distanceTraveled: distanceTraveled))
-    }
-    // 3. 시간 목표만 설정한 경우, 시간 오디오 피드백이 나간다.
     else if hasTimeGoal {
       allFeedbackMutations.append(_generateTimeFeedback())
     }
@@ -344,51 +357,69 @@ public final class RunningReactor: Reactor {
     return Observable.concat(allFeedbackMutations)
   }
 
-  private func _generateDistanceFeedback(distanceTraveled: Double) -> Observable<Mutation> {
+  private func _generateRunnerTypeFeedback(totalDistance: Double) -> Observable<Mutation> {
     let state = currentState
     var mutations: [Observable<Mutation>] = []
 
-    let oldTotalDistance = state.totalDistance - distanceTraveled
-    let newTotalDistance = state.totalDistance
-
     let lastKmReached = state.lastDistanceFeedbackKm
-    let currentKmReached = Int(newTotalDistance / 1000.0)
+    let currentKmReached = Int(totalDistance / 1000.0)
 
-    if currentKmReached > 0 && currentKmReached > lastKmReached {
-      let kmToFeedback = currentKmReached
-
-      var audioType: DistanceFeedbackType? = nil
-      switch kmToFeedback {
-      case 1: audioType = .pass1Km
-      case 2: audioType = .pass2Km
-      case 3: audioType = .pass3Km
-      case 4: audioType = .pass4Km
-      case 5: audioType = .pass5Km
-      case 6: audioType = .pass6Km
-      case 7: audioType = .pass7Km
-      case 8: audioType = .pass8Km
-      case 9: audioType = .pass9Km
-      case 10: audioType = .pass10Km
-      default:
-        break
-      }
-
-      if let type = audioType {
-        print("  📏 거리 피드백 트리거됨: \(kmToFeedback)km (\(type))")
-        // TODO: 실제 오디오 재생 로직 (audioUseCase.playAudio...)
-      }
-      mutations.append(.just(.setLastDistanceFeedbackKm(kmToFeedback)))
+    guard currentKmReached > lastKmReached else {
+      return .empty()
     }
 
-    if let goalDistance = state.goalDistance {
-      if newTotalDistance >= goalDistance - 1000 && oldTotalDistance < goalDistance - 1000 {
-        print("  📏 거리 피드백 트리거됨: 완주 1km 전")
-        // TODO: 실제 오디오 재생 로직
+    var feedbackInterval = 1
+    if let runnerType = state.runnerType {
+      switch runnerType {
+      case "BEGINNER": feedbackInterval = 1
+      case "INTERMEDIATE": feedbackInterval = 3
+      case "EXPERT": feedbackInterval = 5
+      default: feedbackInterval = 1
       }
-      if newTotalDistance >= goalDistance && oldTotalDistance < goalDistance {
-        print("  📏 거리 피드백 트리거됨: 목표 거리 완주")
-        // TODO: 실제 오디오 재생 로직
-      }
+    }
+
+    if currentKmReached > 0 && currentKmReached % feedbackInterval == 0 && currentKmReached > lastKmReached {
+      let audioType = DistanceFeedbackType.passKm(currentKmReached)
+      print(" 📏 runnerType 피드백 트리거됨: \(currentKmReached)km (\(audioType))")
+      mutations.append(.just(.enqueueAudio(.distance(audioType))))
+      mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
+    }
+
+    guard !mutations.isEmpty else { return .empty() }
+    return Observable.concat(mutations)
+  }
+
+  private func _generateDistanceFeedback(totalDistance: Double) -> Observable<Mutation> {
+    let state = currentState
+    var mutations: [Observable<Mutation>] = []
+
+    guard let goalDistance = state.goalDistance else {
+      return .empty()
+    }
+
+    let goalKm = Int(goalDistance / 1000.0)
+    let oneKmBeforeGoalKm = Int((goalDistance - 1000) / 1000.0)
+    let currentKmReached = Int(totalDistance / 1000.0)
+
+    guard
+      currentKmReached > 0,
+      currentKmReached > state.lastDistanceFeedbackKm else {
+      return .empty()
+    }
+
+    if currentKmReached == goalKm && !state.goalFeedbackForFinishGiven {
+      print(" 📏 거리 피드백 트리거됨: 목표 거리 완주")
+      mutations.append(.just(.enqueueAudio(.distance(.finish))))
+      mutations.append(.just(.setGoalFeedbackForFinishGiven(true)))
+    } else if currentKmReached == oneKmBeforeGoalKm && !state.goalFeedbackFor1KmLeftGiven {
+      print(" 📏 거리 피드백 트리거됨: 완주 1km 전")
+      mutations.append(.just(.enqueueAudio(.distance(.left1Km))))
+      mutations.append(.just(.setGoalFeedbackFor1KmLeftGiven(true)))
+    } else if currentKmReached != goalKm && currentKmReached != oneKmBeforeGoalKm {
+      let audioType = DistanceFeedbackType.passKm(currentKmReached)
+      print(" 📏 거리 통과 피드백 트리거됨: \(currentKmReached)km (\(audioType))")
+      mutations.append(.just(.enqueueAudio(.distance(audioType))))
+      mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
     }
 
     guard !mutations.isEmpty else { return .empty() }
@@ -405,21 +436,21 @@ public final class RunningReactor: Reactor {
       let fiftyPercentTime = goalTime * 0.5
       if currentElapsedTime >= fiftyPercentTime && !state.lastTimeFeedback50PercentGiven {
         mutations.append(.just(.setLastTimeFeedback50PercentGiven(true)))
-        print("  ⏱️ 시간 피드백 트리거됨: 50% 지점")
-        // TODO: 실제 오디오 재생 로직
+        print(" ⏱️ 시간 피드백 트리거됨: 50% 지점")
+        mutations.append(.just(.enqueueAudio(.time(.passHalf))))
       }
 
       let fiveMinBeforeTime = goalTime - (5 * 60)
       if currentElapsedTime >= fiveMinBeforeTime && !state.lastTimeFeedback5MinBeforeGiven && fiveMinBeforeTime > 0 {
         mutations.append(.just(.setLastTimeFeedback5MinBeforeGiven(true)))
-        print("  ⏱️ 시간 피드백 트리거됨: 5분 전")
-        // TODO: 실제 오디오 재생 로직
+        print(" ⏱️ 시간 피드백 트리거됨: 5분 전")
+        mutations.append(.just(.enqueueAudio(.time(.left5Min))))
       }
 
       if currentElapsedTime >= goalTime && !state.lastTimeFeedback100PercentGiven {
         mutations.append(.just(.setLastTimeFeedback100PercentGiven(true)))
-        print("  ⏱️ 시간 피드백 트리거됨: 100% 지점")
-        // TODO: 실제 오디오 재생 로직
+        print(" ⏱️ 시간 피드백 트리거됨: 100% 지점")
+        mutations.append(.just(.enqueueAudio(.time(.finish))))
       }
     }
 
@@ -431,24 +462,21 @@ public final class RunningReactor: Reactor {
     let state = currentState
     var mutations: [Observable<Mutation>] = []
 
-    // 목표 페이스와 현재 평균 페이스가 유효한지 확인
     guard let goalPace = state.goalPace, state.averagePaceInSeconds > 0 else {
       return .empty()
     }
 
-    let currentKm = Int(state.totalDistance / 1000.0) // 현재 몇 km를 넘었는지
-    let lastFeedbackKm = Int(state.lastPaceFeedbackTriggerDistance / 1000.0) // 마지막으로 피드백을 준 km 지점
+    let currentKm = Int(state.totalDistance / 1000.0)
+    let lastFeedbackKm = Int(state.lastPaceFeedbackTriggerDistance / 1000.0)
 
-    // 현재 km 지점이 마지막 피드백 km 지점보다 크고, 0km 이상일 때만 피드백 트리거
     guard currentKm > 0 && currentKm > lastFeedbackKm else {
       return .empty()
     }
 
     let currentAveragePace = state.averagePaceInSeconds
 
-    // 페이스 기준 (초/km)
-    let fastThreshold = goalPace - 15.0 // 목표보다 15초/km 빠르면 fast
-    let slowThreshold = goalPace + 30.0 // 목표보다 30초/km 느리면 slow
+    let fastThreshold = goalPace - 15.0
+    let slowThreshold = goalPace + 30.0
 
     var currentPaceCategory: PaceFeedbackType? = nil
 
@@ -460,14 +488,11 @@ public final class RunningReactor: Reactor {
       currentPaceCategory = .good
     }
 
-    // 새로운 1km 지점을 지났으면, 카테고리가 이전과 같든 다르든 피드백을 발생시킵니다.
-    // 그리고 이 1km 지점에서의 페이스 카테고리와, 정확한 1km 지점을 기록합니다.
     if let category = currentPaceCategory {
       mutations.append(.just(.setLastPaceFeedbackCategory(category)))
-      // 피드백 트리거 거리를 현재 통과한 정확한 킬로미터 지점으로 설정 (예: 1000.0m, 2000.0m)
       mutations.append(.just(.setLastPaceFeedbackTriggerDistance(Double(currentKm) * 1000.0)))
-      print("  🏃 페이스 피드백 트리거됨: \(currentKm)km 지점 평균 페이스 - \(category.rawValue)")
-      // TODO: 실제 오디오 재생 로직 (audioUseCase.playAudio...)
+      print(" 🏃 페이스 피드백 트리거됨: \(currentKm)km 지점 평균 페이스 - \(category.rawValue)")
+      mutations.append(.just(.enqueueAudio(.pace(category))))
     }
 
     guard !mutations.isEmpty else { return .empty() }
@@ -497,10 +522,11 @@ public final class RunningReactor: Reactor {
       newState.lastDistanceFeedbackKm = km
     case let .setLastKnownLocation(location):
       newState.lastKnownLocation = location
-    case let .setRunningGoals(paceGoal, distanceGoal, timeGoal):
+    case let .setRunningGoals(paceGoal, distanceGoal, timeGoal, runnerType):
       newState.goalPace = paceGoal
       newState.goalDistance = distanceGoal
       newState.goalTime = timeGoal
+      newState.runnerType = runnerType
     case let .setGoalsLoaded(loaded):
       newState.goalsLoaded = loaded
     case let .setLastTimeFeedback50PercentGiven(given):
@@ -515,6 +541,21 @@ public final class RunningReactor: Reactor {
       newState.lastPaceFeedbackTriggerDistance = distance
     case let .setAveragePace(pace):
       newState.averagePaceInSeconds = pace
+    case let .enqueueAudio(event):
+      if !newState.audioQueue.contains(where: { $0 == event }) {
+        newState.audioQueue.append(event)
+      }
+    case let .dequeueAudio(event):
+      if newState.audioQueue.first == event {
+        newState.audioQueue.removeFirst()
+      }
+    case let .setAudioFeedbackEnabled(isEnabled):
+      newState.isAudioFeedbackEnabled = isEnabled
+      print("🔊 오디오 피드백 상태 변경: \(isEnabled ? "활성화" : "비활성화")")
+    case let .setGoalFeedbackFor1KmLeftGiven(given):
+      newState.goalFeedbackFor1KmLeftGiven = given
+    case let .setGoalFeedbackForFinishGiven(given):
+      newState.goalFeedbackForFinishGiven = given
     }
     return newState
   }

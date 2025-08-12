@@ -29,7 +29,7 @@ public final class FRLocationManager: NSObject {
   }
 
   public func requestAuthorization() {
-    manager.requestWhenInUseAuthorization()
+    manager.requestAlwaysAuthorization()
   }
 
   public func startUpdatingLocation() {
