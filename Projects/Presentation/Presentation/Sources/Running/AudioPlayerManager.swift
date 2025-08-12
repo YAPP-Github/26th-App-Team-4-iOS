@@ -90,8 +90,10 @@ final class AudioPlayerManager: NSObject, AudioPlayerManagerType, AVAudioPlayerD
         self?.setupAndPlay(audioData: audioData)
       }, onFailure: { [weak self] error in
         print("❌ [AudioPlayerManager] 오디오 데이터 로드 실패: \(error.localizedDescription)")
-        self?.completionHandler?(false)
-        self?.completionHandler = nil
+        DispatchQueue.main.async {
+          self?.completionHandler?(false)
+          self?.completionHandler = nil
+        }
       })
       .disposed(by: disposeBag)
   }
@@ -110,15 +112,21 @@ final class AudioPlayerManager: NSObject, AudioPlayerManagerType, AVAudioPlayerD
 
   func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
     print("✅ [AudioPlayerManager] 오디오 재생 완료.")
-    self.completionHandler?(flag)
-    self.completionHandler = nil
-    self.audioPlayer = nil
+    DispatchQueue.main.async { [weak self] in
+      guard let self = self else { return }
+      self.completionHandler?(flag)
+      self.completionHandler = nil
+      self.audioPlayer = nil
+    }
   }
 
   func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
     print("❌ [AudioPlayerManager] 오디오 디코딩 오류 발생: \(error?.localizedDescription ?? "알 수 없음")")
-    self.completionHandler?(false)
-    self.completionHandler = nil
-    self.audioPlayer = nil
+    DispatchQueue.main.async { [weak self] in
+      guard let self = self else { return }
+      self.completionHandler?(false)
+      self.completionHandler = nil
+      self.audioPlayer = nil
+    }
   }
 }

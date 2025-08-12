@@ -171,6 +171,8 @@ final class RunningViewController: BaseViewController, View {
   // MARK: - UI Setup
 
   private func setupUI() {
+    view.backgroundColor = .black
+
     view.addSubview(topBackgroundView)
     view.addSubview(bottomContainerView)
     view.addSubview(animationView)
