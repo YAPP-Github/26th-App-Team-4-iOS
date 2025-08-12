@@ -27,7 +27,7 @@ public final class RunningReactor: Reactor {
     case tick
     case stopRun
     case updateLocation(CLLocation)
-    case dequeueAudio
+    case dequeueAudio(AudioFeedbackEvent)
   }
 
   public enum Mutation {
@@ -49,7 +49,7 @@ public final class RunningReactor: Reactor {
     case setLastPaceFeedbackTriggerDistance(Double)
     case setAveragePace(TimeInterval)
     case enqueueAudio(AudioFeedbackEvent)
-    case dequeueAudio
+    case dequeueAudio(AudioFeedbackEvent)
   }
 
   public struct State {
@@ -278,8 +278,8 @@ public final class RunningReactor: Reactor {
             ])
           }
       ])
-    case .dequeueAudio:
-      return .just(.dequeueAudio)
+    case let .dequeueAudio(event):
+      return .just(.dequeueAudio(event))
     }
   }
 
@@ -296,11 +296,10 @@ public final class RunningReactor: Reactor {
 
     let nextEvent = currentState.audioQueue.first!
     print("▶️ 총\(currentState.audioQueue.count)개. 오디오 큐에서 다음 항목 재생: \(nextEvent)")
-    print(currentState.audioQueue)
 
     audioManager.playAudio(for: nextEvent) { [weak self] success in
       guard let self = self, success else { return }
-      self.action.onNext(.dequeueAudio)
+      self.action.onNext(.dequeueAudio(nextEvent))
     }
   }
 
@@ -351,32 +350,34 @@ public final class RunningReactor: Reactor {
     let lastKmReached = state.lastDistanceFeedbackKm
     let currentKmReached = Int(totalDistance / 1000.0)
 
-    guard currentKmReached > lastKmReached else {
+    guard
+      currentKmReached > lastKmReached,
+      let goalDistance = state.goalDistance
+    else {
       return .empty()
     }
 
-    if let goalDistance = state.goalDistance {
-      let goalKm = Int(goalDistance / 1000.0)
-      let oneKmBeforeGoalKm = Int((goalDistance - 1000) / 1000.0)
+    let goalKm = Int(goalDistance / 1000.0)
+    let oneKmBeforeGoalKm = Int((goalDistance - 1000) / 1000.0)
 
-      if currentKmReached >= goalKm && currentKmReached > lastKmReached {
-        print(" 📏 거리 피드백 트리거됨: 목표 거리 완주")
-        mutations.append(.just(.enqueueAudio(.distance(.finish))))
-        mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
-      }
-
-      else if currentKmReached == oneKmBeforeGoalKm && currentKmReached > lastKmReached {
-        print(" 📏 거리 피드백 트리거됨: 완주 1km 전")
-        mutations.append(.just(.enqueueAudio(.distance(.left1Km))))
-        mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
-      }
-
-      else if (1...49).contains(currentKmReached) && currentKmReached > lastKmReached {
-        let audioType = DistanceFeedbackType.passKm(currentKmReached)
-        print(" 📏 거리 피드백 트리거됨: \(currentKmReached)km (\(audioType))")
-        mutations.append(.just(.enqueueAudio(.distance(audioType))))
-        mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
-      }
+    // 1. 목표 완주 피드백
+    if currentKmReached >= goalKm {
+      print(" 📏 거리 피드백 트리거됨: 목표 거리 완주")
+      mutations.append(.just(.enqueueAudio(.distance(.finish))))
+      mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
+    }
+    // 2. 완주 1km 전 피드백
+    else if currentKmReached == oneKmBeforeGoalKm {
+      print(" 📏 거리 피드백 트리거됨: 완주 1km 전")
+      mutations.append(.just(.enqueueAudio(.distance(.left1Km))))
+      mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
+    }
+    // 3. 1km 단위 일반 피드백
+    else if (1...49).contains(currentKmReached) {
+      let audioType = DistanceFeedbackType.passKm(currentKmReached)
+      print(" 📏 거리 피드백 트리거됨: \(currentKmReached)km (\(audioType))")
+      mutations.append(.just(.enqueueAudio(.distance(audioType))))
+      mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
     }
 
     guard !mutations.isEmpty else { return .empty() }
@@ -501,9 +502,11 @@ public final class RunningReactor: Reactor {
       if !newState.audioQueue.contains(where: { $0 == event }) {
         newState.audioQueue.append(event)
       }
-    case .dequeueAudio:
-      if !newState.audioQueue.isEmpty {
+    case let .dequeueAudio(event):
+      if newState.audioQueue.first == event {
         newState.audioQueue.removeFirst()
+      } else {
+        print("⚠️ [Queue Error] 큐의 첫 번째 항목이 예상과 다릅니다. 현재 큐 상태: \(newState.audioQueue)")
       }
     }
     return newState
