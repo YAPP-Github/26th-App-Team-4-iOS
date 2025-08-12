@@ -85,7 +85,7 @@ public class MyUserInfoTableCell: BaseTableViewCell {
   }
   
   // MARK: - 체력수준
-  private lazy var healthLevelHStack = UIStackView(
+  lazy var healthLevelHStack = UIStackView(
     arrangedSubviews: [healthLevelImageLabel, healthLevelTextVStack, UIView()]
   ).then {
     $0.axis = .horizontal
@@ -120,7 +120,7 @@ public class MyUserInfoTableCell: BaseTableViewCell {
   }
 
   // MARK: - 러닝 목표
-  private lazy var goalHStack = UIStackView(
+  lazy var goalHStack = UIStackView(
     arrangedSubviews: [goalImageLabel, goalTextVStack, UIView()]
   ).then {
     $0.axis = .horizontal

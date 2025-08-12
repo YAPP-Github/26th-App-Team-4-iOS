@@ -231,7 +231,18 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
     let cell = tableView.dequeueReusableCell(
       withIdentifier: MyUserInfoTableCell.identifier, for: indexPath
     ) as! MyUserInfoTableCell
+    cell.healthLevelHStack.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        owner.pushMyLevelSettingVC()
+      }
+      .disposed(by: cell.disposeBag)
     return cell
+  }
+  
+  private func pushMyLevelSettingVC() {
+    let myLevelSettingVC = MyLevelSettingViewController()
+    navigationController?.pushViewController(myLevelSettingVC, animated: true)
   }
   
   private func dequeueGoalCell(for indexPath: IndexPath) -> MyPageGoalTableCell {

@@ -32,7 +32,7 @@ class MyPageFooterTableCell: BaseTableViewCell {
   private let emailLabel = UILabel().then { // 24
     $0.font = .systemFont(ofSize: 13, weight: .regular)
     $0.textColor = FRColor.Fg.Text.primary.withAlphaComponent(0.4)
-    $0.text = "sample@gmail.com"
+    $0.text = "fitrun@gmail.com"
   }
 
   public override func initUI() {
