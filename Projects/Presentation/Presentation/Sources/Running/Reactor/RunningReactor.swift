@@ -1,10 +1,3 @@
-//
-//  RunningReactor.swift
-//  Presentation
-//
-//  Created by dong eun shin on 7/23/25.
-//
-
 import UIKit
 import CoreLocation
 import Domain
@@ -28,6 +21,7 @@ public final class RunningReactor: Reactor {
     case stopRun
     case updateLocation(CLLocation)
     case dequeueAudio(AudioFeedbackEvent)
+    case toggleAudioFeedback
   }
 
   public enum Mutation {
@@ -50,6 +44,7 @@ public final class RunningReactor: Reactor {
     case setAveragePace(TimeInterval)
     case enqueueAudio(AudioFeedbackEvent)
     case dequeueAudio(AudioFeedbackEvent)
+    case setAudioFeedbackEnabled(Bool)
   }
 
   public struct State {
@@ -95,8 +90,8 @@ public final class RunningReactor: Reactor {
       return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
 
-    // 오디오 이벤트를 담을 큐
     var audioQueue: [AudioFeedbackEvent] = []
+    var isAudioFeedbackEnabled: Bool = true
   }
 
   public let initialState: State
@@ -280,6 +275,8 @@ public final class RunningReactor: Reactor {
             ])
           }
       ])
+    case .toggleAudioFeedback:
+      return .just(.setAudioFeedbackEnabled(!currentState.isAudioFeedbackEnabled))
     case let .dequeueAudio(event):
       return .just(.dequeueAudio(event))
     }
@@ -308,6 +305,10 @@ public final class RunningReactor: Reactor {
   private func generateFeedbackMutations(totalDistance: Double) -> Observable<Mutation> {
     let state = currentState
     var allFeedbackMutations: [Observable<Mutation>] = []
+
+    guard state.isAudioFeedbackEnabled else {
+      return .empty()
+    }
 
     guard state.goalsLoaded else {
       return .empty()
@@ -347,36 +348,35 @@ public final class RunningReactor: Reactor {
   }
 
   private func _generateRunnerTypeFeedback(totalDistance: Double) -> Observable<Mutation> {
-      let state = currentState
-      var mutations: [Observable<Mutation>] = []
+    let state = currentState
+    var mutations: [Observable<Mutation>] = []
 
-      let lastKmReached = state.lastDistanceFeedbackKm
-      let currentKmReached = Int(totalDistance / 1000.0)
+    let lastKmReached = state.lastDistanceFeedbackKm
+    let currentKmReached = Int(totalDistance / 1000.0)
 
-      guard currentKmReached > lastKmReached else {
-          return .empty()
+    guard currentKmReached > lastKmReached else {
+      return .empty()
+    }
+
+    var feedbackInterval = 1
+    if let runnerType = state.runnerType {
+      switch runnerType {
+      case "BEGINNER": feedbackInterval = 1
+      case "INTERMEDIATE": feedbackInterval = 3
+      case "EXPERT": feedbackInterval = 5
+      default: feedbackInterval = 1
       }
+    }
 
-      var feedbackInterval = 1
-      if let runnerType = state.runnerType {
-          switch runnerType {
-          case "BEGINNER": feedbackInterval = 1
-          case "INTERMEDIATE": feedbackInterval = 3
-          case "EXPERT": feedbackInterval = 5
-          default: feedbackInterval = 1
-          }
-      }
+    if currentKmReached > 0 && currentKmReached % feedbackInterval == 0 && currentKmReached > lastKmReached {
+      let audioType = DistanceFeedbackType.passKm(currentKmReached)
+      print(" 📏 runnerType 피드백 트리거됨: \(currentKmReached)km (\(audioType))")
+      mutations.append(.just(.enqueueAudio(.distance(audioType))))
+      mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
+    }
 
-      // 1km를 넘었고, 피드백 주기(interval)에 도달했을 때 피드백 추가
-      if currentKmReached > 0 && currentKmReached % feedbackInterval == 0 && currentKmReached > lastKmReached {
-          let audioType = DistanceFeedbackType.passKm(currentKmReached)
-          print(" 📏 runnerType 피드백 트리거됨: \(currentKmReached)km (\(audioType))")
-          mutations.append(.just(.enqueueAudio(.distance(audioType))))
-          mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
-      }
-
-      guard !mutations.isEmpty else { return .empty() }
-      return Observable.concat(mutations)
+    guard !mutations.isEmpty else { return .empty() }
+    return Observable.concat(mutations)
   }
 
   private func _generateDistanceFeedback(totalDistance: Double) -> Observable<Mutation> {
@@ -396,23 +396,13 @@ public final class RunningReactor: Reactor {
     let goalKm = Int(goalDistance / 1000.0)
     let oneKmBeforeGoalKm = Int((goalDistance - 1000) / 1000.0)
 
-    // 1. 목표 완주 피드백
     if currentKmReached >= goalKm {
       print(" 📏 거리 피드백 트리거됨: 목표 거리 완주")
       mutations.append(.just(.enqueueAudio(.distance(.finish))))
       mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
-    }
-    // 2. 완주 1km 전 피드백
-    else if currentKmReached == oneKmBeforeGoalKm {
+    } else if currentKmReached == oneKmBeforeGoalKm {
       print(" 📏 거리 피드백 트리거됨: 완주 1km 전")
       mutations.append(.just(.enqueueAudio(.distance(.left1Km))))
-      mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
-    }
-    // 3. 1km 단위 일반 피드백
-    else if (1...49).contains(currentKmReached) {
-      let audioType = DistanceFeedbackType.passKm(currentKmReached)
-      print(" 📏 거리 피드백 트리거됨: \(currentKmReached)km (\(audioType))")
-      mutations.append(.just(.enqueueAudio(.distance(audioType))))
       mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
     }
 
@@ -545,6 +535,9 @@ public final class RunningReactor: Reactor {
       } else {
         print("⚠️ [Queue Error] 큐의 첫 번째 항목이 예상과 다릅니다. 현재 큐 상태: \(newState.audioQueue)")
       }
+    case let .setAudioFeedbackEnabled(isEnabled):
+      newState.isAudioFeedbackEnabled = isEnabled
+      print("🔊 오디오 피드백 상태 변경: \(isEnabled ? "활성화" : "비활성화")")
     }
     return newState
   }

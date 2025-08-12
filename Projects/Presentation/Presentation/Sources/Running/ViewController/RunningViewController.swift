@@ -132,6 +132,13 @@ final class RunningViewController: BaseViewController, View {
     $0.isHidden = true
   }
 
+  private let toggleAudioButton = UIButton().then {
+    $0.backgroundColor = .clear
+    let image = UIImage(named: "AudioOnWhite", in: .module, with: nil)?
+      .resized(to: CGSize(width: 32, height: 32))
+    $0.setImage(image, for: .normal)
+  }
+
   // MARK: - View Life Cycle
 
   override func viewDidLoad() {
@@ -168,6 +175,7 @@ final class RunningViewController: BaseViewController, View {
     view.addSubview(bottomContainerView)
     view.addSubview(animationView)
     view.addSubview(loadingIndicator)
+    view.addSubview(toggleAudioButton)
 
     topBackgroundView.addSubview(distanceLabel)
     topBackgroundView.addSubview(unitLabel)
@@ -255,6 +263,12 @@ final class RunningViewController: BaseViewController, View {
     loadingIndicator.snp.makeConstraints { make in
       make.center.equalToSuperview()
     }
+
+    toggleAudioButton.snp.makeConstraints { make in
+      make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(10)
+      make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
+      make.width.height.equalTo(66)
+    }
   }
 
   // MARK: - Location Manager
@@ -297,6 +311,40 @@ final class RunningViewController: BaseViewController, View {
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
 
+    toggleAudioButton.rx.tap
+      .map { Reactor.Action.toggleAudioFeedback }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+
+    Observable.combineLatest(
+      reactor.state.map(\.isAudioFeedbackEnabled),
+      reactor.state.map(\.sessionState)
+    )
+    .distinctUntilChanged { $0 == $1 }
+    .bind(with: self) { this, states in
+      let (isEnabled, sessionState) = states
+      var imageName: String
+
+      switch (isEnabled, sessionState) {
+      case (true, .inProgress):
+        imageName = "AudioOnWhite"
+      case (false, .inProgress):
+        imageName = "AudioOffWhite"
+      case (true, .paused):
+        imageName = "AudioOnBlack"
+      case (false, .paused):
+        imageName = "AudioOffBlack"
+      default:
+        this.toggleAudioButton.isHidden = true
+        return
+      }
+
+      let image = UIImage(named: imageName, in: .module, with: nil)?.resized(to: CGSize(width: 32, height: 32))
+      this.toggleAudioButton.setImage(image, for: .normal)
+      this.toggleAudioButton.isHidden = false
+    }
+    .disposed(by: disposeBag)
+
     reactor.state.map { $0.elapsedTimeString }
       .distinctUntilChanged()
       .bind(to: timeValueLabel.rx.text)
@@ -325,6 +373,7 @@ final class RunningViewController: BaseViewController, View {
           this.loadingIndicator.stopAnimating()
           this.loadingIndicator.isHidden = true
           this.locationManager.stopUpdatingLocation()
+          this.toggleAudioButton.isHidden = true
         case .inProgress:
           this.animationView.isHidden = true
           this.animationView.isUserInteractionEnabled = false
@@ -338,6 +387,7 @@ final class RunningViewController: BaseViewController, View {
           this.secondaryActionButton.isHidden = true
           this.playButton.isHidden = true
           this.locationManager.startUpdatingLocation()
+          this.toggleAudioButton.isHidden = false
         case .paused:
           this.animationView.isHidden = true
           this.animationView.isUserInteractionEnabled = false
@@ -350,6 +400,7 @@ final class RunningViewController: BaseViewController, View {
           this.mainActionButton.isHidden = true
           this.secondaryActionButton.isHidden = false
           this.playButton.isHidden = false
+          this.toggleAudioButton.isHidden = false
         case .uploading:
           this.animationView.isHidden = true
           this.animationView.isUserInteractionEnabled = false
@@ -358,12 +409,14 @@ final class RunningViewController: BaseViewController, View {
           this.loadingIndicator.isHidden = false
           this.loadingIndicator.startAnimating()
           this.locationManager.stopUpdatingLocation()
+          this.toggleAudioButton.isHidden = true
         case .finished, .error:
           this.animationView.isHidden = true
           this.animationView.isUserInteractionEnabled = false
           this.loadingIndicator.stopAnimating()
           this.loadingIndicator.isHidden = true
           this.locationManager.stopUpdatingLocation()
+          this.toggleAudioButton.isHidden = true
         }
       }
       .disposed(by: disposeBag)
