@@ -274,6 +274,27 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
     } else {
       cell.setData(title: item.title)
     }
+    
+    cell.contentView.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        switch item {
+        case .runningSetting:
+          owner.coordinator?.showRunningSetting()
+          
+        case .notificationSetting:
+          break
+        case .acessibilitySetting:
+          break
+        case .termOfService:
+          break
+        case .serviceGuide:
+          break
+        default:
+          break
+        }
+      }
+      .disposed(by: cell.disposeBag)
     return cell
   }
 

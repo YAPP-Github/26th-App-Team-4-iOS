@@ -65,5 +65,11 @@ public final class MyPageAssembly: Assembly {
       let vc = DeleteAccountViewController(mode: mode)
       return vc
     }
+    
+    // MARK: - 러닝 설정
+    container.register(MyRunningSettingViewController.self) { r in
+      let vc = MyRunningSettingViewController()
+      return vc
+    }
   }
 }
