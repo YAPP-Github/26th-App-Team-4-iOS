@@ -10,6 +10,8 @@ import Swinject
 import Core
 
 public protocol MyPageCoordinator: Coordinator {
+  func showMyLevelSetting()
+  func showMyPurposeSetting()
 }
 
 public final class MyPageCoordinatorImpl: MyPageCoordinator {
@@ -32,6 +34,22 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
     }
     viewController.coordinator = self
     navigationController.pushViewController(viewController, animated: false)
+  }
+  
+  public func showMyLevelSetting() {
+    guard let viewController = resolver.resolve(MyLevelSettingViewController.self) else {
+      fatalError("Failed to resolve RecordListViewController. Ensure it is registered in Swinject.")
+    }
+    viewController.coordinator = self
+    navigationController.pushViewController(viewController, animated: true)
+  }
+  
+  public func showMyPurposeSetting() {
+    guard let viewController = resolver.resolve(MyPurposeSettingViewController.self) else {
+      fatalError("Failed to resolve RecordListViewController. Ensure it is registered in Swinject.")
+    }
+    viewController.coordinator = self
+    navigationController.pushViewController(viewController, animated: true)
   }
 }
 
