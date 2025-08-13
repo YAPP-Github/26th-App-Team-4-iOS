@@ -23,11 +23,11 @@ public final class RecordDetailViewController: BaseViewController, View {
     case lapSegment
   }
   
-  weak var coordinator: RecordCoordinator?
-  
+  weak var coordinator: RecordDetailCoordinator?
+
   private let backButton = UIButton().then {
     $0.setImage(.init(systemName: "chevron.left"), for: .normal)
-    $0.tintColor = .black
+    $0.tintColor = .orange
   }
   
   private lazy var tableView = UITableView(frame: .zero, style: .grouped).then {
@@ -50,7 +50,7 @@ public final class RecordDetailViewController: BaseViewController, View {
 //    $0.isHidden = true
     $0.onConfirm = { [weak self] in
       guard let self = self else { return }
-//      self.coordinator?.showRunningPaceSetting()
+      self.coordinator?.showRunningPaceSetting()
     }
   }
     override init() {
@@ -65,8 +65,6 @@ public final class RecordDetailViewController: BaseViewController, View {
   public override func viewDidLoad() {
     super.viewDidLoad()
     self.view.backgroundColor = FRColor.Bg.secondary
-
-    bind()
   }
 
   public override func viewDidAppear(_ animated: Bool) {
@@ -98,16 +96,14 @@ public final class RecordDetailViewController: BaseViewController, View {
       $0.edges.equalToSuperview()
     }
   }
-
-  private func bind() {
-    backButton.rx.tap
-      .subscribe(with: self) { object, _ in
-//        object.coordinator?.dismissRunningFlow()
-      }
-      .disposed(by: disposeBag)
-  }
   
   public func bind(reactor: RecordDetailReactor) {
+    backButton.rx.tap
+      .subscribe(with: self) { owner, _ in
+        owner.coordinator?.finish()
+      }
+      .disposed(by: disposeBag)
+
     self.rx.viewDidAppear
       .take(1)
       .subscribe(with: self) { object, _ in
@@ -121,16 +117,6 @@ public final class RecordDetailViewController: BaseViewController, View {
 
         guard let record = record else { return }
         owner.tableView.reloadData()
-      }
-      .disposed(by: disposeBag)
-  }
-  
-  public override func action() {
-    super.action()
-    
-    backButton.rx.tap
-      .subscribe(with: self) { owner, _ in
-        owner.navigationController?.popViewController(animated: true)
       }
       .disposed(by: disposeBag)
   }

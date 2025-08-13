@@ -27,7 +27,7 @@ public final class RunningStartUseCase: RunningStartUseCaseType {
 
 public protocol RunningCompletionUseCaseType {
   func execute(
-    recordId: String,
+    recordId: Int,
     startAt: Date,
     runningPoints: [RunningPoint],
     totalTime: TimeInterval,
@@ -45,7 +45,7 @@ public final class RunningCompletionUseCase: RunningCompletionUseCaseType {
   }
 
   public func execute(
-    recordId: String,
+    recordId: Int,
     startAt: Date,
     runningPoints: [RunningPoint],
     totalTime: TimeInterval,

@@ -35,6 +35,7 @@ final class RunningPaceSettingReactor: Reactor {
     case setDidFinishAnimation(Bool)
     case showToast(String?)
     case setUnderlineVisible(Bool)
+    case setNavigation(NavigationTarget?)
   }
   
   struct State {
@@ -48,8 +49,14 @@ final class RunningPaceSettingReactor: Reactor {
     var didFinishAnimation: Bool = false
     var toastMessage: String?
     var shouldAnimateUnderline: Bool = false
+    @Pulse var navigationTarget: NavigationTarget?
   }
-  
+
+  enum NavigationTarget: Equatable {
+    case pop
+    case finish
+  }
+
   let initialState: State
   private let paceUseCase: GoalUseCase
   
@@ -136,13 +143,13 @@ final class RunningPaceSettingReactor: Reactor {
       ])
       
     case .backButtonTapped:
-      return .empty()
-      
+      return .just(.setNavigation(.pop))
+
     case .closeInfoBanner:
       return .just(.setInfoBannerVisible(false))
       
     case .didFinishAnimation:
-      return .just(.setDidFinishAnimation(true))
+      return .just(.setNavigation(.finish))
     }
   }
   
@@ -171,6 +178,8 @@ final class RunningPaceSettingReactor: Reactor {
       newState.toastMessage = message
     case .setUnderlineVisible(let isVisible):
       newState.shouldAnimateUnderline = isVisible
+    case .setNavigation(let target):
+      newState.navigationTarget = target
     }
     return newState
   }

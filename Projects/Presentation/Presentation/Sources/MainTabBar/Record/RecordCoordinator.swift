@@ -38,21 +38,25 @@ public final class RecordCoordinatorImpl: RecordCoordinator {
   
   /// 리스트에서 개별 기록 상세보기
   public func showRecordDetail(recordID: Int) {
-    guard let viewController = resolver.resolve(
-      RecordDetailViewController.self,
-      argument: recordID
-    ) else {
-      fatalError("Failed to resolve RecordDetailViewController. Ensure it is registered in Swinject.")
+    guard let coordinator = resolver.resolve(RecordDetailCoordinatorImpl.self, arguments: navigationController, recordID) else {
+      fatalError("Failed to resolve RecordDetailCoordinator. Ensure it is registered correctly in Swinject.")
     }
-    viewController.coordinator = self
-    navigationController.pushViewController(viewController, animated: true)
+    coordinator.finishDelegate = self
+    childCoordinators.append(coordinator)
+    coordinator.start()
   }
 }
 
 // MARK: - CoordinatorFinishDelegate
 extension RecordCoordinatorImpl: CoordinatorFinishDelegate {
   public func coordinatorDidFinish(childCoordinator: Coordinator) {
-    // 필요에 따라 childCoordinators에서 제거
     childCoordinators.removeAll { $0 === childCoordinator }
+
+    switch childCoordinator.type {
+    case .recordDetail:
+      navigationController.popViewController(animated: false)
+    default:
+      return
+    }
   }
 }
