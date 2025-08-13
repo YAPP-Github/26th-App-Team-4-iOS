@@ -11,8 +11,7 @@ import CoreLocation
 
 public enum RunningAPI: BaseAPI {
   case startRun(lat: Double, lon: Double, timeStamp: String)
-  case completeRun(recordId: String, data: RunningCompletionRequestDTO)
-  case uploadImage(recordId: String, image: UIImage)
+  case completeRun(recordId: Int, data: RunningCompletionRequestDTO)
 
   public var path: String {
     switch self {
@@ -20,8 +19,6 @@ public enum RunningAPI: BaseAPI {
       return "/running"
     case .completeRun(let recordId, _):
       return "/running/\(recordId)"
-    case .uploadImage(let recordId, _):
-      return "/running/\(recordId)/images"
     }
   }
 
@@ -29,7 +26,6 @@ public enum RunningAPI: BaseAPI {
     switch self {
     case .startRun: return .post
     case .completeRun: return .post
-    case .uploadImage: return .post
     }
   }
 
@@ -51,9 +47,6 @@ public enum RunningAPI: BaseAPI {
 
     case let .completeRun(_, data):
       return .requestJSONEncodable(data)
-
-    case .uploadImage(_, image: let image):
-      return .requestParameters(parameters: [:], encoding: JSONEncoding.default)
     }
   }
 }

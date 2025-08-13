@@ -129,29 +129,14 @@ final class FirstRunningPopUpView: UIView {
   // MARK: - Action Handlers
 
   @objc private func confirmButtonTapped() {
+    UserDefaults.standard.set(true, forKey: "hasShownFirstRunPopUp")
     onConfirm?()
     self.removeFromSuperview()
   }
 
   @objc private func closeButtonTapped() {
+    UserDefaults.standard.set(true, forKey: "hasShownFirstRunPopUp")
+
     self.removeFromSuperview()
-  }
-
-  func show(in view: UIView) {
-    self.frame = view.bounds
-    view.addSubview(self)
-
-    self.alpha = 0
-    UIView.animate(withDuration: 0.3) {
-      self.alpha = 1
-    }
-  }
-
-  func dismiss() {
-    UIView.animate(withDuration: 0.3, animations: {
-      self.alpha = 0
-    }) { _ in
-      self.removeFromSuperview()
-    }
   }
 }

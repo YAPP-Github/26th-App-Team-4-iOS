@@ -427,7 +427,8 @@ final class RunningViewController: BaseViewController, View {
       .filter { $0 }
       .distinctUntilChanged()
       .bind(with: self) { this, _ in
-        this.coordinator?.showRunningResult()
+        guard let recordId = reactor.currentState.recordId else { return }
+        this.coordinator?.showRunningResult(recordId: recordId)
       }
       .disposed(by: disposeBag)
   }

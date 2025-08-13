@@ -47,6 +47,7 @@ public final class RunningReactor: Reactor {
     case setAudioFeedbackEnabled(Bool)
     case setGoalFeedbackFor1KmLeftGiven(Bool)
     case setGoalFeedbackForFinishGiven(Bool)
+    case setRecordId(Int)
   }
 
   public struct State {
@@ -55,7 +56,7 @@ public final class RunningReactor: Reactor {
     var sessionState: SessionState = .idle
     var isUploadSuccess: Bool = false
 
-    var recordId: String? = nil
+    var recordId: Int? = nil
     var totalTime: Double = 0
     var totalDistance: Double = 0
     var localStartTime: Date? = nil
@@ -255,7 +256,7 @@ public final class RunningReactor: Reactor {
             let averagePace = totalDistance > 0 ? totalTime / (totalDistance / 1000) : 0
 
             return self.runningCompletionUseCase.execute(
-              recordId: String(recordId),
+              recordId: recordId,
               startAt: localStartTime,
               runningPoints: self.currentState.runningPoints,
               totalTime: totalTime,
@@ -267,6 +268,7 @@ public final class RunningReactor: Reactor {
             .flatMap { success -> Observable<Mutation> in
               print("✅ 업로드 성공: \(success)")
               return .concat([
+                .just(.setRecordId(recordId)),
                 .just(.setUploadSuccess(success)),
                 .just(.setSessionState(.finished))
               ])
@@ -558,6 +560,8 @@ public final class RunningReactor: Reactor {
       newState.goalFeedbackFor1KmLeftGiven = given
     case let .setGoalFeedbackForFinishGiven(given):
       newState.goalFeedbackForFinishGiven = given
+    case let .setRecordId(recordId):
+      newState.recordId = recordId
     }
     return newState
   }

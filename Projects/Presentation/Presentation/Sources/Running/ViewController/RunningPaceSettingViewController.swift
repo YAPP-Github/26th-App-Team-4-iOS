@@ -19,7 +19,7 @@ final class RunningPaceSettingViewController: BaseViewController, View {
   
   // MARK: - Properties
   
-  weak var coordinator: RunningCoordinator?
+  weak var coordinator: PaceSettingCoordinator?
   private var toastHideDisposable: Disposable?
   
   // MARK: - UI Elements
@@ -400,13 +400,18 @@ final class RunningPaceSettingViewController: BaseViewController, View {
         })
       })
       .disposed(by: disposeBag)
-    
-    reactor.state.map { $0.didFinishAnimation }
+
+    reactor.state.compactMap { $0.navigationTarget }
       .distinctUntilChanged()
-      .filter { $0 }
-      .bind(onNext: { [weak self] _ in
-        self?.animationView.isHidden = true
-        self?.coordinator?.pop()
+      .observe(on: MainScheduler.instance)
+      .subscribe(onNext: { [weak self] target in
+        guard let self = self else { return }
+        switch target {
+        case .finish:
+          self.coordinator?.finish()
+        case .pop:
+          self.coordinator?.pop()
+        }
       })
       .disposed(by: disposeBag)
   }

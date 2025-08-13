@@ -14,13 +14,12 @@ public protocol RunningCoordinator: Coordinator {
   func showFirstRunningGoalSettingIntro()
   func showFirstRunningGoalSetting(goalInputType: GoalInputType)
   func showRunning()
-  func showRunningResult()
-  func showRunningPaceSetting()
+  func showRunningResult(recordId: Int)
   func dismissRunningFlow()
   func pop()
 }
 
-public final class RunningCoordinatorImpl: RunningCoordinator {
+public final class RunningCoordinatorImpl: RunningCoordinator, CoordinatorFinishDelegate {
   public var navigationController: UINavigationController
   public var childCoordinators: [Coordinator] = []
   public var type: CoordinatorType = .running
@@ -60,7 +59,7 @@ public final class RunningCoordinatorImpl: RunningCoordinator {
   }
 
   public func dismissRunningFlow() {
-    runningFlowNavigationController?.dismiss(animated: true) { [weak self] in
+    runningFlowNavigationController?.dismiss(animated: false) { [weak self] in
       guard let self = self else { return }
       self.finishDelegate?.coordinatorDidFinish(childCoordinator: self)
     }
@@ -86,24 +85,28 @@ extension RunningCoordinatorImpl {
     runningFlowNavigationController?.pushViewController(viewController, animated: false)
   }
 
-  public func showRunningPaceSetting() {
-    guard let viewController = resolver.resolve(RunningPaceSettingViewController.self) else { return }
-    viewController.coordinator = self
-    runningFlowNavigationController?.pushViewController(viewController, animated: false)
-  }
-
-  public func showRunningResult() {
-    // TODO: - 기록상세/러닝결과 coordinator 생성해서 분리하기
-//    guard let viewController = resolver.resolve(RecordDetailViewController.self) else {
-//      fatalError("Failed to resolve RecordDetailViewController. Ensure it is registered correctly in Swinject.")
-//    }
-//    viewController.coordinator = self
-//
-//    runningFlowNavigationController.modalPresentationStyle = .none
-//    runningFlowNavigationController.pushViewController(viewController, animated: false)
+  public func showRunningResult(recordId: Int) {
+    guard let navigationControllerForFlow = runningFlowNavigationController else {
+      fatalError("runningFlowNavigationController is not set.")
+    }
+    guard let coordinator = resolver.resolve(RecordDetailCoordinatorImpl.self, arguments: navigationControllerForFlow, recordId) else {
+      fatalError("Failed to resolve RecordDetailCoordinator. Ensure it is registered correctly in Swinject.")
+    }
+    coordinator.finishDelegate = self
+    childCoordinators.append(coordinator)
+    coordinator.start()
   }
 
   public func pop() {
     runningFlowNavigationController?.popViewController(animated: false)
+  }
+
+  public func coordinatorDidFinish(childCoordinator: Coordinator) {
+    switch childCoordinator.type {
+    case .recordDetail:
+      dismissRunningFlow()
+    default:
+      return
+    }
   }
 }

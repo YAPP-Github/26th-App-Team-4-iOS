@@ -21,7 +21,7 @@ public protocol Coordinator: AnyObject {
 }
 
 extension Coordinator {
-  func finish() {
+  public func finish() {
     childCoordinators.removeAll()
     finishDelegate?.coordinatorDidFinish(childCoordinator: self)
   }
@@ -37,6 +37,8 @@ public enum CoordinatorType {
   case home
   case running
   case record
+  case recordDetail
+  case paceSetting
 }
 
 public protocol AppCoordinator: Coordinator {

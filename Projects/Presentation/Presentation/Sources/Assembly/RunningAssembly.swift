@@ -47,7 +47,12 @@ public final class RunningAssembly: Assembly {
       let viewController = FirstRunningGoalSettingViewController()
       viewController.reactor = reactor
       return viewController
-            }
+    }
+
+    // Pace Setting
+    container.register(PaceSettingCoordinatorImpl.self) { (r, navigationController: UINavigationController) in
+      return PaceSettingCoordinatorImpl(navigationController: navigationController, resolver: r)
+    }
 
     container.autoregister(RunningPaceSettingReactor.self, initializer: RunningPaceSettingReactor.init)
 
@@ -57,13 +62,6 @@ public final class RunningAssembly: Assembly {
       }
       let viewController = RunningPaceSettingViewController()
       viewController.reactor = reactor
-      return viewController
-    }
-
-    // TODO: - runningassembly로 이동
-    // RecordDetail
-    container.register(RecordDetailViewController.self) { r in
-      let viewController = RecordDetailViewController()
       return viewController
     }
   }
