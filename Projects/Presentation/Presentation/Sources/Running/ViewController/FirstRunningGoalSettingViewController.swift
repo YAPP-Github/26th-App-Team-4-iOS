@@ -376,6 +376,8 @@ final class FirstRunningGoalSettingViewController: BaseViewController, View {
         case .pop:
           self.coordinator?.pop()
         case .showRunning:
+          UserDefaults.standard.set(true, forKey: "hasCompletedRunningOnboarding")
+
           self.coordinator?.showRunning()
         }
       })

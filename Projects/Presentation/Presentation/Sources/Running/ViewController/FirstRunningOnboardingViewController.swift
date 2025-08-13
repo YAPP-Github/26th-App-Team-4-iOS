@@ -122,6 +122,8 @@ final class FirstRunningOnboardingViewController: BaseViewController {
   }
 
   @objc private func doLaterButtonTapped() {
+    UserDefaults.standard.set(true, forKey: "hasCompletedRunningOnboarding")
+
     coordinator?.showRunning()
   }
 

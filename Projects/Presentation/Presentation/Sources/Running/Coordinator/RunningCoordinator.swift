@@ -11,7 +11,6 @@ import RxSwift
 import Core
 
 public protocol RunningCoordinator: Coordinator {
-  func showFirstRunningOnboarding()
   func showFirstRunningGoalSettingIntro()
   func showFirstRunningGoalSetting(goalInputType: GoalInputType)
   func showRunning()
@@ -27,20 +26,41 @@ public final class RunningCoordinatorImpl: RunningCoordinator {
   public var type: CoordinatorType = .running
   public weak var finishDelegate: CoordinatorFinishDelegate?
   private let resolver: Resolver
-  
-  private var runningFlowNavigationController: UINavigationController!
-  
+
+  private var runningFlowNavigationController: UINavigationController?
+
   public init(navigationController: UINavigationController, resolver: Resolver) {
     self.navigationController = navigationController
     self.resolver = resolver
   }
-  
+
   public func start() {
-    showFirstRunningOnboarding()
+    let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedRunningOnboarding")
+
+    let rootViewController: UIViewController
+    if hasCompletedOnboarding {
+      guard let runningVC = resolver.resolve(RunningViewController.self) else {
+        fatalError("Failed to resolve RunningViewController.")
+      }
+      runningVC.coordinator = self
+      rootViewController = runningVC
+    } else {
+      guard let onboardingVC = resolver.resolve(FirstRunningOnboardingViewController.self) else {
+        fatalError("Failed to resolve FirstRunningOnboardingViewController.")
+      }
+      onboardingVC.coordinator = self
+      rootViewController = onboardingVC
+    }
+
+    runningFlowNavigationController = UINavigationController(rootViewController: rootViewController)
+    runningFlowNavigationController?.modalPresentationStyle = .fullScreen
+    runningFlowNavigationController?.isNavigationBarHidden = true
+
+    navigationController.present(runningFlowNavigationController!, animated: false)
   }
-  
+
   public func dismissRunningFlow() {
-    runningFlowNavigationController.dismiss(animated: true) { [weak self] in
+    runningFlowNavigationController?.dismiss(animated: true) { [weak self] in
       guard let self = self else { return }
       self.finishDelegate?.coordinatorDidFinish(childCoordinator: self)
     }
@@ -48,56 +68,30 @@ public final class RunningCoordinatorImpl: RunningCoordinator {
 }
 
 extension RunningCoordinatorImpl {
-  public func showFirstRunningOnboarding() {
-    guard let viewController = resolver.resolve(FirstRunningOnboardingViewController.self) else {
-      fatalError("Failed to resolve FirstRunningOnboardingViewController. Ensure it is registered correctly in Swinject.")
-    }
-    viewController.coordinator = self
-    
-    runningFlowNavigationController = UINavigationController(rootViewController: viewController)
-    runningFlowNavigationController.modalPresentationStyle = .fullScreen
-    runningFlowNavigationController.isNavigationBarHidden = true
-    
-    navigationController.isNavigationBarHidden = true
-    navigationController.present(runningFlowNavigationController, animated: false)
-  }
-  
   public func showFirstRunningGoalSettingIntro() {
-    guard let viewController = resolver.resolve(FirstRunningGoalSettingIntroViewController.self) else {
-      fatalError("Failed to resolve FirstRunningGoalSettingIntroViewController. Ensure it is registered correctly in Swinject.")
-    }
+    guard let viewController = resolver.resolve(FirstRunningGoalSettingIntroViewController.self) else { return }
     viewController.coordinator = self
-    
-    runningFlowNavigationController.pushViewController(viewController, animated: false)
+    runningFlowNavigationController?.pushViewController(viewController, animated: false)
   }
-  
+
   public func showFirstRunningGoalSetting(goalInputType: GoalInputType) {
-    guard let viewController = resolver.resolve(FirstRunningGoalSettingViewController.self, argument: goalInputType) else {
-      fatalError("Failed to resolve FirstRunningGoalSettingViewController. Ensure it is registered correctly in Swinject.")
-    }
+    guard let viewController = resolver.resolve(FirstRunningGoalSettingViewController.self, argument: goalInputType) else { return }
     viewController.coordinator = self
-    
-    runningFlowNavigationController.pushViewController(viewController, animated: false)
+    runningFlowNavigationController?.pushViewController(viewController, animated: false)
   }
-  
+
   public func showRunning() {
-    guard let viewController = resolver.resolve(RunningViewController.self) else {
-      fatalError("Failed to resolve RunningViewController. Ensure it is registered correctly in Swinject.")
-    }
+    guard let viewController = resolver.resolve(RunningViewController.self) else { return }
     viewController.coordinator = self
-    
-    runningFlowNavigationController.pushViewController(viewController, animated: false)
+    runningFlowNavigationController?.pushViewController(viewController, animated: false)
   }
-  
+
   public func showRunningPaceSetting() {
-    guard let viewController = resolver.resolve(RunningPaceSettingViewController.self) else {
-      fatalError("Failed to resolve RunningViewController. Ensure it is registered correctly in Swinject.")
-    }
+    guard let viewController = resolver.resolve(RunningPaceSettingViewController.self) else { return }
     viewController.coordinator = self
-    
-    runningFlowNavigationController.pushViewController(viewController, animated: false)
+    runningFlowNavigationController?.pushViewController(viewController, animated: false)
   }
-  
+
   public func showRunningResult() {
     // TODO: - 기록상세/러닝결과 coordinator 생성해서 분리하기
 //    guard let viewController = resolver.resolve(RecordDetailViewController.self) else {
@@ -110,6 +104,6 @@ extension RunningCoordinatorImpl {
   }
 
   public func pop() {
-    runningFlowNavigationController.popViewController(animated: false)
+    runningFlowNavigationController?.popViewController(animated: false)
   }
 }
