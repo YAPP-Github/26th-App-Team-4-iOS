@@ -27,7 +27,7 @@ public final class RecordDetailViewController: BaseViewController, View {
 
   private let backButton = UIButton().then {
     $0.setImage(.init(systemName: "chevron.left"), for: .normal)
-    $0.tintColor = .orange
+    $0.tintColor = .black
   }
   
   private lazy var tableView = UITableView(frame: .zero, style: .grouped).then {
@@ -47,7 +47,7 @@ public final class RecordDetailViewController: BaseViewController, View {
   }
 
   private lazy var popUpView = FirstRunningPopUpView().then {
-//    $0.isHidden = true
+    $0.isHidden = true
     $0.onConfirm = { [weak self] in
       guard let self = self else { return }
       self.coordinator?.showRunningPaceSetting()
@@ -117,6 +117,15 @@ public final class RecordDetailViewController: BaseViewController, View {
 
         guard let record = record else { return }
         owner.tableView.reloadData()
+      }
+      .disposed(by: disposeBag)
+
+    reactor.state.map(\.shouldShowFirstRunningPopUp)
+      .distinctUntilChanged()
+      .observe(on: MainScheduler.instance)
+      .delay(.milliseconds(500), scheduler: MainScheduler.instance)
+      .subscribe(with: self) { owner, shouldShowPopUp in
+        owner.popUpView.isHidden = !shouldShowPopUp
       }
       .disposed(by: disposeBag)
   }
