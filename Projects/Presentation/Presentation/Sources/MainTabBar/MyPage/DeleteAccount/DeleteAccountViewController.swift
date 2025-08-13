@@ -155,7 +155,7 @@ public final class DeleteAccountViewController: BaseViewController {
       $0.centerX.equalToSuperview()
       $0.height.equalTo(56)
     }
-    
+    navLabel.text = mode == .deleteAccountTerm ? "탈퇴 약관동의" : "회원탈퇴"
     view.addSubview(textVStack)
     textVStack.snp.makeConstraints {
       $0.top.equalTo(navLabel.snp.bottom).offset(28)
@@ -175,6 +175,7 @@ public final class DeleteAccountViewController: BaseViewController {
       $0.leading.trailing.equalToSuperview().inset(20)
       $0.height.equalTo(56)
     }
+    nextButton.setTitle(mode == .deleteAccountTerm ? "다음" : "탈퇴하기", for: .normal)
   }
   
   public override func action() {
