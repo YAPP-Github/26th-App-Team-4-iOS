@@ -76,5 +76,17 @@ public final class MyPageAssembly: Assembly {
       vc.reactor = r.resolve(MyRunningSettingReactor.self)
       return vc
     }
+    
+    // MARK: - 알림 설정
+    container.register(MyNotiSettingReactor.self) { r in
+      return MyNotiSettingReactor()
+    }
+    
+    container.register(MyNotiSettingViewController.self) { r in
+      let vc = MyNotiSettingViewController()
+      vc.reactor = r.resolve(MyNotiSettingReactor.self)
+      return vc
+    }
+    
   }
 }

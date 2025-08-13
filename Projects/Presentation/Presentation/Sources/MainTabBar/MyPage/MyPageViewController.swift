@@ -283,9 +283,15 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
           owner.coordinator?.showRunningSetting()
           
         case .notificationSetting:
-          break
+          owner.coordinator?.showMyNotiSettingVC()
+          
         case .acessibilitySetting:
-          break
+          if let appSettings = URL(string: UIApplication.openSettingsURLString) {
+            if UIApplication.shared.canOpenURL(appSettings) {
+              UIApplication.shared.open(appSettings, options: [:], completionHandler: nil)
+            }
+          }
+
         case .termOfService:
           break
         case .serviceGuide:

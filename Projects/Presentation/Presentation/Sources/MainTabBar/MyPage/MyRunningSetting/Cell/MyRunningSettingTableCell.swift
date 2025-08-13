@@ -48,8 +48,9 @@ public class MyRunningSettingTableCell: BaseTableViewCell {
     $0.isUserInteractionEnabled = false
   }
   
-  func setData(title: String, desc: String, isOn: Bool) {
+  func setData(title: String, desc: String?, isOn: Bool) {
     titleLabel.text = title
+    descLabel.isHidden = desc == nil
     descLabel.text = desc
     toggleSwitch.isOn = isOn
   }

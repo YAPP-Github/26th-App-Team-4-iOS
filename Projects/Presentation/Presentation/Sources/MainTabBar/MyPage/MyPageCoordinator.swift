@@ -15,6 +15,7 @@ public protocol MyPageCoordinator: Coordinator {
   func showMyProfile()
   func showDeleteAccount(mode: DeleteAccountViewController.Mode)
   func showRunningSetting()
+  func showMyNotiSettingVC()
 }
 
 public final class MyPageCoordinatorImpl: MyPageCoordinator {
@@ -71,6 +72,12 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
   
   public func showRunningSetting() {
     let vc = resolver.resolve(MyRunningSettingViewController.self)!
+    vc.coordinator = self
+    navigationController.pushViewController(vc, animated: true)
+  }
+  
+  public func showMyNotiSettingVC() {
+    let vc = resolver.resolve(MyNotiSettingViewController.self)!
     vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)
   }
