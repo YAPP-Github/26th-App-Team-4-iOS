@@ -51,6 +51,8 @@ public final class DeleteAccountViewController: BaseViewController {
     }
   }
   
+  var coordinator: MyPageCoordinator?
+
   let mode: Mode
   
   var tableItem: [Item] {
@@ -60,6 +62,8 @@ public final class DeleteAccountViewController: BaseViewController {
       return [.reason0, .reason1, .reason2, .reason3, .reason4, .reason5, .reasonEtc]
     }
   }
+  
+  private var selectedItem: Item? = nil
   
   private let backButton = UIButton().then {
     $0.setImage(.init(systemName: "chevron.left"), for: .normal)
@@ -84,7 +88,7 @@ public final class DeleteAccountViewController: BaseViewController {
     arrangedSubviews: [beforeDeleteLabel, confirmLabel]
   ).then {
     $0.axis = .vertical
-    $0.spacing = 8
+    $0.spacing = 4
     $0.alignment = .leading
   }
   private let beforeDeleteLabel = UILabel().then { // 32
@@ -172,6 +176,41 @@ public final class DeleteAccountViewController: BaseViewController {
       $0.height.equalTo(56)
     }
   }
+  
+  public override func action() {
+    super.action()
+    
+    backButton.rx.tap
+      .subscribe(with: self) { owner, _ in
+        owner.navigationController?.popViewController(animated: true)
+      }
+      .disposed(by: disposeBag)
+    
+    nextButton.rx.tap
+      .subscribe(with: self) { owner, _ in
+        if owner.mode == .deleteAccountTerm {
+          if owner.selectedItem == .termOfService {
+            owner.coordinator?.showDeleteAccount(mode: .deleteAccountReason)
+            return
+          }
+        } else {
+          // 탈퇴 액션
+        }
+      }
+      .disposed(by: disposeBag)
+  }
+  
+  private func updateNextButtonState() {
+    if mode == .deleteAccountTerm {
+      let isValid = selectedItem == .termOfService
+      nextButton.isEnabled = isValid
+      nextButton.backgroundColor = isValid ? FRColor.Bg.Interactive.secondary : FRColor.Bg.disabled
+    } else {
+      let isValid = selectedItem != nil
+      nextButton.isEnabled = isValid
+      nextButton.backgroundColor = isValid ? FRColor.Bg.Interactive.secondary : FRColor.Bg.disabled
+    }
+  }
 }
 
 extension DeleteAccountViewController: UITableViewDelegate, UITableViewDataSource {
@@ -185,7 +224,23 @@ extension DeleteAccountViewController: UITableViewDelegate, UITableViewDataSourc
     let cell = tableView.dequeueReusableCell(
       withIdentifier: DeleteAccountTableCell.identifier, for: indexPath
     ) as! DeleteAccountTableCell
-    cell.setData(text: item.text, isChecked: false, showTerms: mode == .deleteAccountTerm)
+    cell.setData(text: item.text, isChecked: item == selectedItem, showTerms: mode == .deleteAccountTerm)
+    
+    cell.contentView.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        owner.selectedItem = item
+        owner.tableView.reloadData()
+        owner.updateNextButtonState()
+      }
+      .disposed(by: cell.disposeBag)
+    
+    cell.showTermsButton.rx.tap
+      .subscribe(with: self) { owner, _ in
+        // 이용약관 보이기
+      }
+      .disposed(by: cell.disposeBag)
+    
     return cell
   }
 }

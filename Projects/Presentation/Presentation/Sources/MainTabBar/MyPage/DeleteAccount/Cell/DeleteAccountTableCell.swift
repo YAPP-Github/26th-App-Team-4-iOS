@@ -13,7 +13,7 @@ import Domain
 public class DeleteAccountTableCell: BaseTableViewCell {
   
   private lazy var rootHStack = UIStackView(
-    arrangedSubviews: [radioImageView, titleLabel, requireLabel, UIView(), showTermsButtonLabel]
+    arrangedSubviews: [radioImageView, titleLabel, requireLabel, UIView(), showTermsButton]
   ).then {
     $0.axis = .horizontal
     $0.spacing = 8
@@ -37,17 +37,17 @@ public class DeleteAccountTableCell: BaseTableViewCell {
     $0.text = "*"
   }
   
-  private let showTermsButtonLabel = UILabel().then {
-    $0.font = .systemFont(ofSize: 13, weight: .semibold)
-    $0.textColor = FRColor.Fg.Text.Interactive.secondary
-    $0.text = "약관 보기"
+  let showTermsButton = UIButton().then {
+    $0.titleLabel?.font = .systemFont(ofSize: 13, weight: .semibold)
+    $0.setTitle("약관 보기", for: .normal)
+    $0.setTitleColor(FRColor.Fg.Text.Interactive.secondary, for: .normal)
   }
   
   func setData(text: String, isChecked: Bool, showTerms: Bool) {
     titleLabel.text = text
     radioImageView.image = UIImage(named: isChecked ? "RadioOn" : "RadioOff", in: Bundle.module, compatibleWith: nil)
     requireLabel.isHidden = !showTerms
-    showTermsButtonLabel.isHidden = !showTerms
+    showTermsButton.isHidden = !showTerms
   }
   
   public override func initUI() {

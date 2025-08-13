@@ -64,6 +64,7 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
   
   public func showDeleteAccount(mode: DeleteAccountViewController.Mode) {
     let vc = resolver.resolve(DeleteAccountViewController.self, argument: mode)!
+    vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)
   }
 }
