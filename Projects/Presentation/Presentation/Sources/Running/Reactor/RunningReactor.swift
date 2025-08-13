@@ -317,8 +317,8 @@ public final class RunningReactor: Reactor {
 
     guard
       state.audioQueue.isEmpty,
-      state.isAudioFeedbackEnabled,
-      state.goalsLoaded else {
+      state.goalsLoaded
+    else {
         return .empty()
     }
 
@@ -542,7 +542,9 @@ public final class RunningReactor: Reactor {
     case let .setAveragePace(pace):
       newState.averagePaceInSeconds = pace
     case let .enqueueAudio(event):
-      if !newState.audioQueue.contains(where: { $0 == event }) {
+      if currentState.isAudioFeedbackEnabled,
+          !newState.audioQueue.contains(where: { $0 == event })
+      {
         newState.audioQueue.append(event)
       }
     case let .dequeueAudio(event):

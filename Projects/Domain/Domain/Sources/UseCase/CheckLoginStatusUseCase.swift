@@ -23,13 +23,12 @@ public final class CheckLoginStatusUseCaseImpl: CheckLoginStatusUseCase {
 
   public func execute() -> Single<UserStatus> {
     return authRepository.attemptAutoLogin()
-      .map { _ in
+      .map { loginResult in
         let hasCompletedOnboarding = self.userDefaults.bool(forKey: "hasCompletedOnboarding") == true
-        return hasCompletedOnboarding ? .loggedIn : .needsWalkthrough
+        return (hasCompletedOnboarding && !loginResult.isNew) ? .loggedIn : .needsWalkthrough
       }
       .catch { _ in
-        let isFirstLaunch = self.userDefaults.bool(forKey: "isFirstLaunch") != false
-        return .just(isFirstLaunch ? .needsWalkthrough : .needsLogin)
+        return .just(.needsWalkthrough)
       }
   }
 }

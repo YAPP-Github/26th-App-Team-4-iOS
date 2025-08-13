@@ -151,6 +151,8 @@ public final class OnboardingViewController: BaseViewController, View {
       .distinctUntilChanged()
       .compactMap { $0 }
       .subscribe(with: self) { object, runnerType in
+        UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+
         object.coordinator?.showRunnerType()
       }
       .disposed(by: disposeBag)

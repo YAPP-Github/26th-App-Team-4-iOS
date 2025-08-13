@@ -23,6 +23,8 @@ public enum GoalAPI: BaseAPI {
   case saveGoalDistance(distance: Int)
   /// 거리 목표 수정 (distance: 거리 목표(m))
   case editGoalDistance(distance: Int)
+  /// 추천 페이스
+  case getRecommendPace
 
   public var path: String {
     switch self {
@@ -40,6 +42,8 @@ public enum GoalAPI: BaseAPI {
       return "users/goals/distance"
     case .editGoalDistance:
       return "users/goals/distance"
+    case .getRecommendPace:
+      return "users/goals/pace/recommend"
     }
   }
 
@@ -52,6 +56,7 @@ public enum GoalAPI: BaseAPI {
     case .saveGoalTime: return .post
     case .saveGoalDistance: return .post
     case .editGoalDistance: return .patch
+    case .getRecommendPace: return .get
     }
   }
   
@@ -68,12 +73,18 @@ public enum GoalAPI: BaseAPI {
       
     case .saveRunningCount(weeklyRunningCount: let weeklyRunningCount):
       return .requestParameters(parameters: ["count": weeklyRunningCount], encoding: JSONEncoding.default)
+
     case .saveGoalTime(time: let time):
       return .requestParameters(parameters: ["time": time], encoding: JSONEncoding.default)
+
     case .saveGoalDistance(distance: let distance):
       return .requestParameters(parameters: ["distanceMeter": distance], encoding: JSONEncoding.default)
+
     case .editGoalDistance(distance: let distance):
       return .requestParameters(parameters: ["distanceMeter": distance], encoding: JSONEncoding.default)
+
+    case .getRecommendPace:
+      return .requestPlain
     }
   }
 }

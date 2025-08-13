@@ -83,8 +83,6 @@ public final class RunnerTypeViewController: BaseViewController {
 
     goToHomeButton.rx.tap
       .subscribe(with: self) { object, _ in
-        // TODO: - UserDefaults 관리
-        UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
         object.coordinator?.showMainTab()
       }
       .disposed(by: disposeBag)

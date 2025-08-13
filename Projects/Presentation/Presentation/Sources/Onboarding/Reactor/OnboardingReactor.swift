@@ -79,7 +79,7 @@ public final class OnboardingReactor: Reactor {
       
     case let .setCompleted(isCompleted):
       newState.isCompleted = isCompleted
-      
+
     case let .setError(errorMessage):
       newState.errorMessage = errorMessage
     }

@@ -214,6 +214,8 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
 
   @objc private func skipButtonTapped() {
     print("Skip button tapped!")
+    UserDefaults.standard.set(true, forKey: "hasCompletedRunningOnboarding")
+
     coordinator?.showRunning()
   }
 

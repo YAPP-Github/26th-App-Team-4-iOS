@@ -32,9 +32,9 @@ final class FirstRunningGoalSettingReactor: Reactor {
 
   struct State {
     var inputType: GoalInputType
-    var goalValue: Int
-    var isLoading: Bool
-    var isAnimationPlaying: Bool
+    var goalValue: Int // km
+    var isLoading: Bool = false
+    var isAnimationPlaying: Bool = false
     var saveSuccess: Bool?
     var saveError: Error?
     @Pulse var navigationTarget: NavigationTarget?
@@ -53,16 +53,11 @@ final class FirstRunningGoalSettingReactor: Reactor {
 
   // MARK: - Initialization
 
-  init(goalUseCase: GoalUseCase) {
+  init(goalUseCase: GoalUseCase, inputType: GoalInputType) {
     self.goalUseCase = goalUseCase
     self.initialState = State(
-      inputType: .distance,
-      goalValue: GoalInputType.distance.initialGoalValue,
-      isLoading: false,
-      isAnimationPlaying: false,
-      saveSuccess: nil,
-      saveError: nil,
-      navigationTarget: nil
+      inputType: inputType,
+      goalValue: inputType.initialGoalValue
     )
   }
 

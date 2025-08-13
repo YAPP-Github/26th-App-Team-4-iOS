@@ -22,7 +22,7 @@ public final class LaunchViewController: BaseViewController, View {
     view.backgroundColor = UIColor(hex: "#FF6600")
     view.addSubview(logoImageView)
     logoImageView.snp.makeConstraints {
-      $0.center.equalToSuperview()
+      $0.center.equalTo(view.safeAreaLayoutGuide)
     }
   }
 
@@ -39,7 +39,7 @@ public final class LaunchViewController: BaseViewController, View {
       .compactMap { $0 }
       .subscribe(with: self) { object, status in
         switch status {
-          // TODO: - needsLogin시 로그인으로 보내야할지 논의 필요
+          // TODO: - needsWalkthrough는 실행 한번만 할 건지 논의 필요
         case .needsWalkthrough, .needsLogin:
           object.coordinator?.showWalkthrough()
         case .loggedIn:
