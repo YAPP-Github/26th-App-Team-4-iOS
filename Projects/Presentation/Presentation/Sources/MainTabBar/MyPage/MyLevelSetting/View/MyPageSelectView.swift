@@ -37,7 +37,7 @@ class MyPageSelectView: BaseView {
   func setData(image: String, title: String, isSelected: Bool) {
     imageLabel.text = image
     titleLabel.text = title
-    updateUI(isSelected: isSelected)
+    setSelected(isSelected: isSelected)
   }
   
   override func initUI() {
@@ -52,7 +52,7 @@ class MyPageSelectView: BaseView {
     }
   }
   
-  private func updateUI(isSelected: Bool) {
+  func setSelected(isSelected: Bool) {
     if isSelected {
       self.layer.borderColor = FRColor.Fg.Border.Interactive.primary.cgColor
       self.backgroundColor = .init(hex: "FFF3EC")

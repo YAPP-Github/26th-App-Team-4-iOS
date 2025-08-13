@@ -1,5 +1,5 @@
 //
-//  MyPurposeSettingReactor.swift
+//  MyLevelSettingReactor.swift
 //  Presentation
 //
 //  Created by JDeoks on 8/13/25.
@@ -11,21 +11,21 @@ import ReactorKit
 import RxSwift
 import Domain
 
-public final class MyPurposeSettingReactor: Reactor {
+public final class MyLevelSettingReactor: Reactor {
   
   public enum Action {
     case initialize
-    case selectPurpose(idx: Int)
+    case selectLevel(idx: Int)
     case save
   }
   
   public enum Mutation {
-    case setPaceSecond(Int)
+    case setLevel(Int)
     case setIsSaved(Bool)
   }
   
   public struct State {
-    fileprivate(set) var purpose: Int = 0
+    fileprivate(set) var level: Int = 0
     fileprivate(set) var isSaved: Bool = false
   }
   
@@ -34,9 +34,11 @@ public final class MyPurposeSettingReactor: Reactor {
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .initialize:
-      return .just(.setPaceSecond(0))
-    case let .selectPurpose(idx):
-      return .just(.setPaceSecond(idx))
+      return .just(.setLevel(0))
+      
+    case let .selectLevel(idx):
+      return .just(.setLevel(idx))
+      
     case .save:
       return .empty()
     }
@@ -46,11 +48,11 @@ public final class MyPurposeSettingReactor: Reactor {
     print(self, #function, state, mutation)
     var newState = state
     switch mutation {
-    case let .setPaceSecond(paceSecond):
-      newState.purpose = paceSecond
+    case let .setLevel(level):
+      newState.level = level
+      
     case let .setIsSaved(isSaved):
       newState.isSaved = isSaved
     }
     return newState
-  }
-}
+  }}

@@ -11,7 +11,9 @@ import ReactorKit
 import NMapsMap
 import Domain
 
-public final class MyLevelSettingViewController: BaseViewController {
+public final class MyLevelSettingViewController: BaseViewController, View {
+  
+  public typealias Reactor = MyLevelSettingReactor
   
   var coordinator: MyPageCoordinator?
   
@@ -41,7 +43,7 @@ public final class MyLevelSettingViewController: BaseViewController {
   }
   
   private lazy var selectHStack = UIStackView(
-    arrangedSubviews: [selectView1, selectView2, selectView3]
+    arrangedSubviews: [selectView0, selectView1, selectView2]
   ).then {
     $0.axis = .horizontal
     $0.spacing = 16
@@ -49,14 +51,14 @@ public final class MyLevelSettingViewController: BaseViewController {
     $0.distribution = .fillEqually
   }
   
-  let selectView1 = MyPageSelectView().then {
+  let selectView0 = MyPageSelectView().then {
     $0.setData(image: "🐣", title: "가볍게 달리는\n워밍업 러너", isSelected: true)
   }
-  let selectView2 = MyPageSelectView().then {
+  let selectView1 = MyPageSelectView().then {
     $0.setData(image: "⏱️", title: "꾸준히 달리는\n루틴 러너", isSelected: false)
   }
   
-  let selectView3 = MyPageSelectView().then {
+  let selectView2 = MyPageSelectView().then {
     $0.setData(image: "🚀", title: "성장 중인\n챌린저 러너", isSelected: false)
   }
   
@@ -120,5 +122,55 @@ public final class MyLevelSettingViewController: BaseViewController {
       $0.leading.trailing.equalToSuperview().inset(20)
       $0.height.equalTo(56)
     }
+  }
+  
+  public func bind(reactor: MyLevelSettingReactor) {
+    self.rx.viewDidLoad
+      .subscribe(with: self) { object, _ in
+        reactor.action.onNext(.initialize)
+      }
+      .disposed(by: disposeBag)
+    
+    selectView0.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        reactor.action.onNext(.selectLevel(idx: 0))
+      }
+      .disposed(by: disposeBag)
+    
+    selectView1.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        reactor.action.onNext(.selectLevel(idx: 1))
+      }
+      .disposed(by: disposeBag)
+    
+    selectView2.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        reactor.action.onNext(.selectLevel(idx: 2))
+      }
+      .disposed(by: disposeBag)
+
+    
+    reactor.state.map(\.level)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .subscribe(with: self) { owner, purpose in
+        owner.selectView0.setSelected(isSelected: purpose == 0)
+        owner.selectView1.setSelected(isSelected: purpose == 1)
+        owner.selectView2.setSelected(isSelected: purpose == 2)
+      }
+      .disposed(by: disposeBag)
+  }
+  
+  public override func action() {
+    super.action()
+    
+    backButton.rx.tap
+      .subscribe(with: self) { owner, _ in
+        owner.navigationController?.popViewController(animated: true)
+      }
+      .disposed(by: disposeBag)
   }
 }

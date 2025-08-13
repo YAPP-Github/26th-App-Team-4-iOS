@@ -11,7 +11,9 @@ import ReactorKit
 import NMapsMap
 import Domain
 
-public final class MyPurposeSettingViewController: BaseViewController {
+public final class MyPurposeSettingViewController: BaseViewController, View {
+  
+  public typealias Reactor = MyPurposeSettingReactor
   
   var coordinator: MyPageCoordinator?
 
@@ -50,7 +52,7 @@ public final class MyPurposeSettingViewController: BaseViewController {
   }
   
   private lazy var selectHStack1 = UIStackView(
-    arrangedSubviews: [selectView1, selectView2]
+    arrangedSubviews: [selectView0, selectView1]
   ).then {
     $0.axis = .horizontal
     $0.spacing = 16
@@ -59,7 +61,7 @@ public final class MyPurposeSettingViewController: BaseViewController {
   }
   
   private lazy var selectHStack2 = UIStackView(
-    arrangedSubviews: [selectView3, selectView4]
+    arrangedSubviews: [selectView2, selectView3]
   ).then {
     $0.axis = .horizontal
     $0.spacing = 16
@@ -67,16 +69,16 @@ public final class MyPurposeSettingViewController: BaseViewController {
     $0.distribution = .fillEqually
   }
   
-  let selectView1 = MyPageSelectView().then {
+  let selectView0 = MyPageSelectView().then {
     $0.setData(image: "🔥", title: "다이어트", isSelected: true)
   }
-  let selectView2 = MyPageSelectView().then {
+  let selectView1 = MyPageSelectView().then {
     $0.setData(image: "💓", title: "건강 관리", isSelected: false)
   }
-  let selectView3 = MyPageSelectView().then {
+  let selectView2 = MyPageSelectView().then {
     $0.setData(image: "🔋", title: "체력 증진", isSelected: false)
   }
-  let selectView4 = MyPageSelectView().then {
+  let selectView3 = MyPageSelectView().then {
     $0.setData(image: "🥇", title: "대회 준비", isSelected: false)
   }
   
@@ -147,5 +149,63 @@ public final class MyPurposeSettingViewController: BaseViewController {
       $0.leading.trailing.equalToSuperview().inset(20)
       $0.height.equalTo(56)
     }
+  }
+  
+  public func bind(reactor: MyPurposeSettingReactor) {
+    self.rx.viewDidLoad
+      .subscribe(with: self) { object, _ in
+        reactor.action.onNext(.initialize)
+      }
+      .disposed(by: disposeBag)
+    
+    selectView0.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        reactor.action.onNext(.selectPurpose(idx: 0))
+      }
+      .disposed(by: disposeBag)
+    
+    selectView1.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        reactor.action.onNext(.selectPurpose(idx: 1))
+      }
+      .disposed(by: disposeBag)
+    
+    selectView2.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        reactor.action.onNext(.selectPurpose(idx: 2))
+      }
+      .disposed(by: disposeBag)
+    
+    selectView3.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        reactor.action.onNext(.selectPurpose(idx: 3))
+      }
+      .disposed(by: disposeBag)
+    
+    reactor.state.map(\.purpose)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .subscribe(with: self) { owner, purpose in
+        owner.selectView0.setSelected(isSelected: purpose == 0)
+        owner.selectView1.setSelected(isSelected: purpose == 1)
+        owner.selectView2.setSelected(isSelected: purpose == 2)
+        owner.selectView3.setSelected(isSelected: purpose == 3)
+      }
+      .disposed(by: disposeBag)
+    
+  }
+  
+  public override func action() {
+    super.action()
+    
+    backButton.rx.tap
+      .subscribe(with: self) { owner, _ in
+        owner.navigationController?.popViewController(animated: true)
+      }
+      .disposed(by: disposeBag)
   }
 }

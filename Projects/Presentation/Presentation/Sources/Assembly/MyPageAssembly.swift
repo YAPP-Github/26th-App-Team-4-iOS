@@ -28,5 +28,25 @@ public final class MyPageAssembly: Assembly {
 //      vc.reactor = reactor
       return vc
     }
+    
+    container.register(MyPurposeSettingReactor.self) { r in
+      return MyPurposeSettingReactor()
+    }
+    
+    container.register(MyLevelSettingReactor.self) { r in
+      return MyLevelSettingReactor()
+    }
+
+    container.register(MyLevelSettingViewController.self) { r in
+      let vc = MyLevelSettingViewController()
+      vc.reactor = r.resolve(MyLevelSettingReactor.self)
+      return vc
+    }
+    
+    container.register(MyPurposeSettingViewController.self) { r in
+      let vc = MyPurposeSettingViewController()
+      vc.reactor = r.resolve(MyPurposeSettingReactor.self)
+      return vc
+    }
   }
 }
