@@ -10,16 +10,19 @@ import Moya
 
 public enum RecordAPI: BaseAPI {
   case records(page: Int, size: Int)
+  case record(recordId: Int)
 
   public var path: String {
     switch self {
     case .records: return "/records"
+    case .record(let recordId): return "/records/\(recordId)"
     }
   }
 
   public var method: Moya.Method {
     switch self {
-    case .records: return .get
+    case .records : return .get
+    case .record : return .get
     }
   }
   
@@ -30,6 +33,8 @@ public enum RecordAPI: BaseAPI {
         parameters: ["page": page, "size": size],
         encoding: URLEncoding.default
       )
+    case .record:
+      return .requestPlain
     }
   }
 }

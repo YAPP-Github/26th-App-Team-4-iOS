@@ -22,8 +22,8 @@ public struct CommonNetworkHeaders {
     return headers
   }
 
-  /// 러닝 완료 API 헤더
-  public static var runningAPI: [String: String] {
+  /// 러닝 기록 이미지 업로드 헤더
+  public static var image: [String: String] {
     var headers: [String: String] = [
       "Content-Type": "multipart/form-data"
     ]

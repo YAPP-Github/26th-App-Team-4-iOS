@@ -26,7 +26,7 @@ public final class RunningReactor: Reactor {
 
   public enum Mutation {
     case incrementTime
-    case addRunningPoint(RunningPoint)
+    case addRunningPoint(Point)
     case setSessionState(SessionState)
     case setUploadSuccess(Bool)
     case setStartRunInfo(localStartTime: Date)
@@ -52,7 +52,7 @@ public final class RunningReactor: Reactor {
 
   public struct State {
     var elapsedTime: TimeInterval = 0
-    var runningPoints: [RunningPoint] = []
+    var runningPoints: [Point] = []
     var sessionState: SessionState = .idle
     var isUploadSuccess: Bool = false
 
@@ -164,7 +164,7 @@ public final class RunningReactor: Reactor {
 
       if let location = startLocation {
         mutations.append(.just(.setLastKnownLocation(location)))
-        let runningPoint = RunningPoint(coordinate: location.coordinate, timestamp: localStartTime)
+        let runningPoint = Point(coordinate: location.coordinate, timestamp: localStartTime)
         mutations.append(.just(.addRunningPoint(runningPoint)))
       }
 
@@ -187,7 +187,7 @@ public final class RunningReactor: Reactor {
 
       if let currentLocation = currentState.lastKnownLocation {
         let timestamp = Date()
-        let newRunningPoint = RunningPoint(coordinate: currentLocation.coordinate, timestamp: timestamp)
+        let newRunningPoint = Point(coordinate: currentLocation.coordinate, timestamp: timestamp)
 
         var distanceTraveled = 0.0
         if let lastPoint = currentState.runningPoints.last {

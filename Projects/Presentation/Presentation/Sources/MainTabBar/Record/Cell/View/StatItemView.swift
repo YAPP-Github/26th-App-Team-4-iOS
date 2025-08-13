@@ -36,7 +36,7 @@ public class StatItemView: BaseView {
   }
   
   private let valueLabel = UILabel().then {
-    $0.text = "7'18"
+    $0.text = "0"
     $0.font = .systemFont(ofSize: 20, weight: .semibold)
     $0.textColor = .black
   }

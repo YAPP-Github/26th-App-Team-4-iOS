@@ -30,7 +30,7 @@ public final class RunningRepositoryImpl: RunningRepository {
       }
   }
 
-  public func completeRun(recordId: Int, completionData: RunningCompletionData) -> Single<Bool> {
+  public func completeRun(recordId: Int, completionData: RunningCompletion) -> Single<Bool> {
     let pointsDTO: [RunningPointRequestDTO] = completionData.runningPoints.map { point in
       let totalRunningTimeMills = Int64(point.timestamp.timeIntervalSince(completionData.startAt) * 1000)
       return RunningPointRequestDTO(
@@ -50,6 +50,11 @@ public final class RunningRepositoryImpl: RunningRepository {
       startAt: ISO8601DateFormatter().string(from: completionData.startAt)
     )
 
+    print("metadata>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n")
+    print(metadata)
+
+
+
     return provider.rx.request(.completeRun(recordId: recordId, data: metadata))
       .map { response in
         return (200...299).contains(response.statusCode)
@@ -58,5 +63,13 @@ public final class RunningRepositoryImpl: RunningRepository {
         print("Error completing run: \(error.localizedDescription)")
         return .just(false)
       }
+  }
+
+  public func saveRunningRecordImage(recordId: Int, image: UIImage) -> Single<String?> {
+    return provider.rx
+      .request(.saveRunningRecordImage(recordId: recordId, image: image))
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<RunningRecordImageResponseDTO>.self)
+      .map { $0.result?.imageUrl }
   }
 }

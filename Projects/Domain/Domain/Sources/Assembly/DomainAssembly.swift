@@ -81,5 +81,12 @@ public class DomainAssembly: Assembly {
       }
       return RecordUseCaseImpl(recordRepository: recordRepository)
     }
+
+    container.register(RunningRecordImageUseCase.self) { r in
+      guard let repository = r.resolve(RunningRepository.self) else {
+        fatalError("Failed to resolve RunningRepository for OnboardingUseCase.")
+      }
+      return RunningRecordImageUseCaseImpl(runningRepository: repository)
+    }
   }
 }

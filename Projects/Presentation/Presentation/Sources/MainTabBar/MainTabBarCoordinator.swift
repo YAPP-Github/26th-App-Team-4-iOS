@@ -23,8 +23,8 @@ enum TabBarPage: Int, CaseIterable {
 
   var pageImage: UIImage? {
     switch self {
-    case .home: return UIImage(systemName: "house.fill")
-    case .record: return UIImage(systemName: "list.bullet")
+    case .home: return UIImage(named: "home", in: .module, with: nil)?.resized(to: CGSize(width: 24, height: 24))
+    case .record: return UIImage(named: "chart", in: .module, with: nil)?.resized(to: CGSize(width: 24, height: 24))
     }
   }
 }
