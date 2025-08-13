@@ -16,7 +16,7 @@ public struct RunningRecord {
   public let totalCalories: Int
   public let averagePace: Double
   public let startAt: Date
-  public let imageUrl: String
+  public var imageUrl: String?
   public let isTimeGoalAchieved: Bool
   public let isPaceGoalAchieved: Bool
   public let isDistanceGoalAchieved: Bool

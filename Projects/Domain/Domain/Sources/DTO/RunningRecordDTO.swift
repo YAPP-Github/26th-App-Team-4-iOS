@@ -18,7 +18,8 @@ public struct RunningRecordDTO: Codable {
   /// 구간 기록 리스트(1km 구간별 정보)
   public let segments: [RunningSegmentDTO]
   public let recordId: Int
-  public let imageUrl: String
+  /// 러닝 경로 이미지 URL
+  public let imageUrl: String?
   /// 시간 목표 달성 여부, 목표가 설정되어 있지 않으면 false 입니다.
   public let isTimeGoalAchieved: Bool
   /// 페이스 목표 달성 여부, 목표가 설정되어 있지 않으면 false 입니다.

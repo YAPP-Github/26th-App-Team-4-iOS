@@ -259,7 +259,7 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
       withIdentifier: RecordDetailCourseTableCell.identifier, for: indexPath
     ) as! RecordDetailCourseTableCell
     guard let detail = self.reactor?.currentState.detail else { return cell }
-    cell.setData(imageURL: "", location: "주소")
+    cell.setData(imageURL: detail.imageUrl, location: "주소")
     return cell
   }
   

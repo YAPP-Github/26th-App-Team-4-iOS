@@ -65,9 +65,9 @@ public final class RunningRepositoryImpl: RunningRepository {
       }
   }
 
-  public func saveRunningRecordImage(recordId: Int) -> Single<String?> {
+  public func saveRunningRecordImage(recordId: Int, image: UIImage) -> Single<String?> {
     return provider.rx
-      .request(.saveRunningRecordImage(recordId: recordId))
+      .request(.saveRunningRecordImage(recordId: recordId, image: image))
       .filter(statusCodes: 200..<300)
       .map(APIResponse<RunningRecordImageResponseDTO>.self)
       .map { $0.result?.imageUrl }

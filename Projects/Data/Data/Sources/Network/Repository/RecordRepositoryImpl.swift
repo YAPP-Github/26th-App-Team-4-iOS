@@ -43,7 +43,6 @@ public final class RecordRepositoryImpl: RecordRepository {
         guard let result = response.result else {
           throw NSError(domain: "RecordRepositoryImpl", code: -1, userInfo: [NSLocalizedDescriptionKey: "No result found in response"])
         }
-        print(">>>>resultresultresult", result)
         return result.toDomain()
       }
       .asSingle()

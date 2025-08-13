@@ -16,6 +16,7 @@ public class RecordDetailReactor: Reactor {
   // MARK: - Action
   public enum Action {
     case initialize
+    case fetchMapImage(record: RunningRecord)
   }
 
   // MARK: - Mutation
@@ -57,6 +58,27 @@ public class RecordDetailReactor: Reactor {
         fetchDetail(),
         .just(.setLoading(false))
       ])
+
+    case .fetchMapImage(let record):
+      return runningRecordImageUseCase.generateMapImage(for: record)
+        .flatMap { image in
+          print("image>>>>>", image)
+          return self.runningRecordImageUseCase.uploadImage(image, recordId: record.recordId)
+        }
+        .asObservable()
+        .flatMap { newImageUrl -> Observable<Mutation> in
+          guard let newImageUrl = newImageUrl else {
+            return .just(.setError(NSError(domain: "ImageUploadError", code: 0, userInfo: nil)))
+          }
+          print("newImageUrl>>>>>", newImageUrl)
+
+          var updatedRecord = record
+          updatedRecord.imageUrl = newImageUrl
+          return .just(.setDetail(updatedRecord))
+        }
+        .catch { error in
+          Observable.just(Mutation.setError(error))
+        }
     }
   }
 
@@ -65,13 +87,10 @@ public class RecordDetailReactor: Reactor {
     switch mutation {
     case let .setDetail(detail):
       newState.detail = detail
-
     case let .setLoading(isLoading):
       newState.isLoading = isLoading
-
     case let .setError(error):
       newState.error = error
-
     case let .setShouldShowFirstRunningPopUp(shouldShow):
       newState.shouldShowFirstRunningPopUp = shouldShow
     }
@@ -82,11 +101,23 @@ public class RecordDetailReactor: Reactor {
     let id = initialState.id
     return recordUseCase.fetchRecordDetial(id: id)
       .asObservable()
-      .map {
-        Mutation.setDetail($0)
+      .flatMap { record -> Observable<Mutation> in
+        guard let record = record else {
+          return .just(.setDetail(nil))
+        }
+
+        let imageUrl = record.imageUrl ?? ""
+        if imageUrl == "" {
+          return Observable.concat([
+            .just(.setDetail(record)),
+            .just(.setLoading(true)),
+            self.mutate(action: .fetchMapImage(record: record)),
+            .just(.setLoading(false))
+          ])
+        } else {
+          return .just(.setDetail(record))
+        }
       }
-      .catch {
-        Observable.just(Mutation.setError($0))
-      }
+      .catch { Observable.just(Mutation.setError($0)) }
   }
 }

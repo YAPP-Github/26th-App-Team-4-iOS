@@ -12,7 +12,7 @@ import CoreLocation
 public enum RunningAPI: BaseAPI {
   case startRun(lat: Double, lon: Double, timeStamp: String)
   case completeRun(recordId: Int, data: RunningCompletionRequestDTO)
-  case saveRunningRecordImage(recordId: Int)
+  case saveRunningRecordImage(recordId: Int, image: UIImage)
 
   public var path: String {
     switch self {
@@ -20,7 +20,7 @@ public enum RunningAPI: BaseAPI {
       return "/running"
     case .completeRun(let recordId, _):
       return "/running/\(recordId)"
-    case .saveRunningRecordImage(recordId: let recordId):
+    case .saveRunningRecordImage(recordId: let recordId, _):
       return "/running/\(recordId)/images"
     }
   }
@@ -46,7 +46,7 @@ public enum RunningAPI: BaseAPI {
     case let .startRun(lat, lon, timeStamp):
       return .requestParameters(
         parameters: [
-          "timeStamp":timeStamp,
+          "timeStamp": timeStamp,
           "lon": lon,
           "lat": lat
         ],
@@ -56,12 +56,25 @@ public enum RunningAPI: BaseAPI {
     case let .completeRun(_, data):
       return .requestJSONEncodable(data)
 
-    case .saveRunningRecordImage:
-      return .requestPlain
+    case let .saveRunningRecordImage(recordId, image):
+      // 💡 이미지를 PNG 데이터로 변환합니다.
+      guard let imageData = image.pngData() else {
+        return .requestPlain // 이미지 데이터 변환 실패 시
+      }
+
+      let formData: [MultipartFormData] = [
+        .init(
+          provider: .data(imageData),
+          name: "image", // 서버에서 이미지를 받는 필드 이름
+          fileName: "running_record_\(recordId).png", // 파일 이름 확장자를 .png로 변경
+          mimeType: "image/png" // MIME 타입을 image/png로 변경
+        )
+      ]
+
+      return .uploadMultipart(formData)
     }
   }
 }
-
 
 
 public struct RunningStartResponseDTO: Codable {
