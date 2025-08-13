@@ -10,9 +10,11 @@ import Core
 import ReactorKit
 import Domain
 
-public final class MyRunningSettingViewController: BaseViewController {
+public final class MyRunningSettingViewController: BaseViewController, View {
   
-  enum Item: Int, CaseIterable {
+  public typealias Reactor = MyRunningSettingReactor
+  
+  public enum Item: Int, CaseIterable {
     case audioCoaching
     case audioFeedback
     
@@ -93,6 +95,24 @@ public final class MyRunningSettingViewController: BaseViewController {
     }
   }
   
+  public func bind(reactor: MyRunningSettingReactor) {
+    print("\(type(of: self)) - \(#function)")
+
+    self.rx.viewDidLoad
+      .subscribe(with: self) { owner, _ in
+        reactor.action.onNext(.initialize)
+      }
+      .disposed(by: disposeBag)
+    
+    reactor.state.map(\.items)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .subscribe(with: self) { owner, items in
+        owner.tableView.reloadData()
+      }
+    .disposed(by: disposeBag)
+  }
+  
   public override func action() {
     super.action()
     
@@ -115,7 +135,16 @@ extension MyRunningSettingViewController: UITableViewDelegate, UITableViewDataSo
     let cell = tableView.dequeueReusableCell(
       withIdentifier: MyRunningSettingTableCell.identifier, for: indexPath
     ) as! MyRunningSettingTableCell
-    cell.setData(title: item.title, desc: item.description, isOn: false)
+    let isOn = reactor?.currentState.items[item] ?? false
+    cell.setData(title: item.title, desc: item.description, isOn: isOn)
+    
+    cell.contentView.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        owner.reactor?.action.onNext(.toggleItem(item: item))
+      }
+      .disposed(by: cell.disposeBag)
+    
     return cell
   }
 }

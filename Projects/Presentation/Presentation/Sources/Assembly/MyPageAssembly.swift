@@ -67,8 +67,13 @@ public final class MyPageAssembly: Assembly {
     }
     
     // MARK: - 러닝 설정
+    container.register(MyRunningSettingReactor.self) { r in
+      return MyRunningSettingReactor()
+    }
+    
     container.register(MyRunningSettingViewController.self) { r in
       let vc = MyRunningSettingViewController()
+      vc.reactor = r.resolve(MyRunningSettingReactor.self)
       return vc
     }
   }
