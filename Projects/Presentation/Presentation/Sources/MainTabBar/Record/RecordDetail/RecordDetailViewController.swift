@@ -152,9 +152,7 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
       return 1
       
     case .lapSegment:
-      print("section>>>", section)
       guard let segments = reactor?.currentState.detail?.segments else { return 0 }
-      print("segments.count>>>", segments.count)
       return segments.count
       
     case .none:

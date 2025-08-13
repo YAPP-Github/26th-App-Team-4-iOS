@@ -1,5 +1,5 @@
 //
-//  RecordListDTO.swift
+//  RunningRecordListDTO.swift
 //  Domain
 //
 //  Created by dong eun shin on 8/13/25.

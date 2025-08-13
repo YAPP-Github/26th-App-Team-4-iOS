@@ -46,8 +46,8 @@ public class RecordDetailTitleTableCell: BaseTableViewCell {
   }
     
   let editButton = UIButton(type: .system).then {
-    let img = UIImage(systemName: "pencil")?
-      .withRenderingMode(.alwaysTemplate)
+    let img = UIImage(named: "EditPencil", in: .module, with: nil)?
+      .resized(to: CGSize(width: 24, height: 24))
     $0.setImage(img, for: .normal)
     $0.tintColor = FRColor.Fg.Text.secondary.withAlphaComponent(0.8)
   }
@@ -81,7 +81,7 @@ public class RecordDetailTitleTableCell: BaseTableViewCell {
     }
     
     editButton.snp.makeConstraints {
-      $0.size.equalTo(24)
+      $0.size.equalTo(44)
     }
   }
 }

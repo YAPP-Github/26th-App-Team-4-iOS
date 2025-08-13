@@ -24,7 +24,7 @@ public final class RecordRepositoryImpl: RecordRepository {
     return provider
       .request(.records(page: page, size: size))
       .filter(statusCodes: 200..<300)
-      .map(APIResponse<RecordListDTO>.self)
+      .map(APIResponse<RunningRecordListDTO>.self)
       .map { response in
         guard let result = response.result else {
           throw NSError(domain: "RecordRepositoryImpl", code: -1, userInfo: [NSLocalizedDescriptionKey: "No result found in response"])
