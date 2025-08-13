@@ -31,6 +31,7 @@ class MyPageSelectView: BaseView {
     $0.font = .systemFont(ofSize: 16, weight: .semibold)
     $0.textColor = FRColor.Fg.Text.primary
     $0.numberOfLines = 0
+    $0.textAlignment = .center
   }
   
   func setData(image: String, title: String, isSelected: Bool) {
@@ -44,15 +45,22 @@ class MyPageSelectView: BaseView {
     self.layer.borderWidth = 2
     self.layer.borderColor = FRColor.Fg.Nuetral.gray400.cgColor
     self.layer.cornerRadius = 12
+    
+    self.addSubview(rootVStack)
+    rootVStack.snp.makeConstraints {
+      $0.center.equalToSuperview()
+    }
   }
   
   private func updateUI(isSelected: Bool) {
     if isSelected {
       self.layer.borderColor = FRColor.Fg.Border.Interactive.primary.cgColor
       self.backgroundColor = .init(hex: "FFF3EC")
+      titleLabel.font = .systemFont(ofSize: 16, weight: .semibold)
     } else {
       self.layer.borderColor = FRColor.Fg.Nuetral.gray400.cgColor
       self.backgroundColor = FRColor.Fg.Nuetral.gray0
+      titleLabel.font = .systemFont(ofSize: 16, weight: .regular)
     }
   }
 }
