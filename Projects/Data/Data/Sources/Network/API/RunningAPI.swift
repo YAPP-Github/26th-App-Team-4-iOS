@@ -12,6 +12,7 @@ import CoreLocation
 public enum RunningAPI: BaseAPI {
   case startRun(lat: Double, lon: Double, timeStamp: String)
   case completeRun(recordId: Int, data: RunningCompletionRequestDTO)
+  case saveRunningRecordImage(recordId: Int)
 
   public var path: String {
     switch self {
@@ -19,6 +20,8 @@ public enum RunningAPI: BaseAPI {
       return "/running"
     case .completeRun(let recordId, _):
       return "/running/\(recordId)"
+    case .saveRunningRecordImage(recordId: let recordId):
+      return "/running/\(recordId)/images"
     }
   }
 
@@ -26,11 +29,16 @@ public enum RunningAPI: BaseAPI {
     switch self {
     case .startRun: return .post
     case .completeRun: return .post
+    case .saveRunningRecordImage: return .post
     }
   }
 
   public var headers: [String: String]? {
-    return CommonNetworkHeaders.default
+    switch self {
+    case .startRun: return CommonNetworkHeaders.default
+    case .completeRun: return CommonNetworkHeaders.default
+    case .saveRunningRecordImage: return CommonNetworkHeaders.image
+    }
   }
 
   public var task: Task {
@@ -47,6 +55,9 @@ public enum RunningAPI: BaseAPI {
 
     case let .completeRun(_, data):
       return .requestJSONEncodable(data)
+
+    case .saveRunningRecordImage:
+      return .requestPlain
     }
   }
 }

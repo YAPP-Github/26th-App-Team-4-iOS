@@ -5,7 +5,6 @@
 //  Created by JDeoks on 7/31/25.
 //
 
-
 import Foundation
 import ReactorKit
 import RxSwift
@@ -39,10 +38,12 @@ public class RecordDetailReactor: Reactor {
   public var initialState: State
 
   private let recordUseCase: RecordUseCase
+  private let runningRecordImageUseCase: RunningRecordImageUseCase
 
-  public init(id: Int, recordUseCase: RecordUseCase) {
+  public init(id: Int, recordUseCase: RecordUseCase, runningRecordImageUseCase: RunningRecordImageUseCase) {
     initialState = State(id: id)
     self.recordUseCase = recordUseCase
+    self.runningRecordImageUseCase = runningRecordImageUseCase
   }
 
   public func mutate(action: Action) -> Observable<Mutation> {

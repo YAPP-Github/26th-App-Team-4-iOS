@@ -64,4 +64,12 @@ public final class RunningRepositoryImpl: RunningRepository {
         return .just(false)
       }
   }
+
+  public func saveRunningRecordImage(recordId: Int) -> Single<String?> {
+    return provider.rx
+      .request(.saveRunningRecordImage(recordId: recordId))
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<RunningRecordImageResponseDTO>.self)
+      .map { $0.result?.imageUrl }
+  }
 }
