@@ -21,7 +21,7 @@ public class RecordDetailReactor: Reactor {
 
   // MARK: - Mutation
   public enum Mutation {
-    case setDetail(RecordDetail)
+    case setDetail(RunningRecord?)
     case setLoading(Bool)
     case setError(Error)
     case setShouldShowFirstRunningPopUp(Bool)
@@ -30,7 +30,7 @@ public class RecordDetailReactor: Reactor {
   // MARK: - State
   public struct State {
     let id: Int
-    fileprivate(set) var detail: RecordDetail?
+    fileprivate(set) var detail: RunningRecord?
     fileprivate(set) var isLoading: Bool = false
     @Pulse fileprivate(set) var error: Error?
     fileprivate(set) var shouldShowFirstRunningPopUp: Bool = false

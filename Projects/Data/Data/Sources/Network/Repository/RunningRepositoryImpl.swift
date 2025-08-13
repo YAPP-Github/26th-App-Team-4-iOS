@@ -30,7 +30,7 @@ public final class RunningRepositoryImpl: RunningRepository {
       }
   }
 
-  public func completeRun(recordId: Int, completionData: RunningCompletionData) -> Single<Bool> {
+  public func completeRun(recordId: Int, completionData: RunningCompletion) -> Single<Bool> {
     let pointsDTO: [RunningPointRequestDTO] = completionData.runningPoints.map { point in
       let totalRunningTimeMills = Int64(point.timestamp.timeIntervalSince(completionData.startAt) * 1000)
       return RunningPointRequestDTO(
@@ -49,6 +49,11 @@ public final class RunningRepositoryImpl: RunningRepository {
       totalDistance: completionData.totalDistance,
       startAt: ISO8601DateFormatter().string(from: completionData.startAt)
     )
+
+    print("metadata>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n")
+    print(metadata)
+
+
 
     return provider.rx.request(.completeRun(recordId: recordId, data: metadata))
       .map { response in

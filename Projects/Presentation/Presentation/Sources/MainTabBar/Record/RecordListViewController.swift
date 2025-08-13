@@ -163,16 +163,16 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
         distance: record.totalDistance,
         pace: record.averagePace,
         time: record.totalTime,
-        imageURL: record.imageURL
+        imageURL: record.imageUrl
       )
+
+      cell.contentView.rx.tapGesture()
+        .when(.recognized)
+        .subscribe(with: self) { owner, _ in
+          owner.coordinator?.showRecordDetail(recordID: record.recordId)
+        }
+        .disposed(by: cell.disposeBag)
     }
-    
-    cell.contentView.rx.tapGesture()
-      .when(.recognized)
-      .subscribe(with: self) { owner, _ in
-        owner.coordinator?.showRecordDetail(recordID: 0)
-      }
-      .disposed(by: cell.disposeBag)
     cell.selectionStyle = .none
     return cell
   }

@@ -152,7 +152,9 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
       return 1
       
     case .lapSegment:
+      print("section>>>", section)
       guard let segments = reactor?.currentState.detail?.segments else { return 0 }
+      print("segments.count>>>", segments.count)
       return segments.count
       
     case .none:
@@ -225,7 +227,10 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
       withIdentifier: RecordDetailTitleTableCell.identifier, for: indexPath
     ) as! RecordDetailTitleTableCell
     guard let detail = self.reactor?.currentState.detail else { return cell }
-    cell.setData(title: detail.title, date: detail.startAt)
+    cell.setData(
+      title: detail.title,
+      date: detail.startAt
+    )
     return cell
   }
   
@@ -233,6 +238,12 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailAchievementTableCell.identifier, for: indexPath
     ) as! RecordDetailAchievementTableCell
+    guard let detail = self.reactor?.currentState.detail else { return cell }
+    cell.setData(
+      distance: detail.isDistanceGoalAchieved,
+      pace: detail.isPaceGoalAchieved,
+      time: detail.isTimeGoalAchieved
+    )
     return cell
   }
   
@@ -250,7 +261,7 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
       withIdentifier: RecordDetailCourseTableCell.identifier, for: indexPath
     ) as! RecordDetailCourseTableCell
     guard let detail = self.reactor?.currentState.detail else { return cell }
-    cell.setData(imageURL: "", location: "종로구 서울특별시 대한민국")
+    cell.setData(imageURL: "", location: "주소")
     return cell
   }
   
@@ -258,13 +269,14 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailLapTableCell.identifier, for: indexPath
     ) as! RecordDetailLapTableCell
+
     guard let segments = self.reactor?.currentState.detail?.segments else { return cell }
     guard segments.indices.contains(indexPath.row) else { return cell }
     
     let segment = segments[indexPath.row]
     let lapNumber = segment.orderNo
     
-    let paceString = segment.averagePace.minuteSecondFormatted
+    let paceString = segment.averagePace.toMinutesAndSeconds()
 
     let scale = normalizedScale(for: indexPath.row, in: segments)
     let length = CGFloat(scale)
@@ -272,14 +284,13 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let isPrimary = scale == 1.0
     
     cell.setData(lapNumber: indexPath.row + 1, lapTime: paceString, length: CGFloat(length), isPrimary: isPrimary)
-    print("\(type(of: self)) - \(#function)", indexPath, scale)
+//    print("\(type(of: self)) - \(#function)", indexPath, scale)
     return cell
   }
   
-  
   public func normalizedScale(
     for index: Int,
-    in segments: [RecordSegment],
+    in segments: [RunningSegment],
     minScale: Float = 0.35,
     maxScale: Float = 1.0
   ) -> Float {

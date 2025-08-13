@@ -9,6 +9,6 @@ import RxSwift
 
 
 public protocol RecordRepository {
-  func fetchRecordData(page: Int, size: Int) -> Single<RunningRecordList>
-  func fetchRecordDetail(id: Int) -> Single<RecordDetail>
+  func fetchRecordData(page: Int, size: Int) -> Single<RecordList?>
+  func fetchRecordDetail(id: Int) -> Single<RunningRecord?>
 }

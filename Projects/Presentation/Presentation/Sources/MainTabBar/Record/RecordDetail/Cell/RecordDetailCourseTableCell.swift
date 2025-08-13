@@ -36,15 +36,15 @@ public class RecordDetailCourseTableCell: BaseTableViewCell {
     $0.alignment = .leading
     $0.spacing = 4
   }
-  private let courseTitleLabel = UILabel().then { // 24
+  private let courseTitleLabel = UILabel().then {
     $0.text = "러닝 코스"
     $0.font = .systemFont(ofSize: 20, weight: .bold)
     $0.textColor = FRColor.Fg.Text.primary
   }
   
   // MARK: - Location
-  private let locationLabel = UILabel().then { // 20
-    $0.text = "종로구 서울특별시 대한민국"
+  private let locationLabel = UILabel().then {
+    $0.text = ""
     $0.font = .systemFont(ofSize: 14)
     $0.textColor = FRColor.Fg.Text.tertiary
   }

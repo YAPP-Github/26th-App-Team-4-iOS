@@ -16,16 +16,36 @@ public final class RecordRepositoryImpl: RecordRepository {
 
   private let provider: NetworkProvider<RecordAPI>
   
-  /// 기본적으로 HomeAPI를 사용합니다.
   public init(provider: NetworkProvider<RecordAPI> = .init()) {
     self.provider = provider
   }
     
-  public func fetchRecordData(page: Int, size: Int) -> Single<RunningRecordList> {
-    return .just(RunningRecordList.dummy)
+  public func fetchRecordData(page: Int, size: Int) -> Single<RecordList?> {
+    return provider
+      .request(.records(page: page, size: size))
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<RecordListDTO>.self)
+      .map { response in
+        guard let result = response.result else {
+          throw NSError(domain: "RecordRepositoryImpl", code: -1, userInfo: [NSLocalizedDescriptionKey: "No result found in response"])
+        }
+        return result.toEntity()
+      }
+      .asSingle()
   }
   
-  public func fetchRecordDetail(id: Int) -> RxSwift.Single<Domain.RecordDetail> {
-    return .just(RecordDetail.dummy)
+  public func fetchRecordDetail(id: Int) -> Single<RunningRecord?> {
+    return provider
+      .request(.record(recordId: id))
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<RunningRecordDTO>.self)
+      .map { response in
+        guard let result = response.result else {
+          throw NSError(domain: "RecordRepositoryImpl", code: -1, userInfo: [NSLocalizedDescriptionKey: "No result found in response"])
+        }
+        print(">>>>resultresultresult", result)
+        return result.toDomain()
+      }
+      .asSingle()
   }
 }

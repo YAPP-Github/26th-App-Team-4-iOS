@@ -27,13 +27,13 @@ public class RecordDetailAchievementTableCell: BaseTableViewCell {
     $0.backgroundColor = .white
   }
   
-  private let achievementImageView = UIImageView().then { // 14, 24
+  private let achievementImageView = UIImageView().then {
     $0.image = UIImage(named: "GoalAchievement", in: Bundle.module, compatibleWith: nil)
     $0.contentMode = .scaleAspectFit
   }
   
-  private let achievementTitleLabel = UILabel().then { // 20
-    $0.text = "페이스, 거리, 시간 목표를 달성했어요! "
+  private let achievementTitleLabel = UILabel().then {
+    $0.text = ""
     $0.font = .systemFont(ofSize: 13, weight: .semibold)
     $0.textColor = FRColor.Fg.Text.primary
   }
@@ -55,5 +55,18 @@ public class RecordDetailAchievementTableCell: BaseTableViewCell {
       $0.height.equalTo(24)
       $0.width.equalTo(14)
     }
+  }
+
+  public func setData(distance: Bool, pace: Bool, time: Bool) {
+    let achievements = [
+        (distance, "거리"),
+        (pace, "페이스"),
+        (time, "시간")
+    ]
+    .filter(\.0)
+    .map(\.1)
+    .joined(separator: ", ")
+
+    achievementTitleLabel.text = "\(achievements) 목표를 달성했어요!"
   }
 }

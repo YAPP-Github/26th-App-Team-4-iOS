@@ -1,5 +1,5 @@
 //
-//  RunningRecordUseCase.swift
+//  RunningStartUseCaseType.swift
 //  Domain
 //
 //  Created by dong eun shin on 8/2/25.
@@ -9,27 +9,11 @@ import UIKit
 import RxSwift
 import CoreLocation
 
-public protocol RunningStartUseCaseType {
-  func execute(startLocation: CLLocation, timeStamp: Date) -> Single<Int?>
-}
-
-public final class RunningStartUseCase: RunningStartUseCaseType {
-  private let runningRepository: RunningRepository
-
-  init(runningRepository: RunningRepository) {
-    self.runningRepository = runningRepository
-  }
-
-  public func execute(startLocation: CLLocation, timeStamp: Date) -> Single<Int?> {
-    return runningRepository.startRun(startLocation: startLocation, timeStamp: timeStamp)
-  }
-}
-
 public protocol RunningCompletionUseCaseType {
   func execute(
     recordId: Int,
     startAt: Date,
-    runningPoints: [RunningPoint],
+    runningPoints: [Point],
     totalTime: TimeInterval,
     totalDistance: Double,
     averagePace: TimeInterval,
@@ -47,14 +31,14 @@ public final class RunningCompletionUseCase: RunningCompletionUseCaseType {
   public func execute(
     recordId: Int,
     startAt: Date,
-    runningPoints: [RunningPoint],
+    runningPoints: [Point],
     totalTime: TimeInterval,
     totalDistance: Double,
     averagePace: TimeInterval,
     totalCalories: Int
   ) -> Single<Bool> {
 
-    let completionData = RunningCompletionData(
+    let completionData = RunningCompletion(
       runningPoints: runningPoints,
       totalTime: totalTime,
       totalCalories: totalCalories,

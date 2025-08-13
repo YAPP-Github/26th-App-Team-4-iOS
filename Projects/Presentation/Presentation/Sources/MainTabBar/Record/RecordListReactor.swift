@@ -23,17 +23,17 @@ public class RecordListReactor: Reactor {
 
   // MARK: - Mutation
   public enum Mutation {
-    case setSummary(RecordSummary)
-    case setRecords([RunningRecord])
-    case appendRecords([RunningRecord])
+    case setSummary(RecordList)
+    case setRecords([RecordEntity])
+    case appendRecords([RecordEntity])
     case setLoading(Bool)
     case setError(Error)
   }
 
   // MARK: - State
   public struct State {
-    fileprivate(set) var summary: RecordSummary?
-    fileprivate(set) var records: [RunningRecord] = []
+    fileprivate(set) var summary: RecordList?
+    fileprivate(set) var records: [RecordEntity] = []
     fileprivate(set) var isLoading: Bool = false
     @Pulse fileprivate(set) var error: Error?
   }
@@ -104,7 +104,8 @@ public class RecordListReactor: Reactor {
       .fetchRecordData(page: page, size: pageSize)
       .asObservable()                      // ← 여기서 Single → Observable 으로 바꿔주고
       .flatMap { response -> Observable<Mutation> in
-        let summary = response.summary
+        guard let response = response else { return Observable.empty() }
+        let summary = response
         let records = response.records
 
         // 페이지 업데이트
