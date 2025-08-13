@@ -23,7 +23,7 @@ public class MyUserInfoTableCell: BaseTableViewCell {
   }
   
   // MARK: - 위쪽 유저 정보
-  private lazy var topHStack = UIStackView( // 88
+  lazy var topHStack = UIStackView( // 88
     arrangedSubviews: [userInfoVStack, UIView(), arrowButton]
   ).then {
     $0.axis = .horizontal
@@ -65,9 +65,10 @@ public class MyUserInfoTableCell: BaseTableViewCell {
     $0.text = "usermail@gmail.com"
     $0.textColor = FRColor.Fg.Text.tertiary
   }
-  
-  private let arrowButton = UIButton(type: .system).then { //  24
-    $0.setImage(UIImage(systemName: "chevron.right"), for: .normal)
+
+  private let arrowButton = UIImageView().then { //  22,22
+    $0.contentMode = .scaleAspectFit
+    $0.image = UIImage(systemName: "chevron.right")
     $0.tintColor = FRColor.Fg.Icon.secondary
   }
   
@@ -172,7 +173,7 @@ public class MyUserInfoTableCell: BaseTableViewCell {
     }
     
     arrowButton.snp.makeConstraints {
-      $0.width.height.equalTo(24)
+      $0.width.height.equalTo(18)
     }
     
     separatorView.snp.makeConstraints {

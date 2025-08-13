@@ -232,6 +232,13 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
       withIdentifier: MyUserInfoTableCell.identifier, for: indexPath
     ) as! MyUserInfoTableCell
     
+    cell.topHStack.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        owner.coordinator?.showMyProfile()
+      }
+      .disposed(by: cell.disposeBag)
+    
     cell.healthLevelHStack.rx.tapGesture()
       .when(.recognized)
       .subscribe(with: self) { owner, _ in

@@ -29,10 +29,8 @@ public final class MyPageAssembly: Assembly {
       return vc
     }
     
-    container.register(MyPurposeSettingReactor.self) { r in
-      return MyPurposeSettingReactor()
-    }
-    
+
+    // MARK: - 체력 수준
     container.register(MyLevelSettingReactor.self) { r in
       return MyLevelSettingReactor()
     }
@@ -43,9 +41,22 @@ public final class MyPageAssembly: Assembly {
       return vc
     }
     
+    
+    // MARK: - 러닝 목표
+    container.register(MyPurposeSettingReactor.self) { r in
+      return MyPurposeSettingReactor()
+    }
+    
     container.register(MyPurposeSettingViewController.self) { r in
       let vc = MyPurposeSettingViewController()
       vc.reactor = r.resolve(MyPurposeSettingReactor.self)
+      return vc
+    }
+    
+    
+    // MARK: - 프로필
+    container.register(MyProfileViewController.self) { r in
+      let vc = MyProfileViewController()
       return vc
     }
   }
