@@ -59,5 +59,11 @@ public final class MyPageAssembly: Assembly {
       let vc = MyProfileViewController()
       return vc
     }
+    
+    // MARK: - 탈퇴 화면
+    container.register(DeleteAccountViewController.self) { (r, mode: DeleteAccountViewController.Mode) in
+      let vc = DeleteAccountViewController(mode: mode)
+      return vc
+    }
   }
 }

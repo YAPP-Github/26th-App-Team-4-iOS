@@ -12,6 +12,8 @@ import Domain
 
 public final class MyProfileViewController: BaseViewController {
   
+  var coordinator: MyPageCoordinator?
+
   private let backButton = UIButton().then {
     $0.setImage(.init(systemName: "chevron.left"), for: .normal)
     $0.tintColor = .black
@@ -158,6 +160,13 @@ public final class MyProfileViewController: BaseViewController {
     backButton.rx.tap
       .subscribe(with: self) { owner, _ in
         owner.navigationController?.popViewController(animated: true)
+      }
+      .disposed(by: disposeBag)
+    
+    deleteUserButtonLabel.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        owner.coordinator?.showDeleteAccount(mode: .deleteAccountTerm)
       }
       .disposed(by: disposeBag)
   }
