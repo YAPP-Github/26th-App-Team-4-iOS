@@ -43,10 +43,10 @@ extension ProfileInfoDTO {
       goal: GoalInfo(
         goalId: goal?.goalId ?? 0,
         runningPurpose: RunningPurpose(rawValue: goal?.runningPurpose ?? "") ?? .health,
-        weeklyRunningCount: goal?.weeklyRunningCount ?? 0,
-        paceGoal: goal?.paceGoal ?? 0,
-        distanceMeterGoal: goal?.distanceMeterGoal ?? 0,
-        timeGoal: goal?.timeGoal ?? 0,
+        weeklyRunningCount: goal?.weeklyRunningCount,
+        paceGoal: goal?.paceGoal,
+        distanceMeterGoal: goal?.distanceMeterGoal,
+        timeGoal: goal?.timeGoal,
         runnerType: RunnerType(rawValue: goal?.runnerType ?? "") ?? .beginner
       )
     )

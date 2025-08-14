@@ -284,10 +284,49 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
     let cell = tableView.dequeueReusableCell(
       withIdentifier: MyPageGoalTableCell.identifier, for: indexPath
     ) as! MyPageGoalTableCell
-    cell.setData(item: Section.allCases[indexPath.section].item[indexPath.row], value: "설정되지 않았어요")
+
+    guard let goalInfo = reactor?.currentState.profileInfo?.goal else {
+      return cell
+    }
+
+    let item = Section.allCases[indexPath.section].item[indexPath.row]
+    let value: String? = {
+      switch item {
+      case .goalDistance:
+        guard let distanceMeterGoal = goalInfo.distanceMeterGoal else {
+          return nil
+        }
+        return "\(Int(distanceMeterGoal))km"
+
+      case .goalTime:
+        guard let timeGoal = goalInfo.timeGoal else {
+          return nil
+        }
+        return "\(timeGoal / 60)분"
+
+      case .goalPace:
+        guard let paceGoalMs = goalInfo.paceGoal else {
+          return nil
+        }
+        let paceGoal = paceGoalMs / 1000
+        let minutes = paceGoal / 60
+        let seconds = paceGoal % 60
+        return "\(minutes)'\(String(format: "%02d", seconds))\""
+
+      case .runningCount:
+        guard let weeklyRunningCount = goalInfo.weeklyRunningCount else {
+          return nil
+        }
+        return "주 \(weeklyRunningCount)회"
+
+      default:
+        return nil
+      }
+    }()
+
+    cell.setData(item: item, value: value)
     return cell
   }
-  
   private func dequeueMenuCell(for indexPath: IndexPath) -> MyPageMenuTableCell {
     let cell = tableView.dequeueReusableCell(
       withIdentifier: MyPageMenuTableCell.identifier, for: indexPath

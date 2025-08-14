@@ -17,10 +17,10 @@ public struct ProfileInfo: Equatable {
 public struct GoalInfo: Equatable {
   public let goalId: Int
   public let runningPurpose: RunningPurpose
-  public let weeklyRunningCount: Int
-  public let paceGoal: Int
-  public let distanceMeterGoal: Double
-  public let timeGoal: Int
+  public let weeklyRunningCount: Int?
+  public let paceGoal: Int?
+  public let distanceMeterGoal: Double?
+  public let timeGoal: Int?
   public let runnerType: RunnerType
 }
 

@@ -61,10 +61,13 @@ class MyPageGoalTableCell: BaseTableViewCell {
   } // 24
   
   
-  func setData(item: MyPageViewController.Item, value: String) {
+  func setData(item: MyPageViewController.Item, value: String?) {
     iconImageView.image = item.image
     titleLabel.text = item.title
-    valueLabel.text = value
+    valueLabel.text = value ?? "설정되지 않았어요"
+    
+    valueLabel.textColor = value == nil ? FRColor.Fg.Text.disabled : FRColor.Fg.Text.primary
+    
   }
   
   public override func initUI() {
