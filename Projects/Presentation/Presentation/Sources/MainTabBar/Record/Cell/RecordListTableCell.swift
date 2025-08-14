@@ -31,7 +31,7 @@ public class RecordListTableCell: BaseTableViewCell {
   }
   
   private lazy var titleWithImageStack = UIStackView(
-    arrangedSubviews: [titleWithDistanceStack, UIView(), CourseImageView]
+    arrangedSubviews: [titleWithDistanceStack, UIView(), courseImageView]
   ).then {
     $0.axis = .horizontal
     $0.spacing = 12

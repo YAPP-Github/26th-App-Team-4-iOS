@@ -194,7 +194,8 @@ public class LoginViewController: BaseViewController, View {
 
   // MARK: - Navigation
   private func navigateToNextScreen() {
-    coordinator?.showOnboarding()
+//    coordinator?.showOnboarding()
+    coordinator?.finish()
   }
 
   // MARK: - Helper
