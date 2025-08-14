@@ -262,11 +262,14 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailTitleTableCell.identifier, for: indexPath
     ) as! RecordDetailTitleTableCell
+
     guard let detail = self.reactor?.currentState.detail else { return cell }
+
     cell.setData(
       title: detail.title,
       date: detail.startAt
     )
+
     return cell
   }
 
@@ -274,12 +277,15 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailAchievementTableCell.identifier, for: indexPath
     ) as! RecordDetailAchievementTableCell
+
     guard let detail = self.reactor?.currentState.detail else { return cell }
+
     cell.setData(
       distance: detail.isDistanceGoalAchieved,
       pace: detail.isPaceGoalAchieved,
       time: detail.isTimeGoalAchieved
     )
+
     return cell
   }
 
@@ -287,8 +293,11 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailRecordTableCell.identifier, for: indexPath
     ) as! RecordDetailRecordTableCell
+
     guard let detail = self.reactor?.currentState.detail else { return cell }
+
     cell.setData(distance: detail.totalDistance, pace: detail.averagePace, runningTime: detail.totalTime)
+
     return cell
   }
 
