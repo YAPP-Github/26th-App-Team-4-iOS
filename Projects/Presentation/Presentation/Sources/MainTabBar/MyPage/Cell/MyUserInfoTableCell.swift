@@ -160,10 +160,8 @@ public class MyUserInfoTableCell: BaseTableViewCell {
 
     userNameLabel.text = profileInfo.nickname
     emailLabel.text = profileInfo.email
-    
-//    if let authProvider = userInfo.provider {
-//      authProviderImageView.image = UIImage(named: authProvider.logo, in: Bundle.module, compatibleWith: nil)
-//    }
+    healthLevelValueLabel.text = profileInfo.runnerType.displayName
+    goalValueLabel.text = profileInfo.goal.runningPurpose.displayName
   }
   
   public override func initUI() {

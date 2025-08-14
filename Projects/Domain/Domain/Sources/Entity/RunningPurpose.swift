@@ -16,4 +16,17 @@ public enum RunningPurpose: String, Codable {
   case health = "HEALTH_MAINTENANCE_PURPOSE"
   /// 대회 준비 목적
   case competitionPreparation = "COMPETITION_PREPARATION"
+  
+  public var displayName: String {
+    switch self {
+    case .weightLoss:
+      return "다이어트"
+    case .endurance:
+      return "체력 증진"
+    case .health:
+      return "건강 관리"
+    case .competitionPreparation:
+      return "대회 준비"
+    }
+  }
 }
