@@ -10,6 +10,7 @@ import RxSwift
 public protocol RecordUseCase {
   func fetchRecordData(page: Int, size: Int) -> Single<RecordList?>
   func fetchRecordDetial(id: Int) -> Single<RunningRecord?>
+  func deleteRecord(recordId: Int) -> Single<Bool>
 }
 
 public class RecordUseCaseImpl: RecordUseCase {
@@ -26,5 +27,9 @@ public class RecordUseCaseImpl: RecordUseCase {
   
   public func fetchRecordDetial(id: Int) -> RxSwift.Single<RunningRecord?> {
     return recordRepository.fetchRecordDetail(id: id)
+  }
+
+  public func deleteRecord(recordId: Int) -> RxSwift.Single<Bool> {
+    return recordRepository.deleteRecord(recordId: recordId)
   }
 }
