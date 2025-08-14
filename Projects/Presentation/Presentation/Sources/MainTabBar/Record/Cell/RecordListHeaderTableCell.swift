@@ -48,7 +48,7 @@ public class RecordListHeaderTableCell: BaseTableViewCell {
   private let distanceLabel = UILabel().then { // 30
     $0.font = .systemFont(ofSize: 28, weight: .bold)
     $0.textColor = .black
-    $0.text = "86.3"
+    $0.text = "0.0"
   }
   private let kmLabel = UILabel().then { //30
     $0.font = .systemFont(ofSize: 28, weight: .semibold)
@@ -123,7 +123,7 @@ public class RecordListHeaderTableCell: BaseTableViewCell {
     $0.alignment = .center
   }
   private let goalDistanceLabel = UILabel().then { // 20
-    $0.text = "N"
+    $0.text = "0"
     $0.font = .systemFont(ofSize: 16, weight: .bold)
     $0.textColor = FRColor.Fg.Text.tertiary
   }
@@ -159,7 +159,7 @@ public class RecordListHeaderTableCell: BaseTableViewCell {
     $0.alignment = .center
   }
   private let goalTimeLabel = UILabel().then { // 20
-    $0.text = "N"
+    $0.text = "0"
     $0.font = .systemFont(ofSize: 16, weight: .bold)
     $0.textColor = FRColor.Fg.Text.tertiary
   }
@@ -169,11 +169,11 @@ public class RecordListHeaderTableCell: BaseTableViewCell {
     $0.textColor = FRColor.Fg.Text.tertiary.withAlphaComponent(0.8)
   }
   
-  func setData(summary: RecordSummary) {
-    distanceLabel.text = String(format: "%.1f", summary.totalDistance)
+  func setData(summary: RecordList) {
+    distanceLabel.text = String(format: "%.1f", summary.totalDistance / 1000)
     runCountStatView.setData(title: "총 러닝 횟수", value: String(summary.recordCount), unit: "회")
-    runPaceStatView.setData(title: "평균 페이스", value: summary.averagePace.minuteSecondFormatted)
-    runTimeStatView.setData(title: "총 러닝 시간", value: summary.totalTime.hourMinuteSecondFormatted)
+    runPaceStatView.setData(title: "평균 페이스", value: summary.averagePace.toMinutesAndSeconds())
+    runTimeStatView.setData(title: "총 러닝 시간", value: summary.totalTime.toTime())
     
     goalDistanceLabel.text = String(summary.distanceGoalAchievedCount)
     goalTimeLabel.text = String(summary.timeGoalAchievedCount)

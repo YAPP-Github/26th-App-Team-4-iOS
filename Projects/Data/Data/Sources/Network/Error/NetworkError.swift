@@ -66,3 +66,27 @@ public enum SocialLoginError: Error, LocalizedError {
     }
   }
 }
+
+public enum AuthError: Error, Equatable {
+  /// 액세스 토큰이 만료된 경우
+  case tokenExpired
+
+  /// 인증 실패 (잘못된 토큰, 사용자 없음 등)
+  case authenticationFailed
+
+  /// 네트워크 또는 응답 파싱 오류
+  case networkError(String)
+
+  /// 알 수 없는 오류
+  case unknown
+
+  case unsupportedLoginType
+
+  case invalidSession
+}
+
+public enum UserDefaultsKey: String {
+  case loginType
+  case hasCompletedOnboarding
+  case isFirstLaunch
+}

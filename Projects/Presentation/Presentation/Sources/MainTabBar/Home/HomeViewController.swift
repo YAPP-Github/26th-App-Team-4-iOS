@@ -116,7 +116,7 @@ public final class HomeViewController: BaseViewController, View {
     FRLocationManager.shared.location
       .observe(on: MainScheduler.instance)
       .subscribe(onNext: { [weak self] location in
-        print("Current Location: \(location.coordinate.latitude), \(location.coordinate.longitude)")
+//        print("Current Location: \(location.coordinate.latitude), \(location.coordinate.longitude)")
         guard let self = self else { return }
 
         let latLng = NMGLatLng(lat: location.coordinate.latitude,

@@ -35,7 +35,7 @@ public class DomainAssembly: Assembly {
 
       container.register(GoalUseCase.self) { r in
       guard let repository = r.resolve(GoalRepository.self) else {
-        fatalError("Failed to resolve OnboardingRepository for OnboardingUseCase.")
+        fatalError("Failed to resolve GoalRepository for GoalUseCase.")
       }
       return GoalUseCaseImpl(goalRepository: repository)
     }
@@ -46,12 +46,47 @@ public class DomainAssembly: Assembly {
       }
       return HomeUseCaseImpl(homeRepository: repository)
     }
+
+    container.register(RunningStartUseCaseType.self) { r in
+      guard let repository = r.resolve(RunningRepository.self) else {
+        fatalError("Failed to resolve RunningRepository for RunningStartUseCase.")
+      }
+      return RunningStartUseCase(runningRepository: repository)
+    }
+
+    container.register(RunningCompletionUseCaseType.self) { r in
+      guard let repository = r.resolve(RunningRepository.self) else {
+        fatalError("Failed to resolve RunningRepository for RunningCompletionUseCase.")
+      }
+      return RunningCompletionUseCase(runningRepository: repository)
+    }
+
+    container.register(AudioUseCase.self) { r in
+      guard let repository = r.resolve(AudioRepository.self) else {
+        fatalError("Failed to resolve AudioRepository for AudioUseCase.")
+      }
+      return AudioUseCaseImpl(audioRepository: repository)
+    }
+
+    container.register(RunningGoalUseCase.self) { r in
+      guard let repository = r.resolve(GoalRepository.self) else {
+        fatalError("Failed to resolve GoalRepository for AudioUseCase.")
+      }
+      return RunningGoalUseCaseImpl(goalRepository: repository)
+    }
     
     container.register(RecordUseCase.self) { r in
       guard let recordRepository = r.resolve(RecordRepository.self) else {
         fatalError("Failed to resolve OnboardingRepository for OnboardingUseCase.")
       }
       return RecordUseCaseImpl(recordRepository: recordRepository)
+    }
+
+    container.register(RunningRecordImageUseCase.self) { r in
+      guard let repository = r.resolve(RunningRepository.self) else {
+        fatalError("Failed to resolve RunningRepository for OnboardingUseCase.")
+      }
+      return RunningRecordImageUseCaseImpl(runningRepository: repository)
     }
     
     container.register(UserUseCase.self) { r in

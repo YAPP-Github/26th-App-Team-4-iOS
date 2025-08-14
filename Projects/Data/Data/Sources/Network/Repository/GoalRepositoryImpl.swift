@@ -11,13 +11,26 @@ import RxSwift
 import Domain
 
 public final class GoalRepositoryImpl: GoalRepository {
-  
+
   private let provider: NetworkProvider<GoalAPI>
   
   public init(provider: NetworkProvider<GoalAPI> = .init()) {
     self.provider = provider
   }
-    
+
+  public func getRecommendPace() -> Single<RecommendPace> {
+    return provider.request(.goal)
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<RecommendPaceDTO>.self)
+      .map { response in
+        guard let dto = response.result else {
+          throw NSError(domain: "GoalRepositoryImpl", code: 0, userInfo: [NSLocalizedDescriptionKey: "No result found"])
+        }
+        return dto.toDomain()
+      }
+      .asSingle()
+  }
+
   public func fetchPaceRunningCount() -> Single<PaceRunningCount> {
     return provider.request(.goal)
       .filter(statusCodes: 200..<300)
@@ -44,6 +57,35 @@ public final class GoalRepositoryImpl: GoalRepository {
       .filter(statusCodes: 200..<300)
       .map(APIResponse<GoalDTO>.self)
       .map { $0.code == "SUCCESS" }
+      .asSingle()
+  }
+
+  public func saveGoalTime(time: Int) -> Single<Bool> {
+    return provider.request(.saveGoalTime(time: time))
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<GoalDTO>.self)
+      .map { $0.code == "SUCCESS" }
+      .asSingle()
+  }
+
+  public func saveGoalDistance(distance: Int) -> Single<Bool> {
+    return provider.request(.saveGoalDistance(distance: distance))
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<GoalDTO>.self)
+      .map { $0.code == "SUCCESS" }
+      .asSingle()
+  }
+
+  public func getRunningGoal() -> Single<RunningGoal> {
+    return provider.request(.goal)
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<GoalDTO>.self)
+      .map { response in
+        guard let dto = response.result else {
+          throw NSError(domain: "GoalRepositoryImpl", code: 0, userInfo: [NSLocalizedDescriptionKey: "No result found"])
+        }
+        return dto.toRunningGoal()
+      }
       .asSingle()
   }
 }

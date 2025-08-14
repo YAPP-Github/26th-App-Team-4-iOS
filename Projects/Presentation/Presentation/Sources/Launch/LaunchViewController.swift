@@ -16,30 +16,31 @@ public final class LaunchViewController: BaseViewController, View {
   private let logoImageView = UIImageView().then {
     $0.image = UIImage(named: "LaunchScreenLogo", in: Bundle.module, compatibleWith: nil)
   }
-  
+
   public override func initUI() {
     super.initUI()
     view.backgroundColor = UIColor(hex: "#FF6600")
     view.addSubview(logoImageView)
     logoImageView.snp.makeConstraints {
-      $0.center.equalToSuperview()
+      $0.center.equalTo(view.safeAreaLayoutGuide)
     }
   }
-  
+
   public func bind(reactor: LaunchReactor) {
     self.rx.viewDidAppear
       .subscribe(with: self) { object, _ in
         reactor.action.onNext(.checkUserStatus)
       }
       .disposed(by: disposeBag)
-    
+
     reactor.state.map { $0.userStatus }
       .observe(on: MainScheduler.instance)
       .distinctUntilChanged()
       .compactMap { $0 }
       .subscribe(with: self) { object, status in
         switch status {
-        case .needsWalkthrough:
+          // TODO: - needsWalkthrough는 실행 한번만 할 건지 논의 필요
+        case .needsWalkthrough, .needsLogin:
           object.coordinator?.showWalkthrough()
         case .loggedIn:
           object.coordinator?.showMainTabBar()

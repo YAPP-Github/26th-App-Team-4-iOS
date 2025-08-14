@@ -32,22 +32,22 @@ public class RecordDetailTitleTableCell: BaseTableViewCell {
     $0.alignment = .leading
   }
   
-  private let titleLabel = UILabel().then { // 32
-    $0.text = "7월 20일 점심 러닝"
+  private let titleLabel = UILabel().then {
+    $0.text = ""
     $0.font = .systemFont(ofSize: 24, weight: .bold)
     $0.textColor = .black
     $0.numberOfLines = 1
   }
   
-  private let dateLabel = UILabel().then {  // 24
-    $0.text = "2025/07/20 13:00:00"
+  private let dateLabel = UILabel().then {
+    $0.text = ""
     $0.font = .systemFont(ofSize: 16)
     $0.textColor = FRColor.Fg.Text.secondary.withAlphaComponent(0.8)
   }
     
-  let editButton = UIButton(type: .system).then { // 24
-    let img = UIImage(systemName: "pencil")?
-      .withRenderingMode(.alwaysTemplate)
+  let editButton = UIButton(type: .system).then {
+    let img = UIImage(named: "EditPencil", in: .module, with: nil)?
+      .resized(to: CGSize(width: 24, height: 24))
     $0.setImage(img, for: .normal)
     $0.tintColor = FRColor.Fg.Text.secondary.withAlphaComponent(0.8)
   }
@@ -81,7 +81,7 @@ public class RecordDetailTitleTableCell: BaseTableViewCell {
     }
     
     editButton.snp.makeConstraints {
-      $0.size.equalTo(24)
+      $0.size.equalTo(44)
     }
   }
 }

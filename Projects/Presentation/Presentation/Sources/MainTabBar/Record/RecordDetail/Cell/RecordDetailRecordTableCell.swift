@@ -36,7 +36,7 @@ public class RecordDetailRecordTableCell: BaseTableViewCell {
   private let distanceValueLabel = UILabel().then { //56
     $0.font = .systemFont(ofSize: 48, weight: .bold)
     $0.textColor = FRColor.Fg.Text.primary
-    $0.text = "5.0"
+    $0.text = "0.0"
   }
   
   private let kmLabel = UILabel().then { // 30
@@ -70,7 +70,7 @@ public class RecordDetailRecordTableCell: BaseTableViewCell {
   private let paceValueLabel = UILabel().then { //24
     $0.font = .systemFont(ofSize: 20, weight: .bold)
     $0.textColor = FRColor.Fg.Text.primary
-    $0.text = "5'00\""
+    $0.text = "0'00\""
   }
   
   private lazy var runningTimeVStack = UIStackView(
@@ -90,13 +90,13 @@ public class RecordDetailRecordTableCell: BaseTableViewCell {
   private let runningTimeValueLabel = UILabel().then { //24
     $0.font = .systemFont(ofSize: 20, weight: .bold)
     $0.textColor = FRColor.Fg.Text.primary
-    $0.text = "hh:mm:ss"
+    $0.text = "00:00:00"
   }
   
-  public func setData(distance: Double, pace: TimeInterval, runningTime: TimeInterval) {
-    distanceValueLabel.text = String(format: "%.1f", distance/1000)
-    paceValueLabel.text = pace.minuteSecondFormatted
-    runningTimeValueLabel.text = runningTime.hourMinuteSecondFormatted
+  public func setData(distance: Double, pace: Double, runningTime: Double) {
+    distanceValueLabel.text = String(format: "%.1f", distance / 1000)
+    paceValueLabel.text = pace.toMinutesAndSeconds()
+    runningTimeValueLabel.text = runningTime.toTime()
   }
   
   public override func initUI() {

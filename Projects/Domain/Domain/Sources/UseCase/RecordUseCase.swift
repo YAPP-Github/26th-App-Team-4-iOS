@@ -8,8 +8,8 @@
 import RxSwift
 
 public protocol RecordUseCase {
-  func fetchRecordData(page: Int, size: Int) -> Single<RunningRecordList>
-  func fetchRecordDetial(id: Int) -> Single<RecordDetail>
+  func fetchRecordData(page: Int, size: Int) -> Single<RecordList?>
+  func fetchRecordDetial(id: Int) -> Single<RunningRecord?>
 }
 
 public class RecordUseCaseImpl: RecordUseCase {
@@ -20,11 +20,11 @@ public class RecordUseCaseImpl: RecordUseCase {
     self.recordRepository = recordRepository
   }
   
-  public func fetchRecordData(page: Int, size: Int) -> Single<RunningRecordList> {
+  public func fetchRecordData(page: Int, size: Int) -> Single<RecordList?> {
     return recordRepository.fetchRecordData(page: page, size: size)
   }
   
-  public func fetchRecordDetial(id: Int) -> RxSwift.Single<RecordDetail> {
+  public func fetchRecordDetial(id: Int) -> RxSwift.Single<RunningRecord?> {
     return recordRepository.fetchRecordDetail(id: id)
   }
 }

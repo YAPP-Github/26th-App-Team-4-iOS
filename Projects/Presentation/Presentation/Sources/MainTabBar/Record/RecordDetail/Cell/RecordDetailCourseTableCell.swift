@@ -10,10 +10,9 @@ import Core
 import ReactorKit
 import NMapsMap
 import Domain
+import Kingfisher
 
 public class RecordDetailCourseTableCell: BaseTableViewCell {
-  
-  // MARK: - Root Stack
   private lazy var rootStack = UIStackView(
     arrangedSubviews: [
       titleStack,
@@ -27,8 +26,7 @@ public class RecordDetailCourseTableCell: BaseTableViewCell {
     $0.layer.cornerRadius = 16
     $0.backgroundColor = .white
   }
-  
-  // MARK: - Title
+
   private lazy var titleStack = UIStackView(
     arrangedSubviews: [courseTitleLabel, locationLabel]
   ).then {
@@ -36,41 +34,46 @@ public class RecordDetailCourseTableCell: BaseTableViewCell {
     $0.alignment = .leading
     $0.spacing = 4
   }
-  private let courseTitleLabel = UILabel().then { // 24
+  private let courseTitleLabel = UILabel().then {
     $0.text = "러닝 코스"
     $0.font = .systemFont(ofSize: 20, weight: .bold)
     $0.textColor = FRColor.Fg.Text.primary
   }
-  
+
   // MARK: - Location
-  private let locationLabel = UILabel().then { // 20
-    $0.text = "종로구 서울특별시 대한민국"
+  private let locationLabel = UILabel().then {
+    $0.text = ""
     $0.font = .systemFont(ofSize: 14)
     $0.textColor = FRColor.Fg.Text.tertiary
   }
-  
+
   // MARK: - Map Container
   private let mapContainer = UIView().then {
     $0.layer.cornerRadius = 12
     $0.clipsToBounds = true
   }
-  
-  let mapView = NMFMapView(frame: .zero).then {
-    $0.positionMode = .direction
-    $0.locationOverlay.hidden = true
+
+  private let mapImageView = UIImageView().then {
+    $0.layer.cornerRadius = 12
+    $0.clipsToBounds = true
+    $0.contentMode = .scaleAspectFill
+    $0.backgroundColor = .systemGray6
   }
-  
-  public func setData(imageURL: String, location: String) {
+
+  public func setData(imageURL: String?, location: String) {
     locationLabel.text = location
-    
-    // Assuming you have a method to load the image into the mapView
-    // loadImageIntoMapView(imageURL: imageURL)
+
+    if let url = URL(string: imageURL ?? "") {
+      mapImageView.kf.setImage(with: url)
+    } else {
+      mapImageView.image = nil
+    }
   }
-  
+
   // MARK: - Life Cycle
   public override func initUI() {
     super.initUI()
-    
+
     contentView.backgroundColor = .clear
 
     contentView.addSubview(rootStack)
@@ -79,17 +82,17 @@ public class RecordDetailCourseTableCell: BaseTableViewCell {
       $0.leading.trailing.equalToSuperview().inset(20)
       $0.bottom.equalToSuperview().inset(28)
     }
-    
+
     courseTitleLabel.snp.makeConstraints {
       $0.height.equalTo(24)
     }
-    
+
     locationLabel.snp.makeConstraints {
       $0.height.equalTo(20)
     }
-    
-    mapContainer.addSubview(mapView)
-    mapView.snp.makeConstraints {
+
+    mapContainer.addSubview(mapImageView)
+    mapImageView.snp.makeConstraints {
       $0.edges.equalToSuperview()
     }
     

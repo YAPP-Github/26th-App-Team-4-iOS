@@ -29,14 +29,25 @@ public enum AuthAPI: BaseAPI {
     return .post
   }
 
+  public var headers: [String: String]? {
+    switch self {
+    case .appleLogin:
+      return CommonNetworkHeaders.default
+    case .kakaoLogin:
+      return CommonNetworkHeaders.default
+    case .refreshToken:
+      return CommonNetworkHeaders.refreshToken
+    }
+  }
+
   public var task: Moya.Task {
     switch self {
     case let .appleLogin(idToken):
       return .requestParameters(parameters: ["idToken": idToken], encoding: JSONEncoding.default)
     case let .kakaoLogin(idToken):
       return .requestParameters(parameters: ["idToken": idToken], encoding: JSONEncoding.default)
-    case .refreshToken(refreshToken: let refreshToken):
-      return .requestParameters(parameters: ["Authorization": refreshToken], encoding: JSONEncoding.default)
+    case .refreshToken:
+      return .requestPlain
     }
   }
 }

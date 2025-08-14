@@ -12,6 +12,7 @@ import RxSwift
 import RxCocoa
 import Lottie
 import Core
+import ReactorKit
 
 public enum GoalInputType {
   case time // 시간 입력 화면
@@ -64,14 +65,13 @@ final class ClearSelectionTextField: UITextField {
   }
 }
 
-final class FirstRunningGoalSettingViewController: UIViewController {
+final class FirstRunningGoalSettingViewController: BaseViewController, View {
+  typealias Reactor = FirstRunningGoalSettingReactor
 
   // MARK: - Properties
 
   weak var coordinator: RunningCoordinator?
 
-  private let disposeBag = DisposeBag()
-  private var inputType: GoalInputType
   private let keyboardHeight = BehaviorRelay<CGFloat>(value: 0)
   private let currentGoalValue = BehaviorRelay<Int>(value: 0) // 현재 입력된 목표 값 (분 또는 km)
 
@@ -143,27 +143,6 @@ final class FirstRunningGoalSettingViewController: UIViewController {
 
   private var setAndRunButtonBottomConstraint: Constraint?
 
-
-  // MARK: - Initialization
-
-  init(inputType: GoalInputType) {
-    self.inputType = inputType
-    super.init(nibName: nil, bundle: nil)
-    setupInitialUIForInputType()
-  }
-
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-
-  private func setupInitialUIForInputType() {
-    titleLabel.text = inputType.title
-    subTitleLabel.text = inputType.subTitle
-    unitLabel.text = inputType.unit
-    currentGoalValue.accept(inputType.initialGoalValue)
-    goalValueTextField.text = String(currentGoalValue.value)
-  }
-
   // MARK: - Lifecycle
 
   override func viewDidLoad() {
@@ -171,8 +150,6 @@ final class FirstRunningGoalSettingViewController: UIViewController {
     view.backgroundColor = FRColor.Fg.Nuetral.gray1000
     
     setupLayout()
-    bindUI()
-    addTargets()
     setupKeyboardHandling()
   }
 
@@ -322,14 +299,142 @@ final class FirstRunningGoalSettingViewController: UIViewController {
       .disposed(by: disposeBag)
   }
 
+  // MARK: - Bind Reactor
+
+  func bind(reactor: FirstRunningGoalSettingReactor) {
+    goalValueTextField.rx.text
+      .orEmpty
+      .skip(1)
+      .distinctUntilChanged()
+      .map { Reactor.Action.updateGoalValue($0) }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+
+    backButton.rx.tap
+      .map { Reactor.Action.backButtonTapped }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+
+    skipButton.rx.tap
+      .map { Reactor.Action.skipButtonTapped }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+
+    setAndRunButton.rx.tap
+      .map { Reactor.Action.setAndRunButtonTapped }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+
+    let tapBackground = UITapGestureRecognizer()
+    view.addGestureRecognizer(tapBackground)
+    tapBackground.rx.event
+      .filter { [weak self] gesture in
+        guard let self = self else { return false }
+        let location = gesture.location(in: self.view)
+        return !self.goalValueTextField.frame.contains(location)
+      }
+      .bind { [weak self] _ in
+        guard let self = self else { return }
+        self.view.endEditing(true)
+      }
+      .disposed(by: disposeBag)
+
+    reactor.state.map { String($0.goalValue) }
+      .distinctUntilChanged()
+      .bind(to: goalValueTextField.rx.text)
+      .disposed(by: disposeBag)
+
+    reactor.state.map { $0.isLoading }
+      .distinctUntilChanged()
+      .map { !$0 }
+      .bind(to: view.rx.isUserInteractionEnabled)
+      .disposed(by: disposeBag)
+
+    reactor.state.map { $0.saveSuccess }
+      .distinctUntilChanged { $0 == $1 }
+      .subscribe(onNext: { [weak self] success in
+        guard let self, let success = success else { return }
+        if success {
+          self.animationView.isHidden = false
+          self.animationView.play { [weak self] finished in
+            guard let self = self else { return }
+            if finished {
+              self.reactor?.action.onNext(.animationDidFinish)
+            }
+          }
+        }
+      })
+      .disposed(by: disposeBag)
+
+
+    reactor.state.compactMap { $0.navigationTarget }
+      .distinctUntilChanged()
+      .observe(on: MainScheduler.instance)
+      .subscribe(onNext: { [weak self] target in
+        guard let self = self else { return }
+        switch target {
+        case .pop:
+          self.coordinator?.pop()
+        case .showRunning:
+          UserDefaults.standard.set(true, forKey: "hasCompletedRunningOnboarding")
+
+          self.coordinator?.showRunning()
+        }
+      })
+      .disposed(by: disposeBag)
+
+    reactor.state.map { $0.inputType }
+      .distinctUntilChanged()
+      .observe(on: MainScheduler.instance)
+      .subscribe(onNext: { [weak self] inputType in
+        guard let self = self else { return }
+        titleLabel.text = inputType.title
+        subTitleLabel.text = inputType.subTitle
+        unitLabel.text = inputType.unit
+        currentGoalValue.accept(inputType.initialGoalValue)
+        goalValueTextField.text = String(currentGoalValue.value)
+      })
+      .disposed(by: disposeBag)
+
+    reactor.state.compactMap { $0.saveError }
+      .distinctUntilChanged { $0.localizedDescription == $1.localizedDescription }
+      .observe(on: MainScheduler.instance)
+      .subscribe(onNext: { error in
+        let alertController = UIAlertController(
+          title: "Error",
+          message: "Failed to save goal: \(error.localizedDescription)",
+          preferredStyle: .alert
+        )
+        alertController.addAction(UIAlertAction(title: "OK", style: .default))
+        self.present(alertController, animated: true, completion: nil)
+      })
+      .disposed(by: disposeBag)
+
+    keyboardHeight
+      .distinctUntilChanged()
+      .subscribe(onNext: { [weak self] height in
+        guard let self = self else { return }
+        let offset: CGFloat
+        if height > 0 {
+          offset = -(height + 12)
+        } else {
+          offset = -46
+        }
+        self.setAndRunButtonBottomConstraint?.update(offset: offset)
+        self.view.layoutIfNeeded()
+      })
+      .disposed(by: disposeBag)
+  }
+
   // MARK: - Underline Animation
 
   private func animateUnderline(isVisible: Bool) {
     if isVisible {
       self.goalValueUnderline.transform = CGAffineTransform(scaleX: 0.01, y: 1.0)
       self.goalValueUnderline.isHidden = false
-      self.goalValueUnderline.transform = .identity
-//      self.view.layoutIfNeeded()
+      UIView.animate(withDuration: 0.25, animations: {
+        self.goalValueUnderline.transform = .identity
+      })
     } else {
       UIView.animate(withDuration: 0.25, animations: {
         self.goalValueUnderline.transform = CGAffineTransform(scaleX: 0.01, y: 1.0)

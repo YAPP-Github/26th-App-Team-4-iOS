@@ -47,7 +47,7 @@ public class RecordListTableCell: BaseTableViewCell {
   }
   
   private let titleLabel = UILabel().then { // 20
-    $0.text = "m월 dd일 시간 러닝"
+    $0.text = ""
     $0.font = .systemFont(ofSize: 16, weight: .bold)
     $0.textColor = FRColor.Fg.Text.secondary
   }
@@ -61,7 +61,7 @@ public class RecordListTableCell: BaseTableViewCell {
   }
   
   private let distanceLabel = UILabel().then { // 36
-    $0.text = "86.3"
+    $0.text = "0.0"
     $0.font = .systemFont(ofSize: 28, weight: .bold)
     $0.textColor = FRColor.Fg.Text.primary
   }
@@ -72,7 +72,7 @@ public class RecordListTableCell: BaseTableViewCell {
     $0.textColor = FRColor.Fg.Text.primary
   }
   
-  private let CourseImageView = UIImageView().then {
+  private let courseImageView = UIImageView().then {
     $0.backgroundColor = UIColor(hex: "#D9D9D9")
     $0.contentMode = .scaleAspectFill
     $0.layer.cornerRadius = 8
@@ -101,7 +101,7 @@ public class RecordListTableCell: BaseTableViewCell {
   }
   
   private let paceValueLabel = UILabel().then { // 24
-    $0.text = "n'nn\""
+    $0.text = "00'00\""
     $0.font = .systemFont(ofSize: 20, weight: .bold)
     $0.textColor = FRColor.Fg.Text.tertiary
   }
@@ -121,7 +121,7 @@ public class RecordListTableCell: BaseTableViewCell {
   }
   
   private let timeValueLabel = UILabel().then { // 24
-    $0.text = "hh:mm:ss"
+    $0.text = "00:00:00"
     $0.font = .systemFont(ofSize: 20, weight: .bold)
     $0.textColor = FRColor.Fg.Text.tertiary
   }
@@ -129,19 +129,19 @@ public class RecordListTableCell: BaseTableViewCell {
   func setData(
     title: String,
     distance: Double,
-    pace: TimeInterval,
-    time: TimeInterval,
+    pace: Double,
+    time: Double,
     imageURL: String?
   ) {
     titleLabel.text = title
-    distanceLabel.text = String(format: "%.1f", distance)
-    paceValueLabel.text = pace.minuteSecondFormatted
-    timeValueLabel.text = time.hourMinuteSecondFormatted
-    
+    distanceLabel.text = String(format: "%.1f", distance / 1000)
+    paceValueLabel.text = pace.toMinutesAndSeconds()
+    timeValueLabel.text = time.toTime()
+
     if let url = URL(string: imageURL ?? "") {
-      CourseImageView.kf.setImage(with: url)
+      courseImageView.kf.setImage(with: url)
     } else {
-      CourseImageView.image = nil
+      courseImageView.image = nil
     }
   }
   
@@ -168,10 +168,11 @@ public class RecordListTableCell: BaseTableViewCell {
       $0.height.equalTo(28)
     }
 
-    CourseImageView.snp.makeConstraints {
-      $0.width.equalTo(CourseImageView.snp.height).multipliedBy(1.33)
+    courseImageView.snp.makeConstraints {
+      $0.width.equalTo(100)
+      $0.height.equalTo(75)
     }
-    
+
     paceTitleLabel.snp.makeConstraints {
       $0.height.equalTo(20)
     }
