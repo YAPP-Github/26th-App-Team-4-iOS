@@ -11,7 +11,7 @@ import ReactorKit
 import NMapsMap
 import Domain
 
-public final class MyPageViewController: BaseViewController {
+public final class MyPageViewController: BaseViewController, View {
   
   enum Section: Int, CaseIterable {
     case userInfo
@@ -118,6 +118,8 @@ public final class MyPageViewController: BaseViewController {
     }
   }
   
+  public typealias Reactor = MyPageReactor
+  
   var coordinator: MyPageCoordinator?
   
   let navLabel = UILabel().then {
@@ -158,6 +160,25 @@ public final class MyPageViewController: BaseViewController {
       $0.top.equalTo(navLabel.snp.bottom)
       $0.leading.trailing.bottom.equalToSuperview()
     }
+  }
+
+  public func bind(reactor: MyPageReactor) {
+    print("\(type(of: self)) - \(#function)")
+
+    self.rx.viewDidLoad
+      .subscribe(with: self) { object, _ in
+        reactor.action.onNext(.initialize)
+      }
+      .disposed(by: disposeBag)
+    
+    reactor.state.map(\.profileInfo)
+      .observe(on: MainScheduler.instance)
+      .compactMap { $0 }
+      .distinctUntilChanged()
+      .subscribe(with: self) { owner, userInfo in
+        owner.tableView.reloadData()
+      }
+      .disposed(by: disposeBag)
   }
 }
 
@@ -231,6 +252,10 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
     let cell = tableView.dequeueReusableCell(
       withIdentifier: MyUserInfoTableCell.identifier, for: indexPath
     ) as! MyUserInfoTableCell
+    
+    if let profileInfo = reactor?.currentState.profileInfo {
+      cell.setData(profileInfo: profileInfo)
+    }
     
     cell.topHStack.rx.tapGesture()
       .when(.recognized)
