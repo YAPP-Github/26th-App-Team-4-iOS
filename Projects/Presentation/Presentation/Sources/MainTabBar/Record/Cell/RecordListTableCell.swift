@@ -72,7 +72,7 @@ public class RecordListTableCell: BaseTableViewCell {
     $0.textColor = FRColor.Fg.Text.primary
   }
   
-  private let CourseImageView = UIImageView().then {
+  private let courseImageView = UIImageView().then {
     $0.backgroundColor = UIColor(hex: "#D9D9D9")
     $0.contentMode = .scaleAspectFill
     $0.layer.cornerRadius = 8
@@ -139,9 +139,9 @@ public class RecordListTableCell: BaseTableViewCell {
     timeValueLabel.text = time.toTime()
 
     if let url = URL(string: imageURL ?? "") {
-      CourseImageView.kf.setImage(with: url)
+      courseImageView.kf.setImage(with: url)
     } else {
-      CourseImageView.image = nil
+      courseImageView.image = nil
     }
   }
   
@@ -168,10 +168,11 @@ public class RecordListTableCell: BaseTableViewCell {
       $0.height.equalTo(28)
     }
 
-    CourseImageView.snp.makeConstraints {
-      $0.width.equalTo(CourseImageView.snp.height).multipliedBy(1.33)
+    courseImageView.snp.makeConstraints {
+      $0.width.equalTo(100)
+      $0.height.equalTo(75)
     }
-    
+
     paceTitleLabel.snp.makeConstraints {
       $0.height.equalTo(20)
     }

@@ -10,6 +10,7 @@ import Core
 import ReactorKit
 import NMapsMap
 import Domain
+import Kingfisher
 
 public class RecordDetailCourseTableCell: BaseTableViewCell {
   private lazy var rootStack = UIStackView(
@@ -62,26 +63,10 @@ public class RecordDetailCourseTableCell: BaseTableViewCell {
   public func setData(imageURL: String?, location: String) {
     locationLabel.text = location
 
-    guard let imageURL = imageURL else { return }
-
-    if let url = URL(string: imageURL), !imageURL.isEmpty {
-      URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-        guard let self = self,
-              let data = data,
-              error == nil,
-              let image = UIImage(data: data) else {
-          DispatchQueue.main.async {
-            self?.mapImageView.image = nil
-          }
-          return
-        }
-
-        DispatchQueue.main.async {
-          self.mapImageView.image = image
-        }
-      }.resume()
+    if let url = URL(string: imageURL ?? "") {
+      mapImageView.kf.setImage(with: url)
     } else {
-      self.mapImageView.image = nil
+      mapImageView.image = nil
     }
   }
 
