@@ -155,6 +155,16 @@ public class MyUserInfoTableCell: BaseTableViewCell {
     $0.textColor = FRColor.Fg.Text.Interactive.inverse
   }
   
+  func setData(profileInfo: ProfileInfo) {
+    print("\(type(of: self)) - \(#function)", profileInfo)
+
+    userNameLabel.text = profileInfo.nickname
+    emailLabel.text = profileInfo.email
+    
+//    if let authProvider = userInfo.provider {
+//      authProviderImageView.image = UIImage(named: authProvider.logo, in: Bundle.module, compatibleWith: nil)
+//    }
+  }
   
   public override func initUI() {
     super.initUI()

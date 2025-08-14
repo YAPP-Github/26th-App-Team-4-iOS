@@ -17,18 +17,18 @@ public final class MyPageAssembly: Assembly {
     container.register(MyPageCoordinator.self) { (r, navigationController: UINavigationController) in
       return MyPageCoordinatorImpl(navigationController: navigationController, resolver: r)
     }
-//    container.register(RecordListReactor.self) { _ in
-//      return RecordListReactor()
-//    }
+    
+    // MARK: - 마이페이지
+    container.autoregister(MyPageReactor.self, initializer: MyPageReactor.init)
+
     container.register(MyPageViewController.self) { r in
-//      guard let reactor = r.resolve(MyPageReactor.self) else {
-//        fatalError("Failed to resolve RecordListReactor.")
-//      }
+      guard let reactor = r.resolve(MyPageReactor.self) else {
+        fatalError("Failed to resolve RecordListReactor.")
+      }
       let vc = MyPageViewController()
-//      vc.reactor = reactor
+      vc.reactor = reactor
       return vc
     }
-    
 
     // MARK: - 체력 수준
     container.register(MyLevelSettingReactor.self) { r in
