@@ -87,8 +87,7 @@ public final class RecordListViewController: BaseViewController, View {
 
   public func bind(reactor: RecordListReactor) {
     // MARK: Action
-    self.rx.viewDidAppear
-      .take(1)
+    self.rx.viewWillAppear
       .map { _ in Reactor.Action.initialize }
       .bind(to: reactor.action)
       .disposed(by: self.disposeBag)
@@ -202,7 +201,7 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
         time: record.totalTime,
         imageURL: record.imageUrl
       )
-
+      print("record.imageUrl>>>>>>>>>>>>\n", record.imageUrl)
       cell.contentView.rx.tapGesture()
         .when(.recognized)
         .subscribe(with: self) { owner, _ in
