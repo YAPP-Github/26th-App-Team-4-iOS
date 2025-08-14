@@ -32,10 +32,11 @@ public final class RecordListViewController: BaseViewController, View {
   }
 
   private lazy var tableView = UITableView(frame: .zero, style: .grouped).then {
-    $0.backgroundColor = FRColor.Bg.primary
+    $0.backgroundColor = FRColor.Bg.secondary
     $0.separatorStyle = .none
     $0.showsVerticalScrollIndicator = false
     $0.sectionHeaderTopPadding = 0
+    $0.bounces = false
 
     $0.registerCell(ofType: RecordListHeaderTableCell.self)
     $0.registerCell(ofType: RecordListTableCell.self)
@@ -71,6 +72,17 @@ public final class RecordListViewController: BaseViewController, View {
       $0.top.equalTo(navTitleLabel.snp.bottom).offset(16)
       $0.leading.trailing.bottom.equalToSuperview()
     }
+
+    let footerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 116))
+    footerView.backgroundColor = FRColor.Bg.secondary
+    footerView.addSubview(loadMoreButton)
+    loadMoreButton.snp.makeConstraints {
+      $0.center.equalToSuperview()
+      $0.width.equalToSuperview().inset(20)
+      $0.height.equalTo(52)
+      $0.bottom.equalToSuperview().inset(64)
+    }
+    tableView.tableFooterView = footerView
   }
 
   public func bind(reactor: RecordListReactor) {
@@ -108,24 +120,9 @@ public final class RecordListViewController: BaseViewController, View {
       .observe(on: MainScheduler.instance)
       .distinctUntilChanged()
       .subscribe(with: self) { owner, hasNextPage in
-        owner.updateLoadMoreButton(isHidden: !hasNextPage)
+        owner.loadMoreButton.isHidden = !hasNextPage
       }
       .disposed(by: self.disposeBag)
-  }
-
-  private func updateLoadMoreButton(isHidden: Bool) {
-    if isHidden {
-      tableView.tableFooterView = nil
-    } else {
-      let footerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 60))
-      footerView.addSubview(loadMoreButton)
-      loadMoreButton.snp.makeConstraints {
-        $0.center.equalToSuperview()
-        $0.width.equalToSuperview().inset(20)
-        $0.height.equalTo(52)
-      }
-      tableView.tableFooterView = footerView
-    }
   }
 }
 
