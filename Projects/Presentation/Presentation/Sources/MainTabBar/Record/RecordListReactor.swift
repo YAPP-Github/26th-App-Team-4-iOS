@@ -27,6 +27,7 @@ public class RecordListReactor: Reactor {
     case setRecords([RecordEntity])
     case appendRecords([RecordEntity])
     case setLoading(Bool)
+    case setHasNextPage(Bool)
     case setError(Error)
   }
 
@@ -35,34 +36,34 @@ public class RecordListReactor: Reactor {
     fileprivate(set) var summary: RecordList?
     fileprivate(set) var records: [RecordEntity] = []
     fileprivate(set) var isLoading: Bool = false
+    fileprivate(set) var hasNextPage: Bool = true
     @Pulse fileprivate(set) var error: Error?
   }
 
   public var initialState = State()
 
   private var currentPage = 0
-  private let pageSize = 20
-  private var hasNextPage = true
+  private let pageSize = 10
 
   private let recordUseCase: RecordUseCase
 
   public init(recordUseCase: RecordUseCase) {
     self.recordUseCase = recordUseCase
   }
-  
+
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .initialize, .refresh:
       resetPagination()
       return Observable.concat([
         .just(.setLoading(true)),
+        .just(.setHasNextPage(true)),
         load(page: 0),
         .just(.setLoading(false))
       ])
 
     case .loadMore:
-      // 로딩 중이거나 더 불러올 게 없으면 무시
-      guard !currentState.isLoading, hasNextPage else {
+      guard !currentState.isLoading, currentState.hasNextPage else {
         return .empty()
       }
       return Observable.concat([
@@ -72,60 +73,64 @@ public class RecordListReactor: Reactor {
       ])
     }
   }
-  
+
   public func reduce(state: State, mutation: Mutation) -> State {
     var newState = state
     switch mutation {
     case let .setSummary(summary):
       newState.summary = summary
-      
+
     case let .setRecords(records):
       newState.records = records
-      
+
     case let .appendRecords(records):
       newState.records.append(contentsOf: records)
-      
+
     case let .setLoading(isLoading):
       newState.isLoading = isLoading
-      
+
+    case let .setHasNextPage(hasNextPage):
+      newState.hasNextPage = hasNextPage
+
     case let .setError(error):
       newState.error = error
     }
     return newState
   }
-  
+
   private func resetPagination() {
     currentPage = 0
-    hasNextPage = true
+    // 직접 할당하는 대신, Mutation을 통해 상태를 변경하도록 수정
+    // currentState.hasNextPage = true // 이 줄을 삭제
   }
-  
+
   private func load(page: Int) -> Observable<Mutation> {
     return recordUseCase
       .fetchRecordData(page: page, size: pageSize)
-      .asObservable()                      // ← 여기서 Single → Observable 으로 바꿔주고
+      .asObservable()
       .flatMap { response -> Observable<Mutation> in
         guard let response = response else { return Observable.empty() }
         let summary = response
         let records = response.records
 
-        // 페이지 업데이트
         self.currentPage = page
-        self.hasNextPage = records.count == self.pageSize
+        let hasNextPage = records.count == self.pageSize
 
         if page == 0 {
-          // 첫 페이지만 summary + records 두 개의 Mutation을 방출
           return Observable.from([
             .setSummary(summary),
-            .setRecords(records)
+            .setRecords(records),
+            .setHasNextPage(hasNextPage)
           ])
         } else {
-          // 그 외에는 append 하나만
-          return .just(.appendRecords(records))
+          return Observable.from([
+            .appendRecords(records),
+            .setHasNextPage(hasNextPage)
+          ])
         }
       }
       .catch { error in
-        .just(.setError(error))
+          .just(.setError(error))
       }
-
   }
 }

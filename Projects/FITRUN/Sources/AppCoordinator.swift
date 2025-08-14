@@ -105,7 +105,7 @@ extension AppCoordinatorImpl: CoordinatorFinishDelegate {
     case .walkthrough:
       showLogin()
     case .login:
-      showOnboarding()
+      showMainTab()
     case .onboarding:
       showMainTab()
     default:

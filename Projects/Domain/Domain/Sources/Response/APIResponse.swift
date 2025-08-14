@@ -11,3 +11,8 @@ public struct APIResponse<T: Codable>: Codable {
   public let result: T?
   public let timeStamp: String
 }
+
+public struct APIResponseWithoutResult: Codable {
+  public let code: String
+  public let timeStamp: String
+}

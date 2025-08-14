@@ -11,6 +11,7 @@ import Core
 
 public protocol LoginCoordinator: Coordinator {
   func showOnboarding()
+  func showMainTabbar()
 }
 
 public final class LoginCoordinatorImpl: LoginCoordinator {
@@ -37,6 +38,21 @@ public final class LoginCoordinatorImpl: LoginCoordinator {
 
 extension LoginCoordinatorImpl {
   public func showOnboarding() {
+    guard let coordinator = resolver.resolve(OnboardingCoordinatorImpl.self, argument: navigationController) else {
+      fatalError("Failed to resolve OnboardingCoordinatorImpl. Ensure it is registered correctly in Swinject.")
+    }
+    coordinator.finishDelegate = self
+    childCoordinators.append(coordinator)
+    coordinator.start()
+  }
+
+  public func showMainTabbar() {
+    finishDelegate?.coordinatorDidFinish(childCoordinator: self)
+  }
+}
+
+extension LoginCoordinatorImpl: CoordinatorFinishDelegate {
+  public func coordinatorDidFinish(childCoordinator: any Coordinator) {
     finishDelegate?.coordinatorDidFinish(childCoordinator: self)
   }
 }

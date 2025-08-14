@@ -47,4 +47,13 @@ public final class RecordRepositoryImpl: RecordRepository {
       }
       .asSingle()
   }
+
+  public func deleteRecord(recordId: Int) -> Single<Bool> {
+    return provider
+      .request(.deleteRecord(recordId: recordId))
+      .filter(statusCodes: 200..<300)
+      .map(APIResponseWithoutResult.self)
+      .map { $0.code == "SUCCESS" }
+      .asSingle()
+  }
 }

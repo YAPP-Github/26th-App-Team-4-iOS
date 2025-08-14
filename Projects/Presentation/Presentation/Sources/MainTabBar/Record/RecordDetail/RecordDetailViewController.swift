@@ -11,8 +11,11 @@ import ReactorKit
 import NMapsMap
 import Domain
 import CoreLocation
+import RxSwift
+import RxCocoa
+import SnapKit
 
-public final class RecordDetailViewController: BaseViewController, View {
+public final class RecordDetailViewController: BaseViewController, View, CustomAlertViewDelegate {
   private var mapView: NMFMapView?
 
   public typealias Reactor = RecordDetailReactor
@@ -48,13 +51,21 @@ public final class RecordDetailViewController: BaseViewController, View {
     $0.dataSource = self
   }
 
-  private lazy var popUpView = FirstRunningPopUpView().then {
-    $0.isHidden = true
-    $0.onConfirm = { [weak self] in
-      guard let self = self else { return }
-      self.coordinator?.showRunningPaceSetting()
-    }
-  }
+  private let deleteButton: UIButton = {
+    var config = UIButton.Configuration.plain()
+    config.title = "삭제하기"
+    config.image = UIImage(named: "trash", in: Bundle.module, compatibleWith: nil)?.resized(to: CGSize(width: 14, height: 14))
+    config.imagePlacement = .leading
+    config.imagePadding = 8
+    config.baseForegroundColor = FRColor.Fg.Text.secondary
+
+    let button = UIButton(configuration: config, primaryAction: nil)
+    button.titleLabel?.font = .systemFont(ofSize: 13, weight: .bold)
+    button.backgroundColor = FRColor.Fg.Nuetral.gray400
+    button.layer.cornerRadius = 12
+    return button
+  }()
+
   override init() {
     super.init()
     hidesBottomBarWhenPushed = true
@@ -74,7 +85,6 @@ public final class RecordDetailViewController: BaseViewController, View {
     navigationController?.setNavigationBarHidden(true, animated: animated)
   }
 
-
   public override func initUI() {
     super.initUI()
     self.view.backgroundColor = FRColor.Bg.secondary
@@ -89,17 +99,23 @@ public final class RecordDetailViewController: BaseViewController, View {
     view.addSubview(tableView)
     tableView.snp.makeConstraints {
       $0.top.equalTo(backButton.snp.bottom).offset(16)
-      $0.leading.trailing.equalToSuperview()
-      $0.bottom.equalToSuperview()
+      $0.leading.trailing.bottom.equalToSuperview()
     }
 
-    view.addSubview(popUpView)
-    popUpView.snp.makeConstraints {
-      $0.edges.equalToSuperview()
+    let footerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 84))
+    footerView.backgroundColor = .clear
+    footerView.addSubview(deleteButton)
+    deleteButton.snp.makeConstraints {
+      $0.top.equalToSuperview().offset(16)
+      $0.centerX.equalToSuperview()
+      $0.height.equalTo(36)
+      $0.width.equalTo(107)
     }
+    tableView.tableFooterView = footerView
   }
 
   public func bind(reactor: RecordDetailReactor) {
+    // MARK: Action
     backButton.rx.tap
       .subscribe(with: self) { owner, _ in
         owner.coordinator?.finish()
@@ -113,27 +129,49 @@ public final class RecordDetailViewController: BaseViewController, View {
       }
       .disposed(by: disposeBag)
 
+    deleteButton.rx.tap
+      .subscribe(with: self) { owner, _ in
+        owner.showDeleteConfirmationDialog()
+      }
+      .disposed(by: disposeBag)
+
+    // MARK: State
     reactor.state.map(\.detail)
       .observe(on: MainScheduler.instance)
       .subscribe(with: self) { owner, record in
-
         guard let record = record else { return }
         owner.tableView.reloadData()
-
         if record.imageUrl ?? "" == "" {
           owner.setupHiddenMap(for: record)
         }
       }
       .disposed(by: disposeBag)
 
-    reactor.state.map(\.shouldShowFirstRunningPopUp)
-      .distinctUntilChanged()
+    reactor.state.map(\.isDeleted)
       .observe(on: MainScheduler.instance)
-      .delay(.milliseconds(500), scheduler: MainScheduler.instance)
-      .subscribe(with: self) { owner, shouldShowPopUp in
-        owner.popUpView.isHidden = !shouldShowPopUp
+      .distinctUntilChanged()
+      .filter { $0 == true }
+      .subscribe(with: self) { owner, _ in
+        owner.coordinator?.pop()
+        owner.showToast(message: "삭제가 완료되었어요.")
       }
       .disposed(by: disposeBag)
+  }
+
+  private func showDeleteConfirmationDialog() {
+      let alertView = CustomAlertView(
+          title: "해당 기록을 삭제하시겠어요?",
+          message: "삭제된 기록은 되돌릴 수 없어요."
+      )
+      alertView.delegate = self
+      self.view.addSubview(alertView)
+      alertView.snp.makeConstraints { $0.edges.equalToSuperview() }
+  }
+
+  // MARK: - CustomAlertViewDelegate
+  public func deleteButtonTapped() {
+    guard let reactor = self.reactor else { return }
+    reactor.action.onNext(.deleteRecord)
   }
 
   private func getAddressFrom(coordinate: CLLocationCoordinate2D, completion: @escaping (String?) -> Void) {
@@ -141,18 +179,15 @@ public final class RecordDetailViewController: BaseViewController, View {
     let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
 
     geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
-      if let error = error {
+      if error != nil {
         completion(nil)
         return
       }
-
       guard let placemark = placemarks?.first else {
         completion("주소 없음")
         return
       }
-
       var addressComponents: [String] = []
-
       if let administrativeArea = placemark.administrativeArea {
         addressComponents.append(administrativeArea)
       }
@@ -162,10 +197,27 @@ public final class RecordDetailViewController: BaseViewController, View {
       if let thoroughfare = placemark.thoroughfare {
         addressComponents.append(thoroughfare)
       }
-
       let fullAddress = addressComponents.joined(separator: " ")
       completion(fullAddress.isEmpty ? "주소 없음" : fullAddress)
     }
+  }
+
+  private func showToast(message: String) {
+    let toastLabel = UILabel(frame: CGRect(x: self.view.frame.size.width/2 - 125, y: self.view.frame.size.height-100, width: 250, height: 35))
+    toastLabel.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+    toastLabel.textColor = UIColor.white
+    toastLabel.textAlignment = .center;
+    toastLabel.font = .systemFont(ofSize: 14)
+    toastLabel.text = message
+    toastLabel.alpha = 1.0
+    toastLabel.layer.cornerRadius = 10;
+    toastLabel.clipsToBounds  =  true
+    self.view.addSubview(toastLabel)
+    UIView.animate(withDuration: 4.0, delay: 0.1, options: .curveEaseOut, animations: {
+      toastLabel.alpha = 0.0
+    }, completion: {(isCompleted) in
+      toastLabel.removeFromSuperview()
+    })
   }
 }
 
@@ -179,23 +231,17 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     switch Section(rawValue: section) {
     case .title:
       return 1
-
     case .goalAchievement:
       return 1
-
     case .runRecord:
       return 1
-
     case .runningCourse:
       return 1
-
     case .lapSegment:
       guard let segments = reactor?.currentState.detail?.segments else { return 0 }
       return segments.count
-
     case .none:
       return 0
-
     }
   }
 
@@ -217,7 +263,6 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     }
   }
 
-  // 모든 섹션 푸터 없애기
   public func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
     switch Section(rawValue: section) {
     case .lapSegment:
@@ -240,19 +285,14 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     switch Section(rawValue: indexPath.section) {
     case .title:
       return dequeueTitleCell(for: indexPath)
-
     case .goalAchievement:
       return dequeueGoalAchievementCell(for: indexPath)
-
     case .runRecord:
       return dequeueRecordCell(for: indexPath)
-
     case .runningCourse:
       return dequeRueRunningCourseCell(for: indexPath)
-
     case .lapSegment:
       return dequeueLapSegmentCell(for: indexPath)
-
     case .none:
       return UITableViewCell()
     }
@@ -262,14 +302,11 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailTitleTableCell.identifier, for: indexPath
     ) as! RecordDetailTitleTableCell
-
     guard let detail = self.reactor?.currentState.detail else { return cell }
-
     cell.setData(
       title: detail.title,
       date: detail.startAt
     )
-
     return cell
   }
 
@@ -277,15 +314,12 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailAchievementTableCell.identifier, for: indexPath
     ) as! RecordDetailAchievementTableCell
-
     guard let detail = self.reactor?.currentState.detail else { return cell }
-
     cell.setData(
       distance: detail.isDistanceGoalAchieved,
       pace: detail.isPaceGoalAchieved,
       time: detail.isTimeGoalAchieved
     )
-
     return cell
   }
 
@@ -293,11 +327,8 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailRecordTableCell.identifier, for: indexPath
     ) as! RecordDetailRecordTableCell
-
     guard let detail = self.reactor?.currentState.detail else { return cell }
-
     cell.setData(distance: detail.totalDistance, pace: detail.averagePace, runningTime: detail.totalTime)
-
     return cell
   }
 
@@ -306,17 +337,14 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
       withIdentifier: RecordDetailCourseTableCell.identifier, for: indexPath
     ) as! RecordDetailCourseTableCell
     guard let detail = self.reactor?.currentState.detail else { return cell }
-
     if let location = detail.runningPoints.first?.location {
       let coordinate = CLLocationCoordinate2D(latitude: location.lat, longitude: location.lon)
-
       getAddressFrom(coordinate: coordinate) { location in
         cell.setData(imageURL: detail.imageUrl, location: location ?? "")
       }
     } else {
       cell.setData(imageURL: detail.imageUrl, location: "")
     }
-
     return cell
   }
 
@@ -324,22 +352,14 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     let cell = tableView.dequeueReusableCell(
       withIdentifier: RecordDetailLapTableCell.identifier, for: indexPath
     ) as! RecordDetailLapTableCell
-
     guard let segments = self.reactor?.currentState.detail?.segments else { return cell }
     guard segments.indices.contains(indexPath.row) else { return cell }
-
     let segment = segments[indexPath.row]
-    let lapNumber = segment.orderNo
-
     let paceString = segment.averagePace.toMinutesAndSeconds()
-
     let scale = normalizedScale(for: indexPath.row, in: segments)
     let length = CGFloat(scale)
-
     let isPrimary = scale == 1.0
-
     cell.setData(lapNumber: indexPath.row + 1, lapTime: paceString, length: CGFloat(length), isPrimary: isPrimary)
-    //    print("\(type(of: self)) - \(#function)", indexPath, scale)
     return cell
   }
 
@@ -349,31 +369,20 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     minScale: Float = 0.35,
     maxScale: Float = 1.0
   ) -> Float {
-    // 안전성 검사
     guard !segments.isEmpty,
           segments.indices.contains(index) else {
       return minScale
     }
-
-    // 모든 페이스 값 추출
     let paces = segments.map { $0.averagePace }
     guard let minPace = paces.min(),
           let maxPace = paces.max(),
           minPace < maxPace else {
-      // 모든 값이 동일하면 가장 빠른 값 스케일로
       return maxScale
     }
-
-    // 타겟 segment 페이스
     let pace = segments[index].averagePace
-
-    // faster (작은 페이스) → 큰 normalized, slower (큰 페이스) → 작은 normalized
     let normalized = (maxPace - pace) / (maxPace - minPace)
-
-    // minScale…maxScale 구간으로 매핑
     return minScale + Float(normalized) * (maxScale - minScale)
   }
-
 }
 
 extension RecordDetailViewController: NMFMapViewRenderDelegate {
@@ -406,11 +415,10 @@ extension RecordDetailViewController: NMFMapViewRenderDelegate {
         polyline?.width = 8
         polyline?.color = .systemBlue
         polyline?.mapView = mapView
-
         let bounds = NMGLatLngBounds(latLngs: points)
         let cameraUpdate = NMFCameraUpdate(fit: bounds, padding: 50)
         mapView.moveCamera(cameraUpdate)
-
+        
         reactor?.action.onNext(.mapRendered(mapView: mapView))
       }
     }

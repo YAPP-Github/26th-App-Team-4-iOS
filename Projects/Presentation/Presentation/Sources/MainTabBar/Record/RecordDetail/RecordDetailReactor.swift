@@ -18,6 +18,7 @@ public class RecordDetailReactor: Reactor {
   public enum Action {
     case initialize
     case mapRendered(mapView: NMFMapView)
+    case deleteRecord
   }
 
   // MARK: - Mutation
@@ -26,6 +27,7 @@ public class RecordDetailReactor: Reactor {
     case setLoading(Bool)
     case setError(Error)
     case setShouldShowFirstRunningPopUp(Bool)
+    case setDeleted(Bool)
   }
 
   // MARK: - State
@@ -35,6 +37,7 @@ public class RecordDetailReactor: Reactor {
     fileprivate(set) var isLoading: Bool = false
     @Pulse fileprivate(set) var error: Error?
     fileprivate(set) var shouldShowFirstRunningPopUp: Bool = false
+    fileprivate(set) var isDeleted: Bool = false
   }
 
   public var initialState: State
@@ -79,6 +82,15 @@ public class RecordDetailReactor: Reactor {
         .catch { error in
           Observable.just(Mutation.setError(error))
         }
+
+    case .deleteRecord:
+      guard let recordId = currentState.detail?.recordId else { return .empty() }
+      return recordUseCase.deleteRecord(recordId: recordId)
+        .asObservable()
+        .flatMap { success -> Observable<Mutation> in
+          return .just(.setDeleted(success))
+        }
+        .catch { Observable.just(Mutation.setError($0)) }
     }
   }
 
@@ -96,6 +108,9 @@ public class RecordDetailReactor: Reactor {
 
     case let .setShouldShowFirstRunningPopUp(shouldShow):
       newState.shouldShowFirstRunningPopUp = shouldShow
+
+    case let .setDeleted(isDeleted):
+      newState.isDeleted = isDeleted
     }
     return newState
   }
