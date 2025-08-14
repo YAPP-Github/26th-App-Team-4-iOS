@@ -71,5 +71,10 @@ public class DataAssembly: Assembly {
     container.register(RecordRepository.self) { r in
       return RecordRepositoryImpl()
     }
+    
+    // My
+    container.register(UserRepository.self) { r in
+      return UserRepositoryImpl()
+    }
   }
 }

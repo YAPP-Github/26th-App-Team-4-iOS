@@ -9,14 +9,14 @@ import Foundation
 import Moya
 
 public enum UserAPI: BaseAPI {
-  case fetchUserProfile(userId: String)
+  case fetchMyProfile
   case updateUserProfile(userId: String, name: String)
   case saveOnboarding(answers: [[String: Any]])
   case type
   
   public var path: String {
     switch self {
-    case .fetchUserProfile(let userId): return "/users/\(userId)"
+    case .fetchMyProfile: return "/users"
     case .updateUserProfile(let userId, _): return "/users/\(userId)"
     case .saveOnboarding: return "/users/onboarding"
     case .type: return "/users/type"
@@ -25,7 +25,7 @@ public enum UserAPI: BaseAPI {
   
   public var method: Moya.Method {
     switch self {
-    case .fetchUserProfile: return .get
+    case .fetchMyProfile: return .get
     case .updateUserProfile: return .put
     case .saveOnboarding: return .post
     case .type: return .get
@@ -34,7 +34,7 @@ public enum UserAPI: BaseAPI {
   
   public var task: Task {
     switch self {
-    case .fetchUserProfile:
+    case .fetchMyProfile:
       return .requestPlain
     case .updateUserProfile(_, let name):
       return .requestParameters(parameters: ["name": name], encoding: JSONEncoding.default)

@@ -18,5 +18,6 @@ public class PresentationAssembly: Assembly {
     MainTabBarAssembly().assemble(container: container)
     RunningAssembly().assemble(container: container)
     RecordAssembly().assemble(container: container)
+    MyPageAssembly().assemble(container: container)
   }
 }

@@ -39,6 +39,7 @@ public enum CoordinatorType {
   case record
   case recordDetail
   case paceSetting
+  case myPage
 }
 
 public protocol AppCoordinator: Coordinator {
