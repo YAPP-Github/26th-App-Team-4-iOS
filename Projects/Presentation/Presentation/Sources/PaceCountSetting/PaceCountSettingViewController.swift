@@ -36,6 +36,15 @@ public final class PaceCountSettingViewController: BaseViewController, View {
     $0.isHidden = true
   }
   
+  override init() {
+    super.init()
+    self.hidesBottomBarWhenPushed = true
+  }
+  
+  @MainActor required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
   public override func initUI() {
     super.initUI()
     

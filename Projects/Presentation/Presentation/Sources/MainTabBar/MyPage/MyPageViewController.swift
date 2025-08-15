@@ -329,7 +329,18 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
     cell.contentView.rx.tapGesture()
       .when(.recognized)
       .subscribe(with: self) { owner, _ in
-        owner.coordinator?.showPaceCountSettingVC()
+        switch item {
+        case .goalDistance:
+          owner.coordinator?.showMyGoalSettingVC()
+        case .goalTime:
+          owner.coordinator?.showMyGoalSettingVC()
+        case .goalPace:
+          owner.coordinator?.showPaceCountSettingVC()
+        case .runningCount:
+          owner.coordinator?.showPaceCountSettingVC()
+        default:
+          break
+        }
       }
       .disposed(by: cell.disposeBag)
     
