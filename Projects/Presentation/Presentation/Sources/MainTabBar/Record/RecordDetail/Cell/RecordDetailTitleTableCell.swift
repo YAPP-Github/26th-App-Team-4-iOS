@@ -50,6 +50,7 @@ public class RecordDetailTitleTableCell: BaseTableViewCell {
       .resized(to: CGSize(width: 24, height: 24))
     $0.setImage(img, for: .normal)
     $0.tintColor = FRColor.Fg.Text.secondary.withAlphaComponent(0.8)
+    $0.isHidden = true
   }
   
   public func setData(
