@@ -138,7 +138,7 @@ public class RecordListTableCell: BaseTableViewCell {
     paceValueLabel.text = pace.toMinutesAndSeconds()
     timeValueLabel.text = time.toTime()
 
-    if let url = URL(string: imageURL ?? "") {
+    if let imageURL = imageURL, let url = URL(string: imageURL) {
       courseImageView.kf.setImage(with: url)
     } else {
       courseImageView.image = nil
