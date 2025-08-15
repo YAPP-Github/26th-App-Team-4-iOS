@@ -232,6 +232,10 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     case .title:
       return 1
     case .goalAchievement:
+      guard let detail = reactor?.currentState.detail,
+            (detail.isDistanceGoalAchieved || detail.isPaceGoalAchieved || detail.isTimeGoalAchieved) else {
+        return 0
+      }
       return 1
     case .runRecord:
       return 1
