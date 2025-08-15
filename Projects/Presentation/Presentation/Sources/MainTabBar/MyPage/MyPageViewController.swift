@@ -165,7 +165,7 @@ public final class MyPageViewController: BaseViewController, View {
   public func bind(reactor: MyPageReactor) {
     print("\(type(of: self)) - \(#function)")
 
-    self.rx.viewDidLoad
+    self.rx.viewWillAppear
       .subscribe(with: self) { object, _ in
         reactor.action.onNext(.initialize)
       }

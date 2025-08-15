@@ -43,16 +43,13 @@ public final class MyPageAssembly: Assembly {
     
     
     // MARK: - 러닝 목표
-    container.register(MyPurposeSettingReactor.self) { r in
-      return MyPurposeSettingReactor()
-    }
-    
+    container.autoregister(MyPurposeSettingReactor.self, initializer: MyPurposeSettingReactor.init)
+
     container.register(MyPurposeSettingViewController.self) { r in
       let vc = MyPurposeSettingViewController()
       vc.reactor = r.resolve(MyPurposeSettingReactor.self)
       return vc
     }
-    
     
     // MARK: - 프로필
     container.autoregister(MyProfileReactor.self, initializer: MyProfileReactor.init)
@@ -90,6 +87,5 @@ public final class MyPageAssembly: Assembly {
       vc.reactor = r.resolve(MyNotiSettingReactor.self)
       return vc
     }
-    
   }
 }

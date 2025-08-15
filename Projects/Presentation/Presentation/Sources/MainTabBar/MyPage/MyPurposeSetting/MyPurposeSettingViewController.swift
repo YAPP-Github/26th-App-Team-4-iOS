@@ -161,28 +161,34 @@ public final class MyPurposeSettingViewController: BaseViewController, View {
     selectView0.rx.tapGesture()
       .when(.recognized)
       .subscribe(with: self) { owner, _ in
-        reactor.action.onNext(.selectPurpose(idx: 0))
+        reactor.action.onNext(.selectPurpose(.weightLoss))
       }
       .disposed(by: disposeBag)
     
     selectView1.rx.tapGesture()
       .when(.recognized)
       .subscribe(with: self) { owner, _ in
-        reactor.action.onNext(.selectPurpose(idx: 1))
+        reactor.action.onNext(.selectPurpose(.health))
       }
       .disposed(by: disposeBag)
     
     selectView2.rx.tapGesture()
       .when(.recognized)
       .subscribe(with: self) { owner, _ in
-        reactor.action.onNext(.selectPurpose(idx: 2))
+        reactor.action.onNext(.selectPurpose(.endurance))
       }
       .disposed(by: disposeBag)
     
     selectView3.rx.tapGesture()
       .when(.recognized)
       .subscribe(with: self) { owner, _ in
-        reactor.action.onNext(.selectPurpose(idx: 3))
+        reactor.action.onNext(.selectPurpose(.competitionPreparation))
+      }
+      .disposed(by: disposeBag)
+    
+    saveButton.rx.tap
+      .subscribe(with: self) { owner, _ in
+        reactor.action.onNext(.save)
       }
       .disposed(by: disposeBag)
     
@@ -190,13 +196,21 @@ public final class MyPurposeSettingViewController: BaseViewController, View {
       .observe(on: MainScheduler.instance)
       .distinctUntilChanged()
       .subscribe(with: self) { owner, purpose in
-        owner.selectView0.setSelected(isSelected: purpose == 0)
-        owner.selectView1.setSelected(isSelected: purpose == 1)
-        owner.selectView2.setSelected(isSelected: purpose == 2)
-        owner.selectView3.setSelected(isSelected: purpose == 3)
+        owner.selectView0.setSelected(isSelected: purpose == .weightLoss)
+        owner.selectView1.setSelected(isSelected: purpose == .health)
+        owner.selectView2.setSelected(isSelected: purpose == .endurance)
+        owner.selectView3.setSelected(isSelected: purpose == .competitionPreparation)
       }
       .disposed(by: disposeBag)
     
+    reactor.state.map(\.isSaved)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .filter { $0 }
+      .subscribe(with: self) { owner, isSaved in
+        owner.navigationController?.popViewController(animated: true)
+      }
+      .disposed(by: disposeBag)
   }
   
   public override func action() {
