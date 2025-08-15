@@ -74,8 +74,8 @@ let project = Project(
       resources: ["Resources/**"],
       dependencies: dependencies,
       settings: .settings(configurations: [
-        .debug(name: "Debug", xcconfig: "Configs/Debug.xcconfig"),
-        .release(name: "Release", xcconfig: "Configs/Release.xcconfig")
+        .debug(name: "Debug", settings: ["BASE_URL": "http://fitrun.p-e.kr/api/v1"], xcconfig: "Configs/Debug.xcconfig"),
+        .release(name: "Release", settings: ["BASE_URL": "https://fitrun.o-r.kr/"], xcconfig: "Configs/Release.xcconfig")
       ])
     ),
     .target(

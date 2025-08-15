@@ -69,7 +69,6 @@ extension RunningRecordDTO {
 
     let runningPointEntities = self.runningPoints.compactMap { $0.toDomain() }
     let segmentsEntities = self.segments.compactMap { $0.toDomain() }
-    print("segments>>>", self.segments)
 
     return RunningRecord(
       recordId: self.recordId,

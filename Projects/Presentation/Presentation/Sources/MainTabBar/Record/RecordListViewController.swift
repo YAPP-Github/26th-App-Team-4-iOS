@@ -201,7 +201,7 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
         time: record.totalTime,
         imageURL: record.imageUrl
       )
-      print("record.imageUrl>>>>>>>>>>>>\n", record.imageUrl)
+      print("recordimageUrl>>>>>>>>>>>>\n", record.imageUrl)
       cell.contentView.rx.tapGesture()
         .when(.recognized)
         .subscribe(with: self) { owner, _ in
