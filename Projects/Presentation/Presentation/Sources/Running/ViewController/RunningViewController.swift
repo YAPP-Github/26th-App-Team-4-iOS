@@ -157,6 +157,12 @@ final class RunningViewController: BaseViewController, View {
     }
   }
 
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    print("🔊 [ViewController] 오디오 세션 비활성화.")
+  }
+
   // MARK: - Audio Session Setup
   private func setupAudioSession() {
     do {
