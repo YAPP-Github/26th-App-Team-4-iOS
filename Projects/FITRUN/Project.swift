@@ -19,6 +19,7 @@ let appTargetInfoPlist: InfoPlist = .extendingDefault(
         ]
       ]
     ],
+    "BASE_URL": "$(BASE_URL)",
     "CFBundleURLTypes": [
       [
         "CFBundleTypeRole": "Editor",
