@@ -50,11 +50,6 @@ public final class RunningRepositoryImpl: RunningRepository {
       startAt: ISO8601DateFormatter().string(from: completionData.startAt)
     )
 
-    print("metadata>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n")
-    print(metadata)
-
-
-
     return provider.rx.request(.completeRun(recordId: recordId, data: metadata))
       .map { response in
         return (200...299).contains(response.statusCode)

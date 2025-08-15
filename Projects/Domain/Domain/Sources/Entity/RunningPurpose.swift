@@ -7,7 +7,7 @@
 
 
 /// 달리기 목적 종류
-public enum RunningPurpose: String, Codable {
+public enum RunningPurpose: String, Codable, CaseIterable {
   /// 체중 감량 목적
   case weightLoss = "WEIGHT_LOSS_PURPOSE"
   /// 지구력 향상 목적

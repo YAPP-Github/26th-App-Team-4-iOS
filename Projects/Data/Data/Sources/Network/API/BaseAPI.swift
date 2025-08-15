@@ -15,9 +15,7 @@ public protocol BaseAPI: TargetType {
 
 extension BaseAPI {
   public var baseURL: URL {
-    return URL(string: "http://fitrun.p-e.kr/api/v1")!
-    // TODO: - config파일에 BASE_API_URL 추가
-    guard let urlString = Bundle.main.object(forInfoDictionaryKey: "BASE_API_URL") as? String,
+    guard let urlString = Bundle.main.object(forInfoDictionaryKey: "BASE_URL") as? String,
           let url = URL(string: urlString) else {
       fatalError("BASE_API_URL not set in Info.plist or invalid format.")
     }

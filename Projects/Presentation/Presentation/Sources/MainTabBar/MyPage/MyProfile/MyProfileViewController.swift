@@ -10,7 +10,9 @@ import Core
 import ReactorKit
 import Domain
 
-public final class MyProfileViewController: BaseViewController {
+public final class MyProfileViewController: BaseViewController, View {
+  
+  public typealias Reactor = MyProfileReactor
   
   var coordinator: MyPageCoordinator?
 
@@ -152,6 +154,30 @@ public final class MyProfileViewController: BaseViewController {
       $0.leading.trailing.equalToSuperview()
       $0.bottom.equalToSuperview()
     }
+  }
+  
+  public func bind(reactor: MyProfileReactor) {
+    print("\(type(of: self)) - \(#function)")
+
+    self.rx.viewDidLoad
+      .subscribe(with: self) { object, _ in
+        reactor.action.onNext(.initialize)
+      }
+      .disposed(by: disposeBag)
+    
+    reactor.state.map(\.profileInfo)
+      .observe(on: MainScheduler.instance)
+      .compactMap { $0 }
+      .distinctUntilChanged()
+      .subscribe(with: self) { owner, userInfo in
+        owner.setUserinfo(userInfo)
+      }
+      .disposed(by: disposeBag)
+  }
+  
+  private func setUserinfo(_ userInfo: Domain.ProfileInfo) {
+    userNameLabel.text = userInfo.nickname
+    emailLabel.text = userInfo.email
   }
   
   public override func action() {

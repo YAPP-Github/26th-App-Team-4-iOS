@@ -173,7 +173,7 @@ public class LoginViewController: BaseViewController, View {
 
     reactor.state.compactMap { $0.error }
       .subscribe(onNext: { [weak self] error in
-        self?.showAlert(title: "로그인 실패", message: error)
+        self?.showAlert(title: "로그인 실패", message: "다시 시도해 주세요.")
       })
       .disposed(by: disposeBag)
   }
@@ -226,7 +226,7 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
 
   public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
     activityIndicator.stopAnimating()
-    showAlert(title: "로그인 실패", message: error.localizedDescription)
+    showAlert(title: "로그인 실패", message: "다시 시도해 주세요.")
   }
 }
 

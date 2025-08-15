@@ -1,32 +1,27 @@
 //
-//  MyPurposeSettingReactor.swift
+//  MyProfileReactor.swift
 //  Presentation
 //
-//  Created by JDeoks on 8/13/25.
+//  Created by JDeoks on 8/15/25.
 //
-
 
 import Foundation
 import ReactorKit
 import RxSwift
 import Domain
 
-public final class MyPurposeSettingReactor: Reactor {
+public final class MyProfileReactor: Reactor {
   
   public enum Action {
     case initialize
-    case selectPurpose(RunningPurpose)
-    case save
   }
   
   public enum Mutation {
-    case setPurpose(RunningPurpose)
-    case setIsSaved(Bool)
+    case setprofileInfo(ProfileInfo)
   }
   
   public struct State {
-    fileprivate(set) var purpose: RunningPurpose = .weightLoss
-    fileprivate(set) var isSaved: Bool = false
+    fileprivate(set) var profileInfo: ProfileInfo? = nil
   }
   
   public var initialState: State = State()
@@ -39,14 +34,13 @@ public final class MyPurposeSettingReactor: Reactor {
     self.onboardngUseCase = onboardngUseCase
   }
   
+  
   public func mutate(action: Action) -> Observable<Mutation> {
+    print("\(type(of: self)) - \(#function)")
+
     switch action {
     case .initialize:
       return fetchUserInfo()
-    case let .selectPurpose(item):
-      return .just(.setPurpose(item))
-    case .save:
-      return savePurpose()
     }
   }
   
@@ -54,12 +48,8 @@ public final class MyPurposeSettingReactor: Reactor {
     print(self, #function, state, mutation)
     var newState = state
     switch mutation {
-    case let .setPurpose(purpose):
-      newState.purpose = purpose
-      
-    case let .setIsSaved(isSaved):
-      newState.isSaved = isSaved
-      
+    case let .setprofileInfo(profileInfo):
+      newState.profileInfo = profileInfo
     }
     return newState
   }
@@ -67,14 +57,7 @@ public final class MyPurposeSettingReactor: Reactor {
   private func fetchUserInfo() -> Observable<Mutation> {
     return userUseCase
       .fetchMyUserInfo()
-      .map { Mutation.setPurpose($0.goal.runningPurpose) }
-      .asObservable()
-  }
-  
-  private func savePurpose() -> Observable<Mutation> {
-    return onboardngUseCase
-      .savePurpose(currentState.purpose.rawValue)
-      .map { _ in Mutation.setIsSaved(true) }
+      .map { Mutation.setprofileInfo($0) }
       .asObservable()
   }
 }

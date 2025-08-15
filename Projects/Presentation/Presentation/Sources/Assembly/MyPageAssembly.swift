@@ -31,9 +31,7 @@ public final class MyPageAssembly: Assembly {
     }
 
     // MARK: - 체력 수준
-    container.register(MyLevelSettingReactor.self) { r in
-      return MyLevelSettingReactor()
-    }
+    container.autoregister(MyLevelSettingReactor.self, initializer: MyLevelSettingReactor.init)
 
     container.register(MyLevelSettingViewController.self) { r in
       let vc = MyLevelSettingViewController()
@@ -43,20 +41,20 @@ public final class MyPageAssembly: Assembly {
     
     
     // MARK: - 러닝 목표
-    container.register(MyPurposeSettingReactor.self) { r in
-      return MyPurposeSettingReactor()
-    }
-    
+    container.autoregister(MyPurposeSettingReactor.self, initializer: MyPurposeSettingReactor.init)
+
     container.register(MyPurposeSettingViewController.self) { r in
       let vc = MyPurposeSettingViewController()
       vc.reactor = r.resolve(MyPurposeSettingReactor.self)
       return vc
     }
     
-    
     // MARK: - 프로필
+    container.autoregister(MyProfileReactor.self, initializer: MyProfileReactor.init)
+
     container.register(MyProfileViewController.self) { r in
       let vc = MyProfileViewController()
+      vc.reactor = r.resolve(MyProfileReactor.self)
       return vc
     }
     
@@ -87,6 +85,5 @@ public final class MyPageAssembly: Assembly {
       vc.reactor = r.resolve(MyNotiSettingReactor.self)
       return vc
     }
-    
   }
 }

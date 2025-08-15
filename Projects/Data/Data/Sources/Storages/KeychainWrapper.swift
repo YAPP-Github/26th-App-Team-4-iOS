@@ -1,0 +1,59 @@
+//
+//  KeychainWrapper.swift
+//  Data
+//
+//  Created by dong eun shin on 8/15/25.
+//
+
+import Foundation
+import Security
+
+final class KeychainWrapper {
+  static let shared = KeychainWrapper()
+
+  private init() {}
+
+  func set(value: String, forKey key: String) {
+    let data = value.data(using: .utf8)!
+    let query: [String: Any] = [
+      kSecClass as String: kSecClassGenericPassword,
+      kSecAttrAccount as String: key
+    ]
+
+    SecItemDelete(query as CFDictionary)
+
+    let attributes: [String: Any] = [
+      kSecClass as String: kSecClassGenericPassword,
+      kSecAttrAccount as String: key,
+      kSecValueData as String: data
+    ]
+
+    SecItemAdd(attributes as CFDictionary, nil)
+  }
+
+  func get(forKey key: String) -> String? {
+    let query: [String: Any] = [
+      kSecClass as String: kSecClassGenericPassword,
+      kSecAttrAccount as String: key,
+      kSecReturnData as String: true,
+      kSecMatchLimit as String: kSecMatchLimitOne
+    ]
+
+    var dataTypeRef: AnyObject?
+    let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
+    if status == errSecSuccess,
+       let retrievedData = dataTypeRef as? Data,
+       let value = String(data: retrievedData, encoding: .utf8) {
+      return value
+    }
+    return nil
+  }
+
+  func delete(forKey key: String) {
+    let query: [String: Any] = [
+      kSecClass as String: kSecClassGenericPassword,
+      kSecAttrAccount as String: key
+    ]
+    SecItemDelete(query as CFDictionary)
+  }
+}
