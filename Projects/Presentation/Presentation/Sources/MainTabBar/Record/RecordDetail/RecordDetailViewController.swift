@@ -66,6 +66,14 @@ public final class RecordDetailViewController: BaseViewController, View, CustomA
     return button
   }()
 
+  private lazy var popUpView = FirstRunningPopUpView().then {
+    $0.isHidden = true
+    $0.onConfirm = { [weak self] in
+      guard let self = self else { return }
+      self.coordinator?.showRunningPaceSetting()
+    }
+  }
+
   override init() {
     super.init()
     hidesBottomBarWhenPushed = true
@@ -112,6 +120,11 @@ public final class RecordDetailViewController: BaseViewController, View, CustomA
       $0.width.equalTo(107)
     }
     tableView.tableFooterView = footerView
+
+    view.addSubview(popUpView)
+    popUpView.snp.makeConstraints {
+      $0.edges.equalToSuperview()
+    }
   }
 
   public func bind(reactor: RecordDetailReactor) {
@@ -154,6 +167,16 @@ public final class RecordDetailViewController: BaseViewController, View, CustomA
       .subscribe(with: self) { owner, _ in
         owner.coordinator?.pop()
         owner.showToast(message: "삭제가 완료되었어요.")
+      }
+      .disposed(by: disposeBag)
+
+    reactor.state.map(\.shouldShowFirstRunningPopUp)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .filter { $0 == true }
+      .delay(.seconds(1), scheduler: MainScheduler.instance)
+      .subscribe(with: self) { owner, _ in
+        owner.popUpView.isHidden = false
       }
       .disposed(by: disposeBag)
   }

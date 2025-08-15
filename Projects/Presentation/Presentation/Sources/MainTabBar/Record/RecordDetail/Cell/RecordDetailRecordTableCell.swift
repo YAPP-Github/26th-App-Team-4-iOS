@@ -36,7 +36,7 @@ public class RecordDetailRecordTableCell: BaseTableViewCell {
   private let distanceValueLabel = UILabel().then { //56
     $0.font = .systemFont(ofSize: 48, weight: .bold)
     $0.textColor = FRColor.Fg.Text.primary
-    $0.text = "0.0"
+    $0.text = "-.-"
   }
   
   private let kmLabel = UILabel().then { // 30
@@ -70,7 +70,7 @@ public class RecordDetailRecordTableCell: BaseTableViewCell {
   private let paceValueLabel = UILabel().then { //24
     $0.font = .systemFont(ofSize: 20, weight: .bold)
     $0.textColor = FRColor.Fg.Text.primary
-    $0.text = "0'00\""
+    $0.text = "--'--\""
   }
   
   private lazy var runningTimeVStack = UIStackView(
@@ -90,7 +90,7 @@ public class RecordDetailRecordTableCell: BaseTableViewCell {
   private let runningTimeValueLabel = UILabel().then { //24
     $0.font = .systemFont(ofSize: 20, weight: .bold)
     $0.textColor = FRColor.Fg.Text.primary
-    $0.text = "00:00:00"
+    $0.text = "--:--:--"
   }
   
   public func setData(distance: Double, pace: Double, runningTime: Double) {

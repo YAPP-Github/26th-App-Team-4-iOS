@@ -19,7 +19,7 @@ public final class GoalRepositoryImpl: GoalRepository {
   }
 
   public func getRecommendPace() -> Single<RecommendPace> {
-    return provider.request(.goal)
+    return provider.request(.getRecommendPace)
       .filter(statusCodes: 200..<300)
       .map(APIResponse<RecommendPaceDTO>.self)
       .map { response in
