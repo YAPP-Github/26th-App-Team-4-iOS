@@ -134,32 +134,46 @@ public final class MyLevelSettingViewController: BaseViewController, View {
     selectView0.rx.tapGesture()
       .when(.recognized)
       .subscribe(with: self) { owner, _ in
-        reactor.action.onNext(.selectLevel(idx: 0))
+        reactor.action.onNext(.selectLevel(.beginner))
       }
       .disposed(by: disposeBag)
     
     selectView1.rx.tapGesture()
       .when(.recognized)
       .subscribe(with: self) { owner, _ in
-        reactor.action.onNext(.selectLevel(idx: 1))
+        reactor.action.onNext(.selectLevel(.intermediate))
       }
       .disposed(by: disposeBag)
     
     selectView2.rx.tapGesture()
       .when(.recognized)
       .subscribe(with: self) { owner, _ in
-        reactor.action.onNext(.selectLevel(idx: 2))
+        reactor.action.onNext(.selectLevel(.expert))
       }
       .disposed(by: disposeBag)
-
+    
+    saveButton.rx.tap
+      .subscribe(with: self) { owner, _ in
+        reactor.action.onNext(.save)
+      }
+      .disposed(by: disposeBag)
     
     reactor.state.map(\.level)
       .observe(on: MainScheduler.instance)
       .distinctUntilChanged()
       .subscribe(with: self) { owner, purpose in
-        owner.selectView0.setSelected(isSelected: purpose == 0)
-        owner.selectView1.setSelected(isSelected: purpose == 1)
-        owner.selectView2.setSelected(isSelected: purpose == 2)
+        owner.selectView0.setSelected(isSelected: purpose == .beginner)
+        owner.selectView1.setSelected(isSelected: purpose == .intermediate)
+        owner.selectView2.setSelected(isSelected: purpose == .expert)
+      }
+      .disposed(by: disposeBag)
+    
+    reactor.state.map(\.isSaved)
+      .observe(on: MainScheduler.instance)
+      .distinctUntilChanged()
+      .filter { $0 }
+      .subscribe(with: self) { owner, isSaved in
+        owner.navigationController?.popViewController(animated: true)
       }
       .disposed(by: disposeBag)
   }

@@ -30,4 +30,14 @@ public final class UserRepositoryImpl: UserRepository {
         return Single.error(error)
       }
   }
+  
+  public func saveRunnerType(type: RunnerType) -> Single<Bool> {
+    return provider
+      .request(.saveRunnerType(type: type.rawValue))
+      .filter(statusCodes: 200..<300)
+      .map(APIResponse<OnboardingDTO>.self)
+      .map { $0.code == "SUCCESS" }
+      .asSingle()
+  }
+
 }

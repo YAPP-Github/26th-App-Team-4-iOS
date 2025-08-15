@@ -27,10 +27,13 @@ public final class MyProfileReactor: Reactor {
   public var initialState: State = State()
   
   private let userUseCase: UserUseCase
+  private let onboardngUseCase: OnboardingUseCase
   
-  init(userUseCase: UserUseCase) {
+  init(userUseCase: UserUseCase, onboardngUseCase: OnboardingUseCase) {
     self.userUseCase = userUseCase
+    self.onboardngUseCase = onboardngUseCase
   }
+  
   
   public func mutate(action: Action) -> Observable<Mutation> {
     print("\(type(of: self)) - \(#function)")

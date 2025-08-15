@@ -31,9 +31,7 @@ public final class MyPageAssembly: Assembly {
     }
 
     // MARK: - 체력 수준
-    container.register(MyLevelSettingReactor.self) { r in
-      return MyLevelSettingReactor()
-    }
+    container.autoregister(MyLevelSettingReactor.self, initializer: MyLevelSettingReactor.init)
 
     container.register(MyLevelSettingViewController.self) { r in
       let vc = MyLevelSettingViewController()
