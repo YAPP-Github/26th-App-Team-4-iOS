@@ -32,5 +32,12 @@ public final class MainTabBarAssembly: Assembly {
       viewController.reactor = reactor
       return viewController
     }
+    
+    container.autoregister(PaceCountSettingReactor.self, initializer: PaceCountSettingReactor.init)
+    
+    container.register(PaceCountSettingViewController.self) { r in
+      let vc = PaceCountSettingViewController()
+      return vc
+    }
   }
 }

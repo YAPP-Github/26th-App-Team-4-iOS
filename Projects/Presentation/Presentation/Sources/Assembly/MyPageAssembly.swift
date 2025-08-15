@@ -64,6 +64,12 @@ public final class MyPageAssembly: Assembly {
       return vc
     }
     
+    // MARK: - 목표 시간, 거리
+    container.register(MyGoalSettingViewController.self) { r in
+      let vc = MyGoalSettingViewController()
+      return vc
+    }
+    
     // MARK: - 러닝 설정
     container.register(MyRunningSettingReactor.self) { r in
       return MyRunningSettingReactor()

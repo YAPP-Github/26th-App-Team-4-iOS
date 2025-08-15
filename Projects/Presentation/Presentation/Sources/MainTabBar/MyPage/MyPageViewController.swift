@@ -325,6 +325,14 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
     }()
 
     cell.setData(item: item, value: value)
+    
+    cell.contentView.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        owner.coordinator?.showPaceCountSettingVC()
+      }
+      .disposed(by: cell.disposeBag)
+    
     return cell
   }
   private func dequeueMenuCell(for indexPath: IndexPath) -> MyPageMenuTableCell {

@@ -14,7 +14,7 @@ import RxGesture
 
 import Core
 
-public final class GoalSegmentedView: BaseView {
+public final class PaceCountGoalSegmentedView: BaseView {
 
   public enum Segment: Int, CaseIterable {
     case pace = 0

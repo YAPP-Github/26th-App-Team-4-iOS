@@ -1,32 +1,32 @@
 //
-//  PaceCountSettingViewController.swift
+//  MyGoalSettingViewController.swift
 //  Presentation
 //
-//  Created by JDeoks on 7/18/25.
+//  Created by JDeoks on 8/15/25.
 //
-
 
 import UIKit
 import Core
 import ReactorKit
 import RxKeyboard
 
-public final class PaceCountSettingViewController: BaseViewController, View {
+public final class MyGoalSettingViewController: BaseViewController {
   
   private let backButton = UIButton().then {
     $0.setImage(.init(systemName: "chevron.left"), for: .normal)
     $0.tintColor = .black
   }
   
-  private let goalSegmentedView = PaceCountGoalSegmentedView()
+  private let goalSegmentedView = MyGoalSegmentView()
   
-  private let goalRunningCountView = GoalRunningCountView().then {
+  private let goalRunningCountView = GoalRunningTimeView().then {
     $0.isHidden = true
   }
-  private let goalPaceView = GoalPaceView()
+  
+  private let goalPaceView = GoalRunningTimeView()
   
   private let nextButton = UIButton().then {
-    $0.setTitle("루틴 설정하기", for: .normal)
+    $0.setTitle("설정하기", for: .normal)
     $0.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
     $0.backgroundColor = UIColor(hex: "#FF6600")
     $0.layer.cornerRadius = 16
@@ -34,6 +34,15 @@ public final class PaceCountSettingViewController: BaseViewController, View {
   
   private let goalSaveAlertView = GoalSaveAlertView().then {
     $0.isHidden = true
+  }
+  
+  public override init() {
+    super.init()
+    self.hidesBottomBarWhenPushed = true
+  }
+  
+  @MainActor required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
   }
   
   public override func initUI() {
@@ -79,57 +88,6 @@ public final class PaceCountSettingViewController: BaseViewController, View {
     }
   }
   
-  public func bind(reactor: PaceCountSettingReactor) {
-    
-    self.rx.viewDidLoad
-      .map { Reactor.Action.initialize }
-      .bind(to: reactor.action)
-      .disposed(by: disposeBag)
-
-    nextButton.rx.tap
-      .withUnretained(self)
-      .bind { owner, _ in
-        let segment = owner.goalSegmentedView.selectedSegment.value
-        switch segment {
-        case .pace:
-          let seconds = owner.goalPaceView.selectedPaceSeconds
-          reactor.action.onNext(.savePace(paceSecond: seconds))
-        case .runningCount:
-          let count = owner.goalRunningCountView.currentCount
-          reactor.action.onNext(.saveRunningCount(runningCount: count))
-        }
-      }
-      .disposed(by: disposeBag)
-    
-    // 페이스 값 구독 → GoalPaceView 업데이트
-    reactor.state
-      .map(\.paceSecond)
-      .distinctUntilChanged()
-      .observe(on: MainScheduler.asyncInstance)
-      .subscribe(onNext: { [weak self] seconds in
-        self?.goalPaceView.setPace(seconds: seconds)
-      })
-      .disposed(by: disposeBag)
-
-    // 러닝 카운트 값 구독 → GoalRunningCountView 업데이트
-    reactor.state
-      .map(\.runningCount)
-      .distinctUntilChanged()
-      .observe(on: MainScheduler.asyncInstance)
-      .subscribe(onNext: { [weak self] count in
-        self?.goalRunningCountView.setCount(count)
-      })
-      .disposed(by: disposeBag)
-    
-    reactor.pulse(\.$isSaved)
-      .observe(on: MainScheduler.instance)
-      .filter { $0 }
-      .subscribe(with: self) { owner, _ in
-        owner.showGoalSaveAlert()
-      }
-      .disposed(by: disposeBag)
-  }
-  
   public override func action() {
     super.action()
     
@@ -160,13 +118,14 @@ public final class PaceCountSettingViewController: BaseViewController, View {
       .distinctUntilChanged()
       .observe(on: MainScheduler.asyncInstance)
       .subscribe(with: self) { object, index in
+        object.view.endEditing(true)
         object.switchGoalView(to: index)
       }
       .disposed(by: disposeBag)
   }
   
-  private func switchGoalView(to index: PaceCountGoalSegmentedView.Segment) {
-    let showPaceView = (index == .pace)
+private func switchGoalView(to index: MyGoalSegmentView.Segment) {
+  let showPaceView = (index == .goalTime)
     let toHideView = showPaceView ? goalRunningCountView : goalPaceView
     let toShowView = showPaceView ? goalPaceView : goalRunningCountView
 
