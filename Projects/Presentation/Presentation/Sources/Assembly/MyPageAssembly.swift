@@ -55,8 +55,11 @@ public final class MyPageAssembly: Assembly {
     
     
     // MARK: - 프로필
+    container.autoregister(MyProfileReactor.self, initializer: MyProfileReactor.init)
+
     container.register(MyProfileViewController.self) { r in
       let vc = MyProfileViewController()
+      vc.reactor = r.resolve(MyProfileReactor.self)
       return vc
     }
     
