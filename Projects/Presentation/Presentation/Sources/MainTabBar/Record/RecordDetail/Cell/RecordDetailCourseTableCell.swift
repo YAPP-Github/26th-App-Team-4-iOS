@@ -63,7 +63,7 @@ public class RecordDetailCourseTableCell: BaseTableViewCell {
   public func setData(imageURL: String?, location: String) {
     locationLabel.text = location
 
-    if let url = URL(string: imageURL ?? "") {
+    if let imageURL = imageURL, let url = URL(string: imageURL) {
       mapImageView.kf.setImage(with: url)
     } else {
       mapImageView.image = nil
