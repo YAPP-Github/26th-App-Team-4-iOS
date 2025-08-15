@@ -65,8 +65,11 @@ public final class MyPageAssembly: Assembly {
     }
     
     // MARK: - 목표 시간, 거리
+    container.autoregister(MyGoalSettingReactor.self, initializer: MyGoalSettingReactor.init)
+
     container.register(MyGoalSettingViewController.self) { r in
       let vc = MyGoalSettingViewController()
+      vc.reactor = r.resolve(MyGoalSettingReactor.self)
       return vc
     }
     

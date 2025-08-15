@@ -296,13 +296,13 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
         guard let distanceMeterGoal = goalInfo.distanceMeterGoal else {
           return nil
         }
-        return "\(Int(distanceMeterGoal))km"
+        return "\(Int(distanceMeterGoal) / 1000)km"
 
       case .goalTime:
         guard let timeGoal = goalInfo.timeGoal else {
           return nil
         }
-        return "\(timeGoal / 60)분"
+        return "\(timeGoal)분"
 
       case .goalPace:
         guard let paceGoalMs = goalInfo.paceGoal else {
