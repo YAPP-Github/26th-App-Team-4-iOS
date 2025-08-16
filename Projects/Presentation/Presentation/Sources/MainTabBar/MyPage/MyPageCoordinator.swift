@@ -14,6 +14,8 @@ public protocol MyPageCoordinator: Coordinator {
   func showMyPurposeSetting()
   func showMyProfile()
   func showDeleteAccount(mode: DeleteAccountViewController.Mode)
+  func showMyGoalSettingVC()
+  func showPaceCountSettingVC()
   func showRunningSetting()
   func showMyNotiSettingVC()
 }
@@ -67,6 +69,16 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
   public func showDeleteAccount(mode: DeleteAccountViewController.Mode) {
     let vc = resolver.resolve(DeleteAccountViewController.self, argument: mode)!
     vc.coordinator = self
+    navigationController.pushViewController(vc, animated: true)
+  }
+  
+  public func showMyGoalSettingVC() {
+    let vc = resolver.resolve(MyGoalSettingViewController.self)!
+    navigationController.pushViewController(vc, animated: true)
+  }
+  
+  public func showPaceCountSettingVC() {
+    let vc = resolver.resolve(PaceCountSettingViewController.self)!
     navigationController.pushViewController(vc, animated: true)
   }
   

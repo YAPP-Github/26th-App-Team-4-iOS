@@ -13,6 +13,7 @@ import Domain
 public final class UserRepositoryImpl: UserRepository {
   
   private let provider: NetworkProvider<UserAPI>
+  private let authTokenStorage = AuthTokenStorageImpl()
   
   public init(provider: NetworkProvider<UserAPI> = .init()) {
     self.provider = provider
@@ -39,5 +40,18 @@ public final class UserRepositoryImpl: UserRepository {
       .map { $0.code == "SUCCESS" }
       .asSingle()
   }
-
+  
+  public func deleteAccount(reason: String) -> Single<Bool> {
+    return provider
+      .request(.deleteAccount(reason: reason))
+        .map { _ in
+          self.authTokenStorage.clearTokens()
+          if let id = Bundle.main.bundleIdentifier {
+            UserDefaults.standard.removePersistentDomain(forName: id)
+            UserDefaults.standard.synchronize()
+          }
+          return true
+        }
+        .asSingle()
+  }
 }

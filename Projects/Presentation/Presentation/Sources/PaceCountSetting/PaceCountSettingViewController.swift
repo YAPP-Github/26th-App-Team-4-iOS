@@ -13,12 +13,14 @@ import RxKeyboard
 
 public final class PaceCountSettingViewController: BaseViewController, View {
   
+  var coordinator: HomeCoordinator?
+  
   private let backButton = UIButton().then {
     $0.setImage(.init(systemName: "chevron.left"), for: .normal)
     $0.tintColor = .black
   }
   
-  private let goalSegmentedView = GoalSegmentedView()
+  private let goalSegmentedView = PaceCountGoalSegmentedView()
   
   private let goalRunningCountView = GoalRunningCountView().then {
     $0.isHidden = true
@@ -34,6 +36,15 @@ public final class PaceCountSettingViewController: BaseViewController, View {
   
   private let goalSaveAlertView = GoalSaveAlertView().then {
     $0.isHidden = true
+  }
+  
+  override init() {
+    super.init()
+    self.hidesBottomBarWhenPushed = true
+  }
+  
+  @MainActor required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
   }
   
   public override func initUI() {
@@ -165,7 +176,7 @@ public final class PaceCountSettingViewController: BaseViewController, View {
       .disposed(by: disposeBag)
   }
   
-  private func switchGoalView(to index: GoalSegmentedView.Segment) {
+  private func switchGoalView(to index: PaceCountGoalSegmentedView.Segment) {
     let showPaceView = (index == .pace)
     let toHideView = showPaceView ? goalRunningCountView : goalPaceView
     let toShowView = showPaceView ? goalPaceView : goalRunningCountView

@@ -14,6 +14,7 @@ public enum UserAPI: BaseAPI {
   case updateUserProfile(userId: String, name: String)
   case saveOnboarding(answers: [[String: Any]])
   case type
+  case deleteAccount(reason: String)
   
   public var path: String {
     switch self {
@@ -22,6 +23,7 @@ public enum UserAPI: BaseAPI {
     case .updateUserProfile(let userId, _): return "/users/\(userId)"
     case .saveOnboarding: return "/users/onboarding"
     case .type: return "/users/type"
+    case .deleteAccount: return "/users"
     }
   }
   
@@ -32,6 +34,7 @@ public enum UserAPI: BaseAPI {
     case .updateUserProfile: return .put
     case .saveOnboarding: return .post
     case .type: return .get
+    case .deleteAccount: return .delete
     }
   }
   
@@ -53,6 +56,9 @@ public enum UserAPI: BaseAPI {
       
     case .type:
       return .requestParameters(parameters: [:], encoding: URLEncoding.default)
+      
+    case let .deleteAccount(reason):
+      return .requestParameters(parameters: ["reason": reason], encoding: JSONEncoding.default)
     }
   }
 }

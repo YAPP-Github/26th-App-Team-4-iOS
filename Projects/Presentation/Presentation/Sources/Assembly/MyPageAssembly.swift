@@ -59,8 +59,20 @@ public final class MyPageAssembly: Assembly {
     }
     
     // MARK: - 탈퇴 화면
+    container.autoregister(DeleteAccountReactor.self, initializer: DeleteAccountReactor.init)
+    
     container.register(DeleteAccountViewController.self) { (r, mode: DeleteAccountViewController.Mode) in
       let vc = DeleteAccountViewController(mode: mode)
+      vc.reactor = r.resolve(DeleteAccountReactor.self)
+      return vc
+    }
+    
+    // MARK: - 목표 시간, 거리
+    container.autoregister(MyGoalSettingReactor.self, initializer: MyGoalSettingReactor.init)
+
+    container.register(MyGoalSettingViewController.self) { r in
+      let vc = MyGoalSettingViewController()
+      vc.reactor = r.resolve(MyGoalSettingReactor.self)
       return vc
     }
     

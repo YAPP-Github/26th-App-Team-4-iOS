@@ -11,7 +11,9 @@ import Core
 import ReactorKit
 import Domain
 
-public final class DeleteAccountViewController: BaseViewController {
+public final class DeleteAccountViewController: BaseViewController, View {
+  
+  public typealias Reactor = DeleteAccountReactor
   
   public enum Mode {
     case deleteAccountTerm
@@ -127,6 +129,10 @@ public final class DeleteAccountViewController: BaseViewController {
     $0.backgroundColor = FRColor.Bg.disabled
     $0.layer.cornerRadius = 16
   }
+  
+  let alertView = DeleteAccountConfirmView().then  {
+    $0.isHidden = true
+  }
 
   init(mode: Mode) {
     self.mode = mode
@@ -176,6 +182,24 @@ public final class DeleteAccountViewController: BaseViewController {
       $0.height.equalTo(56)
     }
     nextButton.setTitle(mode == .deleteAccountTerm ? "다음" : "탈퇴하기", for: .normal)
+    
+    view.addSubview(alertView)
+    alertView.snp.makeConstraints {
+      $0.edges.equalToSuperview()
+    }
+  }
+  
+  public func bind(reactor: DeleteAccountReactor) {
+    print("\(type(of: self)) - \(#function)")
+
+    reactor.state.map(\.accountDeleted)
+      .observe(on: MainScheduler.instance)
+      .filter { $0 }
+      .subscribe(with: self) { owner, accountDeleted in
+        print("reactor.state.map(accountDeleted)")
+        // MARK: - 여기서 런치스크린 이동
+      }
+      .disposed(by: disposeBag)
   }
   
   public override func action() {
@@ -195,10 +219,26 @@ public final class DeleteAccountViewController: BaseViewController {
             return
           }
         } else {
-          // 탈퇴 액션
+          owner.alertView.isHidden = false
         }
       }
       .disposed(by: disposeBag)
+    
+    alertView.onCancel = { [weak self] in
+      print("alertView.onCancel")
+
+      self?.alertView.isHidden = true
+    }
+    alertView.onConfirm = { [weak self] in
+      print("alertView.onConfirm")
+      self?.alertView.isHidden = true
+      let reason = self?.selectedItem?.text ?? Item.reason0.text
+      guard let reactor = self?.reactor else {
+        print("alertView.onConfirm 리액터 없음")
+        return
+      }
+      reactor.action.onNext(.deleteAccount(reason: reason))
+    }
   }
   
   private func updateNextButtonState() {

@@ -12,6 +12,7 @@ import Core
 
 public protocol HomeCoordinator: Coordinator {
   func showRunngingFlow()
+  func showPaceCountSetting()
 }
 
 public final class HomeCoordinatorImpl: HomeCoordinator {
@@ -45,6 +46,14 @@ extension HomeCoordinatorImpl {
     coordinator.finishDelegate = self
     childCoordinators.append(coordinator)
     coordinator.start()
+  }
+  
+  public func showPaceCountSetting() {
+    guard let viewController = resolver.resolve(PaceCountSettingViewController.self) else {
+      fatalError("Failed to resolve PaceCountSettingViewController. Ensure it is registered correctly in Swinject.")
+    }
+    viewController.coordinator = self
+    navigationController.pushViewController(viewController, animated: true)
   }
 }
 

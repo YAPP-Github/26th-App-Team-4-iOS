@@ -95,7 +95,7 @@ public final class MyPageViewController: BaseViewController, View {
       case .serviceGuide:
         return "서비스 이용 안내"
       case .version:
-        return "앱 버전 정보"
+        return "앱 버전"
         
       case .footer:
         return ""
@@ -296,13 +296,13 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
         guard let distanceMeterGoal = goalInfo.distanceMeterGoal else {
           return nil
         }
-        return "\(Int(distanceMeterGoal))km"
+        return "\(Int(distanceMeterGoal) / 1000)km"
 
       case .goalTime:
         guard let timeGoal = goalInfo.timeGoal else {
           return nil
         }
-        return "\(timeGoal / 60)분"
+        return "\(timeGoal)분"
 
       case .goalPace:
         guard let paceGoalMs = goalInfo.paceGoal else {
@@ -325,6 +325,25 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
     }()
 
     cell.setData(item: item, value: value)
+    
+    cell.contentView.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        switch item {
+        case .goalDistance:
+          owner.coordinator?.showMyGoalSettingVC()
+        case .goalTime:
+          owner.coordinator?.showMyGoalSettingVC()
+        case .goalPace:
+          owner.coordinator?.showPaceCountSettingVC()
+        case .runningCount:
+          owner.coordinator?.showPaceCountSettingVC()
+        default:
+          break
+        }
+      }
+      .disposed(by: cell.disposeBag)
+    
     return cell
   }
   private func dequeueMenuCell(for indexPath: IndexPath) -> MyPageMenuTableCell {
