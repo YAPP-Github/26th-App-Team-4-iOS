@@ -57,10 +57,6 @@ public final class UserRepositoryImpl: UserRepository {
   
   public func signOut() -> Single<Bool> {
     self.authTokenStorage.clearTokens()
-    if let id = Bundle.main.bundleIdentifier {
-      UserDefaults.standard.removePersistentDomain(forName: id)
-      UserDefaults.standard.synchronize()
-    }
     return .just(true)
   }
 }
