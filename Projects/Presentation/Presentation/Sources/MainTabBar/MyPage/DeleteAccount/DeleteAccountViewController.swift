@@ -196,8 +196,7 @@ public final class DeleteAccountViewController: BaseViewController, View {
       .observe(on: MainScheduler.instance)
       .filter { $0 }
       .subscribe(with: self) { owner, accountDeleted in
-        print("reactor.state.map(accountDeleted)")
-        // MARK: - 여기서 런치스크린 이동
+        owner.coordinator?.showWalkthrough()
       }
       .disposed(by: disposeBag)
   }
