@@ -10,11 +10,12 @@ import UIKit
 import RxSwift
 import Then
 import SnapKit
+import ReactorKit
 
 import Core
 
-public final class RunnerTypeViewController: BaseViewController {
-
+public final class RunnerTypeViewController: BaseViewController, View {
+  
   weak var coordinator: OnboardingCoordinator?
 
   public var runnerType: String = "워밍업"
@@ -77,7 +78,24 @@ public final class RunnerTypeViewController: BaseViewController {
       make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-12)
     }
   }
-
+  
+  public func bind(reactor: RunnerTypeViewReactor) {
+    self.rx.viewDidLoad
+      .subscribe(with: self) { object, _ in
+        reactor.action.onNext(.initialize)
+      }
+      .disposed(by: disposeBag)
+    
+    reactor.state.map { $0.type }
+      .observe(on: MainScheduler.instance)
+      .compactMap { $0 }
+      .distinctUntilChanged()
+      .subscribe(with: self) { owner, runnerType in
+        owner.typeTitleLabel.text = "체력 분석완료\n나는 \(runnerType.displayName) 러너에 가까워요"
+      }
+      .disposed(by: disposeBag)
+  }
+  
   public override func action() {
     super.action()
 
