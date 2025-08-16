@@ -59,8 +59,11 @@ public final class MyPageAssembly: Assembly {
     }
     
     // MARK: - 탈퇴 화면
+    container.autoregister(DeleteAccountReactor.self, initializer: DeleteAccountReactor.init)
+    
     container.register(DeleteAccountViewController.self) { (r, mode: DeleteAccountViewController.Mode) in
       let vc = DeleteAccountViewController(mode: mode)
+      vc.reactor = r.resolve(DeleteAccountReactor.self)
       return vc
     }
     

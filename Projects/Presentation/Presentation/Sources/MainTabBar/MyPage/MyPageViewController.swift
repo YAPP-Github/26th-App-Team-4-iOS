@@ -95,7 +95,7 @@ public final class MyPageViewController: BaseViewController, View {
       case .serviceGuide:
         return "서비스 이용 안내"
       case .version:
-        return "앱 버전 정보"
+        return "앱 버전"
         
       case .footer:
         return ""

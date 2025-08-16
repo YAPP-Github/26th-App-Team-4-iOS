@@ -10,5 +10,6 @@ import RxSwift
 public protocol UserRepository {
   func fetchUserInfo() -> Single<ProfileInfo>
   func saveRunnerType(type: RunnerType) -> Single<Bool>
+  func deleteAccount(reason: String) -> Single<Bool>
 }
 
