@@ -134,11 +134,7 @@ public final class HomeViewController: BaseViewController, View {
     
     cardView.editButton.rx.tap
       .subscribe(with: self) { object, _ in
-//        let vc = PaceCountSettingViewController().then {
-//          $0.reactor = PaceCountSettingReactor(goalUseCase: GoalUseCaseImpl(goalRepository: GoalRepositoryImpl()))
-//        }
-//        vc.hidesBottomBarWhenPushed = true
-//        object.navigationController?.pushViewController(vc, animated: true)
+        object.coordinator?.showPaceCountSetting()
       }
       .disposed(by: disposeBag)
 

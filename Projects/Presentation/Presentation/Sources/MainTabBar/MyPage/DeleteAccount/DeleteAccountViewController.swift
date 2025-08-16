@@ -197,11 +197,7 @@ public final class DeleteAccountViewController: BaseViewController, View {
       .filter { $0 }
       .subscribe(with: self) { owner, accountDeleted in
         print("reactor.state.map(accountDeleted)")
-        guard let coordinator = owner.coordinator else {
-          print("coordinator 없음")
-          return
-        }
-        coordinator.showLaunch()
+        // MARK: - 여기서 런치스크린 이동
       }
       .disposed(by: disposeBag)
   }

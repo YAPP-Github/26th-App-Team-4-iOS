@@ -13,6 +13,8 @@ import RxKeyboard
 
 public final class PaceCountSettingViewController: BaseViewController, View {
   
+  var coordinator: HomeCoordinator?
+  
   private let backButton = UIButton().then {
     $0.setImage(.init(systemName: "chevron.left"), for: .normal)
     $0.tintColor = .black
