@@ -31,7 +31,9 @@ public class WeeklyRunningGoalCardView: BaseView {
   }
 
   let editButton = UIButton(type: .system).then {
-    $0.setImage(UIImage(systemName: "pencil"), for: .normal)
+    let image = UIImage(named: "EditPencil", in: .module, with: nil)?
+      .resized(to: CGSize(width: 24, height: 24))
+    $0.setImage(image, for: .normal)
     $0.tintColor = .gray
   }
 
