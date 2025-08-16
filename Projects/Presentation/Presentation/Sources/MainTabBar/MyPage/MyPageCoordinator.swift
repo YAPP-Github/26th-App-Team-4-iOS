@@ -18,6 +18,7 @@ public protocol MyPageCoordinator: Coordinator {
   func showPaceCountSettingVC()
   func showRunningSetting()
   func showMyNotiSettingVC()
+  func showWalkthrough()
 }
 
 public final class MyPageCoordinatorImpl: MyPageCoordinator {
@@ -92,6 +93,11 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
     let vc = resolver.resolve(MyNotiSettingViewController.self)!
     vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)
+  }
+
+  public func showWalkthrough() {
+    self.navigationController.viewControllers.removeAll()
+    self.finish()
   }
 }
 

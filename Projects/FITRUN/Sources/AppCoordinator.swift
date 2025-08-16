@@ -108,6 +108,8 @@ extension AppCoordinatorImpl: CoordinatorFinishDelegate {
       showMainTab()
     case .onboarding:
       showMainTab()
+    case .mainTabBar:
+      showWalkthrough()
     default:
       break
     }

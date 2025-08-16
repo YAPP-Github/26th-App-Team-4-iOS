@@ -119,10 +119,6 @@ public class MainTabBarCoordinatorImpl: NSObject, MainTabBarCoordinator {
   func currentPage() -> TabBarPage? {
     TabBarPage(rawValue: tabBarController.selectedIndex)
   }
-
-  func removeChildCoordinator(_ coordinator: Coordinator) {
-    childCoordinators = childCoordinators.filter { $0 !== coordinator }
-  }
 }
 
 // MARK: - UITabBarControllerDelegate
@@ -139,6 +135,11 @@ extension MainTabBarCoordinatorImpl: UITabBarControllerDelegate {
 
 extension MainTabBarCoordinatorImpl: CoordinatorFinishDelegate {
   public func coordinatorDidFinish(childCoordinator: Coordinator) {
-    removeChildCoordinator(childCoordinator)
+    self.childCoordinators = childCoordinators.filter({ $0.type != childCoordinator.type })
+
+    if childCoordinator.type == .myPage {
+      navigationController.dismiss(animated: false)
+      finishDelegate?.coordinatorDidFinish(childCoordinator: self)
+    }
   }
 }
