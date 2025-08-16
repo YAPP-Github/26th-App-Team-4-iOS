@@ -54,4 +54,9 @@ public final class UserRepositoryImpl: UserRepository {
         }
         .asSingle()
   }
+  
+  public func signOut() -> Single<Bool> {
+    self.authTokenStorage.clearTokens()
+    return .just(true)
+  }
 }

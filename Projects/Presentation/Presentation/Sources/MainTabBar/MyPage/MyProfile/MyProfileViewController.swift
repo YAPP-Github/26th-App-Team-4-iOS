@@ -165,12 +165,27 @@ public final class MyProfileViewController: BaseViewController, View {
       }
       .disposed(by: disposeBag)
     
+    logOutButtonLabel.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(with: self) { owner, _ in
+        reactor.action.onNext(.signOut)
+      }
+      .disposed(by: disposeBag)
+        
     reactor.state.map(\.profileInfo)
       .observe(on: MainScheduler.instance)
       .compactMap { $0 }
       .distinctUntilChanged()
       .subscribe(with: self) { owner, userInfo in
         owner.setUserinfo(userInfo)
+      }
+      .disposed(by: disposeBag)
+        
+    reactor.state.map(\.isSignOutDone)
+      .observe(on: MainScheduler.instance)
+      .filter { $0 }
+      .subscribe(with: self) { owner, isSignOutDone in
+        owner.coordinator?.showWalkthrough()
       }
       .disposed(by: disposeBag)
   }

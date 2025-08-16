@@ -35,7 +35,7 @@ public final class GoalPaceView: BaseView {
   // MARK: - UI Components
 
   private let weekLabel = UILabel().then {
-    $0.text = "일주일에"
+    $0.text = "나의 페이스는"
     $0.font = .systemFont(ofSize: 16, weight: .semibold)
     $0.textColor = UIColor(hex: "#555D6D")
     $0.textAlignment = .center
@@ -153,6 +153,7 @@ public final class GoalPaceView: BaseView {
 
     // 2) 텍스트 입력 → 포맷 후 selectedPaceSeconds 업데이트
     hiddenTextField.rx.text.orEmpty
+      .skip(1)
       .distinctUntilChanged()
       .bind { [weak self] in self?.handleTextChanged($0) }
       .disposed(by: disposeBag)

@@ -35,7 +35,14 @@ public enum WalkThroughStep: Int, CaseIterable {
   }
   
   var image: UIImage? {
-    return nil
+    switch self {
+    case .step1:
+      return UIImage(named: "walkthrough0", in: .module, with: nil)
+    case .step2:
+      return UIImage(named: "walkthrough1", in: .module, with: nil)
+    case .step3:
+      return UIImage(named: "walkthrough2", in: .module, with: nil)
+    }
   }
 
   var buttonTitle: String {

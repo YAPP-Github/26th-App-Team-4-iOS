@@ -64,7 +64,7 @@ public final class WalkThroughCollectionCell: UICollectionViewCell {
     imageView.snp.makeConstraints {
       $0.top.equalTo(descriptionLabel.snp.bottom).offset(20)
       $0.centerX.equalToSuperview()
-      $0.width.equalToSuperview().multipliedBy(0.6)
+      $0.width.equalToSuperview().multipliedBy(0.8)
       $0.height.equalTo(imageView.snp.width) // 1:1 비율
       $0.bottom.lessThanOrEqualToSuperview().inset(20)
     }
@@ -74,5 +74,6 @@ public final class WalkThroughCollectionCell: UICollectionViewCell {
   public func setData(step: WalkThroughStep) {
     titleLabel.text = step.title
     descriptionLabel.text = step.description
+    imageView.image = step.image
   }
 }

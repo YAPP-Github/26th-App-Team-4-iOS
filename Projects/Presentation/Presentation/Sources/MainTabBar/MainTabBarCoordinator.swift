@@ -9,7 +9,6 @@ import UIKit
 import Swinject
 import Core
 
-
 enum TabBarPage: Int, CaseIterable {
   case home = 0
   case record
@@ -17,7 +16,7 @@ enum TabBarPage: Int, CaseIterable {
 
   var pageTitle: String {
     switch self {
-    case .home: return "홈"
+    case .home:   return "홈"
     case .record: return "기록"
     case .myPage: return "마이페이지"
     }
@@ -25,9 +24,16 @@ enum TabBarPage: Int, CaseIterable {
 
   var pageImage: UIImage? {
     switch self {
-    case .home: return UIImage(named: "home", in: .module, with: nil)?.resized(to: CGSize(width: 24, height: 24))
-    case .record: return UIImage(named: "chart", in: .module, with: nil)?.resized(to: CGSize(width: 24, height: 24))
-    case .myPage: return UIImage(systemName: "person")
+    case .home:
+      return UIImage(named: "home", in: .module, with: nil)?
+        .resized(to: CGSize(width: 24, height: 24))?
+        .withRenderingMode(.alwaysTemplate) // ← 템플릿 처리
+    case .record:
+      return UIImage(named: "chart", in: .module, with: nil)?
+        .resized(to: CGSize(width: 24, height: 24))?
+        .withRenderingMode(.alwaysTemplate) // ← 템플릿 처리
+    case .myPage:
+      return UIImage(systemName: "person")?.withRenderingMode(.alwaysTemplate) // ← 템플릿 처리
     }
   }
 }
@@ -55,17 +61,33 @@ public class MainTabBarCoordinatorImpl: NSObject, MainTabBarCoordinator {
     super.init()
     self.tabBarController.delegate = self
 
+    // MARK: - Tab bar appearance (selected/normal tint)
     let appearance = UITabBarAppearance()
     appearance.configureWithOpaqueBackground()
     appearance.backgroundColor = .white
 
-    appearance.stackedLayoutAppearance.selected.iconColor = FRColor.Fg.Icon.primary
-    appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: FRColor.Fg.Text.primary]
-    appearance.stackedLayoutAppearance.normal.iconColor = FRColor.Fg.Icon.primary
-    appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: FRColor.Fg.Text.primary]
+    let selectedIcon = FRColor.Fg.Icon.primary
+    let normalIcon   = UIColor(hex: "#C2C6CE")
+    let selectedText = FRColor.Fg.Text.primary
+    let normalText   = FRColor.Fg.Text.secondary
 
-    tabBarController.tabBar.standardAppearance = appearance
+    func configureItemAppearance(_ item: UITabBarItemAppearance) {
+      item.selected.iconColor = selectedIcon
+      item.normal.iconColor   = normalIcon
+      item.selected.titleTextAttributes = [.foregroundColor: selectedText]
+      item.normal.titleTextAttributes   = [.foregroundColor: normalText]
+    }
+
+    configureItemAppearance(appearance.stackedLayoutAppearance)
+    configureItemAppearance(appearance.inlineLayoutAppearance)
+    configureItemAppearance(appearance.compactInlineLayoutAppearance)
+
+    tabBarController.tabBar.standardAppearance   = appearance
     tabBarController.tabBar.scrollEdgeAppearance = appearance
+
+    // 백업 틴트 (템플릿 이미지용)
+    tabBarController.tabBar.tintColor = selectedIcon
+    tabBarController.tabBar.unselectedItemTintColor = normalIcon
   }
 
   public func start() {
@@ -79,24 +101,29 @@ public class MainTabBarCoordinatorImpl: NSObject, MainTabBarCoordinator {
 
   private func getTabController(_ page: TabBarPage) -> UINavigationController {
     let navController = UINavigationController()
-    navController.tabBarItem = UITabBarItem(title: page.pageTitle, image: page.pageImage, tag: page.rawValue)
+
+    // 이미지는 템플릿 렌더링을 가정(pageImage가 이미 .alwaysTemplate)
+    navController.tabBarItem = UITabBarItem(
+      title: page.pageTitle,
+      image: page.pageImage,
+      tag: page.rawValue
+    )
 
     switch page {
     case .home:
       guard let coordinator = resolver.resolve(HomeCoordinatorImpl.self, argument: navController) else {
         fatalError("Failed to resolve HomeCoordinator. Ensure it is registered correctly in Swinject.")
       }
-
       coordinator.finishDelegate = self
       childCoordinators.append(coordinator)
       coordinator.start()
-      
+
     case .record:
       let recordCoord = resolver.resolve(RecordCoordinatorImpl.self, argument: navController)!
       recordCoord.finishDelegate = self
       childCoordinators.append(recordCoord)
       recordCoord.start()
-      
+
     case .myPage:
       guard let coordinator = resolver.resolve(MyPageCoordinator.self, argument: navController) else {
         fatalError("Failed to resolve MyPageCoordinator. Ensure it is registered correctly in Swinject.")
@@ -105,6 +132,7 @@ public class MainTabBarCoordinatorImpl: NSObject, MainTabBarCoordinator {
       childCoordinators.append(coordinator)
       coordinator.start()
     }
+
     return navController
   }
 
