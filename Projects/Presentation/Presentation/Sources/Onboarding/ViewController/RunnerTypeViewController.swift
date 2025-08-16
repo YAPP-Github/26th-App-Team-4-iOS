@@ -37,7 +37,7 @@ public final class RunnerTypeViewController: BaseViewController, View {
   }
 
   private let imageView = UIImageView().then {
-    $0.image = UIImage(named: "RunnerType", in: Bundle.module, compatibleWith: nil)
+    $0.image = UIImage(named: "runnerType", in: Bundle.module, compatibleWith: nil)
     $0.contentMode = .scaleAspectFit
   }
 
