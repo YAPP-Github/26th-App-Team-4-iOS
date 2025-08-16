@@ -10,6 +10,7 @@ import RxSwift
 public protocol UserUseCase {
   func fetchMyUserInfo() -> Single<ProfileInfo>
   func saveRunnerType(runnerType: RunnerType) -> Single<Bool>
+  func signOut() -> Single<Bool>
   func deleteAccount(reason: String) -> Single<Bool>
 }
 
@@ -27,6 +28,10 @@ public final class UserUseCaseImpl: UserUseCase {
   
   public func saveRunnerType(runnerType: RunnerType) -> Single<Bool> {
     return userRepository.saveRunnerType(type: runnerType)
+  }
+  
+  public func signOut() -> Single<Bool> {
+    return userRepository.signOut()
   }
   
   public func deleteAccount(reason: String) -> Single<Bool> {
