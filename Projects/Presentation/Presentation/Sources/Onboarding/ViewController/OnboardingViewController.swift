@@ -25,8 +25,8 @@ public final class OnboardingViewController: BaseViewController, View {
   }
 
   private let progressView = UIProgressView(progressViewStyle: .bar).then {
-    $0.trackTintColor = UIColor.systemGray5
-    $0.progressTintColor = UIColor.orange
+    $0.trackTintColor = FRColor.Fg.Nuetral.gray300
+    $0.progressTintColor = FRColor.Fg.Icon.primary
     $0.layer.cornerRadius = 2
     $0.clipsToBounds = true
     $0.progress = 0

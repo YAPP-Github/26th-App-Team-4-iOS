@@ -18,7 +18,7 @@ public final class OnboardingAnswerTableCell: BaseTableViewCell {
     didSet {
       let borderColor = isSelected
         ? FRColor.Fg.Icon.Interactive.primary.cgColor
-        : UIColor.systemGray4.cgColor
+        : FRColor.Fg.Nuetral.gray400.cgColor
       
       let bgColor = isSelected
       ? UIColor(hex: "#FFF3EC")
@@ -32,7 +32,7 @@ public final class OnboardingAnswerTableCell: BaseTableViewCell {
     $0.backgroundColor = .white
     $0.layer.cornerRadius = 12
     $0.layer.borderWidth = 2
-    $0.layer.borderColor = UIColor.systemGray4.cgColor
+    $0.layer.borderColor = FRColor.Fg.Nuetral.gray400.cgColor
     $0.clipsToBounds = true
   }
 
@@ -43,6 +43,7 @@ public final class OnboardingAnswerTableCell: BaseTableViewCell {
   private let titleLabel = UILabel().then {
     $0.font = .systemFont(ofSize: 16)
     $0.textColor = .label
+    $0.textColor = FRColor.Fg.Text.primary
   }
 
   private let checkmarkView = UIImageView().then {
