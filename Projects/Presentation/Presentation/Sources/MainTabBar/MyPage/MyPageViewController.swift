@@ -10,6 +10,7 @@ import Core
 import ReactorKit
 import NMapsMap
 import Domain
+import SafariServices
 
 public final class MyPageViewController: BaseViewController, View {
   
@@ -376,9 +377,17 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
           }
 
         case .termOfService:
-          break
+          let termsURL = "https://encouraging-romano-d7b.notion.site/251fb0e93b32801fbfc1c90bd48b36ff"
+          guard let url = URL(string: termsURL) else { return }
+          let safari = SFSafariViewController(url: url)
+          owner.present(safari, animated: true)
+          
         case .serviceGuide:
-          break
+          let serviceGuideURL = "https://encouraging-romano-d7b.notion.site/251fb0e93b32808bbbcbee2c78b825d9"
+          guard let url = URL(string: serviceGuideURL) else { return }
+          let safari = SFSafariViewController(url: url)
+          owner.present(safari, animated: true)
+          
         default:
           break
         }

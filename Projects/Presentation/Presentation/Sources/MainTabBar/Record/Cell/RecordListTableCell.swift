@@ -73,7 +73,7 @@ public class RecordListTableCell: BaseTableViewCell {
   }
   
   private let courseImageView = UIImageView().then {
-    $0.backgroundColor = UIColor(hex: "#D9D9D9")
+    $0.backgroundColor = .clear
     $0.contentMode = .scaleAspectFill
     $0.layer.cornerRadius = 8
     $0.clipsToBounds = true

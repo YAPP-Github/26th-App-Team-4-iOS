@@ -69,7 +69,7 @@ public class WeeklyRunningGoalCardView: BaseView {
   private let targetTitleLabel = UILabel().then {
     $0.text = "목표 페이스"
     $0.font = .systemFont(ofSize: 10)
-    $0.textColor = UIColor.systemGray
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
 
   private let targetValueLabel = UILabel().then {
@@ -93,7 +93,7 @@ public class WeeklyRunningGoalCardView: BaseView {
   private let recentTitleLabel = UILabel().then {
     $0.text = "최근 페이스"
     $0.font = .systemFont(ofSize: 10)
-    $0.textColor = UIColor.systemGray
+    $0.textColor = FRColor.Fg.Text.tertiary
   }
 
   private let recentValueLabel = UILabel().then {
@@ -167,7 +167,7 @@ public class WeeklyRunningGoalCardView: BaseView {
       v.layer.cornerRadius = 1
       v.backgroundColor = i < done
         ? UIColor(hex: "#FF6600")
-        : UIColor.systemGray5
+        : FRColor.Fg.Nuetral.gray300
       progressStackView.addArrangedSubview(v)
     }
   }
