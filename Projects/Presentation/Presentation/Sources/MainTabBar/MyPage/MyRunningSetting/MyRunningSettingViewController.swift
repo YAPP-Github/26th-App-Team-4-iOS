@@ -35,6 +35,15 @@ public final class MyRunningSettingViewController: BaseViewController, View {
         return "러닝 중 실시간 페이스에 따라 맞춤형 안내가 음성으로 제공되는 기능이에요"
       }
     }
+
+    var userDefaultsKey: String {
+      switch self {
+      case .audioCoaching:
+        return "running.setting.audioCoaching"
+      case .audioFeedback:
+        return "running.setting.audioFeedback"
+      }
+    }
   }
   
   var coordinator: MyPageCoordinator?
