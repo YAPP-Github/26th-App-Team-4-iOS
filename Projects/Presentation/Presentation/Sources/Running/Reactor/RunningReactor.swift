@@ -329,28 +329,32 @@ public final class RunningReactor: Reactor {
     let hasTimeGoal = state.goalTime != nil
 
     // runnerType 피드백은 항상 처리
-    allFeedbackMutations.append(_generateRunnerTypeFeedback(totalDistance: totalDistance))
+    if UserDefaults.standard.bool(forKey: "running.setting.audioCoaching") {
+      allFeedbackMutations.append(_generateRunnerTypeFeedback(totalDistance: totalDistance))
+    }
 
     // 목표 설정에 따라 피드백 로직 실행
-    if hasDistanceGoal && hasPaceGoal {
-      allFeedbackMutations.append(_generateDistanceFeedback(totalDistance: totalDistance))
-      allFeedbackMutations.append(_generatePaceFeedback())
-    }
-    else if hasDistanceGoal {
-      allFeedbackMutations.append(_generateDistanceFeedback(totalDistance: totalDistance))
-    }
-    else if hasTimeGoal && hasPaceGoal {
-      allFeedbackMutations.append(_generateTimeFeedback())
-      allFeedbackMutations.append(_generatePaceFeedback())
-    }
-    else if hasDistanceGoal && hasTimeGoal {
-      allFeedbackMutations.append(_generatePaceFeedback())
-    }
-    else if hasPaceGoal {
-      allFeedbackMutations.append(_generatePaceFeedback())
-    }
-    else if hasTimeGoal {
-      allFeedbackMutations.append(_generateTimeFeedback())
+    if UserDefaults.standard.bool(forKey: "running.setting.audioFeedback") {
+      if hasDistanceGoal && hasPaceGoal {
+        allFeedbackMutations.append(_generateDistanceFeedback(totalDistance: totalDistance))
+        allFeedbackMutations.append(_generatePaceFeedback())
+      }
+      else if hasDistanceGoal {
+        allFeedbackMutations.append(_generateDistanceFeedback(totalDistance: totalDistance))
+      }
+      else if hasTimeGoal && hasPaceGoal {
+        allFeedbackMutations.append(_generateTimeFeedback())
+        allFeedbackMutations.append(_generatePaceFeedback())
+      }
+      else if hasDistanceGoal && hasTimeGoal {
+        allFeedbackMutations.append(_generatePaceFeedback())
+      }
+      else if hasPaceGoal {
+        allFeedbackMutations.append(_generatePaceFeedback())
+      }
+      else if hasTimeGoal {
+        allFeedbackMutations.append(_generateTimeFeedback())
+      }
     }
 
     guard !allFeedbackMutations.isEmpty else {
