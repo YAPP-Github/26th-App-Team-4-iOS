@@ -39,9 +39,9 @@ public final class MyRunningSettingViewController: BaseViewController, View {
     var userDefaultsKey: String {
       switch self {
       case .audioCoaching:
-        return "running.setting.audioCoaching"
+        return "running.setting.audioCoaching.isOff"
       case .audioFeedback:
-        return "running.setting.audioFeedback"
+        return "running.setting.audioFeedback.isOff"
       }
     }
   }

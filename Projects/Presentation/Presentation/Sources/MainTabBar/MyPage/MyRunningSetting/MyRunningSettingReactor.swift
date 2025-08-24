@@ -33,8 +33,8 @@ public final class MyRunningSettingReactor: Reactor {
       var initialItems: [MyRunningSettingViewController.Item: Bool] = [:]
 
       for item in MyRunningSettingViewController.Item.allCases {
-        let isOn = UserDefaults.standard.bool(forKey: item.userDefaultsKey)
-        initialItems[item] = isOn
+        let isOff = UserDefaults.standard.bool(forKey: item.userDefaultsKey)
+        initialItems[item] = !isOff
       }
       return .just(.setItems(initialItems))
 
@@ -44,7 +44,7 @@ public final class MyRunningSettingReactor: Reactor {
       let newValue = !currentValue
       newItems[item] = newValue
 
-      UserDefaults.standard.set(newValue, forKey: item.userDefaultsKey)
+      UserDefaults.standard.set(!newValue, forKey: item.userDefaultsKey)
 
       return .just(.setItems(newItems))
     }

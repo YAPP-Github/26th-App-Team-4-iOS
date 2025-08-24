@@ -339,12 +339,14 @@ public final class RunningReactor: Reactor {
     let hasPaceGoal = state.goalPace != nil
     let hasDistanceGoal = state.goalDistance != nil
     let hasTimeGoal = state.goalTime != nil
-    
-    if UserDefaults.standard.bool(forKey: MyRunningSettingViewController.Item.audioCoaching.userDefaultsKey) {
+    let audioCoachingIsOff = UserDefaults.standard.bool(forKey: MyRunningSettingViewController.Item.audioCoaching.userDefaultsKey)
+    let audioFeedbackIsOff = UserDefaults.standard.bool(forKey: MyRunningSettingViewController.Item.audioFeedback.userDefaultsKey)
+
+    if !audioCoachingIsOff {
       allFeedbackMutations.append(_generateRunnerTypeFeedback(totalDistance: totalDistance))
     }
     
-    if UserDefaults.standard.bool(forKey: MyRunningSettingViewController.Item.audioFeedback.userDefaultsKey) {
+    if !audioFeedbackIsOff {
       if hasDistanceGoal && hasPaceGoal {
         allFeedbackMutations.append(_generateDistanceFeedback(totalDistance: totalDistance))
         allFeedbackMutations.append(_generatePaceFeedback())

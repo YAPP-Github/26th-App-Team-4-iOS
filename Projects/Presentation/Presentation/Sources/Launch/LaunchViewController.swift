@@ -41,8 +41,6 @@ public final class LaunchViewController: BaseViewController, View {
         switch status {
           // TODO: - needsWalkthrough는 실행 한번만 할 건지 논의 필요
         case .needsWalkthrough, .needsLogin:
-          UserDefaults.standard.set(true, forKey: MyRunningSettingViewController.Item.audioCoaching.userDefaultsKey)
-          UserDefaults.standard.set(true, forKey: MyRunningSettingViewController.Item.audioFeedback.userDefaultsKey)
           object.coordinator?.showWalkthrough()
         case .loggedIn:
           object.coordinator?.showMainTabBar()
