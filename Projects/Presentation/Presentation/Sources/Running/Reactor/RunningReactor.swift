@@ -613,7 +613,7 @@ public final class RunningReactor: Reactor {
 
     case let .enqueueAudio(event):
       if
-        currentState.isAudioFeedbackEnabled,
+        state.isAudioFeedbackEnabled,
         !newState.audioQueue.contains(where: { $0 == event })
       {
         newState.audioQueue.append(event)
