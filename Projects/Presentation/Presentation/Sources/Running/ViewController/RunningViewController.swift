@@ -418,13 +418,9 @@ final class RunningViewController: BaseViewController, View {
           this.loadingIndicator.startAnimating()
           this.locationManager.stopUpdatingLocation()
           this.toggleAudioButton.isHidden = true
-        case .finished, .error:
-          this.animationView.isHidden = true
-          this.animationView.isUserInteractionEnabled = false
-          this.loadingIndicator.stopAnimating()
-          this.loadingIndicator.isHidden = true
-          this.locationManager.stopUpdatingLocation()
-          this.toggleAudioButton.isHidden = true
+        case .error:
+          // TODO: - 오류 발생시 대응 방안 논의 필요
+          this.coordinator?.dismissRunningFlow()
         }
       }
       .disposed(by: disposeBag)

@@ -16,7 +16,6 @@ public final class RunningReactor: Reactor {
     case idle
     case inProgress
     case paused
-    case finished
     case uploading
     case error
   }
@@ -232,10 +231,9 @@ public final class RunningReactor: Reactor {
       
     case .stopRun:
       timer?.invalidate()
-      // 💡 수정: 정지 시 최종 경과 시간 다시 계산
       guard let localStartTime = currentState.localStartTime else {
         print("⚠️ 시작 시간이 누락되어 업로드할 수 없습니다. 달리기 종료.")
-        return .just(.setSessionState(.finished))
+        return .just(.setSessionState(.error))
       }
       
       let finalTime = Date().timeIntervalSince(localStartTime)
@@ -245,10 +243,10 @@ public final class RunningReactor: Reactor {
       let displayDataMutation: Observable<Mutation> = .just(.setRunData(totalTime: totalTime, totalDistance: totalDistance))
 
       guard let startLocation = currentState.runningPoints.first?.coordinate.location else {
-        print("⚠️ 시작 위치 또는 시간이 누락되어 업로드할 수 없습니다. 달리기 종료.")
+        print("⚠️ 시작 위치가 누락되어 업로드할 수 없습니다. 달리기 종료.")
         return .concat([
           displayDataMutation,
-          .just(.setSessionState(.finished))
+          .just(.setSessionState(.error))
         ])
       }
       
@@ -262,7 +260,7 @@ public final class RunningReactor: Reactor {
             guard let recordId = recordId else {
               print("❌ 오류: recordId를 가져오지 못했습니다. 완료 API 호출 없이 종료.")
               return .concat([
-                .just(.setSessionState(.finished)),
+                .just(.setSessionState(.error)),
                 .just(.setUploadSuccess(false))
               ])
             }
@@ -285,8 +283,7 @@ public final class RunningReactor: Reactor {
               print("✅ 업로드 성공: \(success)")
               return .concat([
                 .just(.setRecordId(recordId)),
-                .just(.setUploadSuccess(success)),
-                .just(.setSessionState(.finished))
+                .just(.setUploadSuccess(success))
               ])
             }
           }
@@ -294,7 +291,7 @@ public final class RunningReactor: Reactor {
             print("❌ stopRun 중 API 호출 오류: \(error.localizedDescription)")
             return .concat([
               .just(.setUploadSuccess(false)),
-              .just(.setSessionState(.finished))
+              .just(.setSessionState(.error))
             ])
           }
       ])
