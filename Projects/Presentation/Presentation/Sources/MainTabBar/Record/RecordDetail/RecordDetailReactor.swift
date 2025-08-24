@@ -17,7 +17,7 @@ public class RecordDetailReactor: Reactor {
   // MARK: - Action
   public enum Action {
     case initialize
-    case mapRendered(mapView: NMFMapView)
+    case mapRendered(_ mapViewImage: UIImage)
     case deleteRecord
   }
 
@@ -63,13 +63,10 @@ public class RecordDetailReactor: Reactor {
         .just(.setLoading(false))
       ])
 
-    case let .mapRendered(mapView):
+    case let .mapRendered(mapViewImage):
       guard let record = currentState.detail else { return .empty() }
 
-      return runningRecordImageUseCase.captureMapImage(from: mapView)
-        .flatMap { image in
-          self.runningRecordImageUseCase.uploadImage(image, recordId: record.recordId)
-        }
+      return runningRecordImageUseCase.uploadImage(mapViewImage, recordId: record.recordId)
         .asObservable()
         .flatMap { newImageUrl -> Observable<Mutation> in
           guard let newImageUrl = newImageUrl else {
@@ -123,5 +120,23 @@ public class RecordDetailReactor: Reactor {
         return .just(.setDetail(record))
       }
       .catch { Observable.just(Mutation.setError($0)) }
+  }
+
+  private func uploadMapViewImage(_ mapViewImage: UIImage) -> Observable<Mutation> {
+    guard let record = currentState.detail else { return .empty() }
+
+    return runningRecordImageUseCase.uploadImage(mapViewImage, recordId: record.recordId)
+      .asObservable()
+      .flatMap { newImageUrl -> Observable<Mutation> in
+        guard let newImageUrl = newImageUrl else {
+          return .just(.setError(NSError(domain: "ImageUploadError", code: 0, userInfo: nil)))
+        }
+        var updatedRecord = record
+        updatedRecord.imageUrl = newImageUrl
+        return .just(.setDetail(updatedRecord))
+      }
+      .catch { error in
+        Observable.just(Mutation.setError(error))
+      }
   }
 }

@@ -74,6 +74,10 @@ public final class RecordDetailViewController: BaseViewController, View, CustomA
     }
   }
 
+  private let activityIndicator = UIActivityIndicatorView().then { indicator in
+    indicator.hidesWhenStopped = true
+  }
+
   override init() {
     super.init()
     hidesBottomBarWhenPushed = true
@@ -106,7 +110,7 @@ public final class RecordDetailViewController: BaseViewController, View, CustomA
 
     view.addSubview(tableView)
     tableView.snp.makeConstraints {
-      $0.top.equalTo(backButton.snp.bottom).offset(16)
+      $0.top.equalTo(backButton.snp.bottom)
       $0.leading.trailing.bottom.equalToSuperview()
     }
 
@@ -123,6 +127,11 @@ public final class RecordDetailViewController: BaseViewController, View, CustomA
 
     view.addSubview(popUpView)
     popUpView.snp.makeConstraints {
+      $0.edges.equalToSuperview()
+    }
+
+    view.addSubview(activityIndicator)
+    activityIndicator.snp.makeConstraints {
       $0.edges.equalToSuperview()
     }
   }
@@ -155,6 +164,7 @@ public final class RecordDetailViewController: BaseViewController, View, CustomA
         guard let record = record else { return }
         owner.tableView.reloadData()
         if record.imageUrl ?? "" == "" {
+          owner.deleteButton.isHidden = true
           owner.setupHiddenMap(for: record)
         }
       }
@@ -178,6 +188,11 @@ public final class RecordDetailViewController: BaseViewController, View, CustomA
       .subscribe(with: self) { owner, _ in
         owner.popUpView.isHidden = false
       }
+      .disposed(by: disposeBag)
+
+    reactor.state.map { $0.isLoading }
+      .distinctUntilChanged()
+      .bind(to: activityIndicator.rx.isAnimating)
       .disposed(by: disposeBag)
   }
 
@@ -342,11 +357,13 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
       withIdentifier: RecordDetailAchievementTableCell.identifier, for: indexPath
     ) as! RecordDetailAchievementTableCell
     guard let detail = self.reactor?.currentState.detail else { return cell }
+
     cell.setData(
       distance: detail.isDistanceGoalAchieved,
       pace: detail.isPaceGoalAchieved,
       time: detail.isTimeGoalAchieved
     )
+
     return cell
   }
 
@@ -355,7 +372,9 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
       withIdentifier: RecordDetailRecordTableCell.identifier, for: indexPath
     ) as! RecordDetailRecordTableCell
     guard let detail = self.reactor?.currentState.detail else { return cell }
+
     cell.setData(distance: detail.totalDistance, pace: detail.averagePace, runningTime: detail.totalTime)
+
     return cell
   }
 
@@ -364,6 +383,7 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
       withIdentifier: RecordDetailCourseTableCell.identifier, for: indexPath
     ) as! RecordDetailCourseTableCell
     guard let detail = self.reactor?.currentState.detail else { return cell }
+
     if let location = detail.runningPoints.first?.location {
       let coordinate = CLLocationCoordinate2D(latitude: location.lat, longitude: location.lon)
       getAddressFrom(coordinate: coordinate) { location in
@@ -381,12 +401,15 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     ) as! RecordDetailLapTableCell
     guard let segments = self.reactor?.currentState.detail?.segments else { return cell }
     guard segments.indices.contains(indexPath.row) else { return cell }
+
     let segment = segments[indexPath.row]
     let paceString = segment.averagePace.toMinutesAndSeconds()
     let scale = normalizedScale(for: indexPath.row, in: segments)
     let length = CGFloat(scale)
     let isPrimary = scale == 1.0
+
     cell.setData(lapNumber: indexPath.row + 1, lapTime: paceString, length: CGFloat(length), isPrimary: isPrimary)
+
     return cell
   }
 
@@ -400,14 +423,18 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
           segments.indices.contains(index) else {
       return minScale
     }
+
     let paces = segments.map { $0.averagePace }
+
     guard let minPace = paces.min(),
           let maxPace = paces.max(),
           minPace < maxPace else {
       return maxScale
     }
+
     let pace = segments[index].averagePace
     let normalized = (maxPace - pace) / (maxPace - minPace)
+
     return minScale + Float(normalized) * (maxScale - minScale)
   }
 }
@@ -418,13 +445,13 @@ extension RecordDetailViewController: NMFMapViewRenderDelegate {
     guard mapView == nil else { return }
 
     let mapView = NMFMapView()
-    mapView.isHidden = false
-    mapView.alpha = 0
-    self.view.addSubview(mapView)
+    view.addSubview(mapView)
+    view.sendSubviewToBack(mapView)
+
     self.mapView = mapView
 
     mapView.snp.makeConstraints { make in
-      make.top.equalTo(view.safeAreaLayoutGuide)
+      make.top.equalTo(tableView.snp.top)
       make.leading.trailing.equalToSuperview()
       make.height.equalTo(200)
     }
@@ -433,6 +460,7 @@ extension RecordDetailViewController: NMFMapViewRenderDelegate {
 
     DispatchQueue.main.async { [weak self] in
       guard let self = self else { return }
+
       let points = record.runningPoints.map {
         NMGLatLng(lat: $0.location.lat, lng: $0.location.lon)
       }
@@ -442,16 +470,17 @@ extension RecordDetailViewController: NMFMapViewRenderDelegate {
         polyline?.width = 8
         polyline?.color = .systemBlue
         polyline?.mapView = mapView
+
         let bounds = NMGLatLngBounds(latLngs: points)
         let cameraUpdate = NMFCameraUpdate(fit: bounds, padding: 50)
-        mapView.moveCamera(cameraUpdate)
-        
-        reactor?.action.onNext(.mapRendered(mapView: mapView))
+
+        mapView.moveCamera(cameraUpdate) { [weak self] _ in
+          DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            guard let capturedImage = mapView.asImage() else { return }
+            self?.reactor?.action.onNext(.mapRendered(capturedImage))
+          }
+        }
       }
     }
-  }
-
-  public func mapViewDidFinishRender(_ mapView: NMFMapView) {
-    reactor?.action.onNext(.mapRendered(mapView: mapView))
   }
 }

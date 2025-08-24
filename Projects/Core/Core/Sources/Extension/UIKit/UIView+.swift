@@ -16,4 +16,11 @@ extension UIView {
     self.layer.shadowOffset = Offset
     self.layer.shadowRadius = radius
   }
+
+  public func asImage() -> UIImage? {
+    let renderer = UIGraphicsImageRenderer(bounds: bounds)
+    return renderer.image { _ in
+      drawHierarchy(in: bounds, afterScreenUpdates: true)
+    }
+  }
 }
