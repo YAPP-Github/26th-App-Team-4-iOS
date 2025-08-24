@@ -188,6 +188,7 @@ final class FirstRunningGoalSettingIntroViewController: BaseViewController {
       make.leading.equalTo(timeGoalButton.snp.trailing).offset(20)
       make.trailing.equalToSuperview().offset(-20)
       make.height.equalTo(timeGoalButton.snp.height)
+      make.width.equalTo(timeGoalButton.snp.width)
     }
 
     footerStackView.snp.makeConstraints { make in
