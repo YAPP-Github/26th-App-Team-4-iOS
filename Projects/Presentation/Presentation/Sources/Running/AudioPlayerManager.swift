@@ -48,6 +48,7 @@ public enum AudioFeedbackEvent: Equatable {
   case distance(DistanceFeedbackType)
   case pace(PaceFeedbackType)
   case time(TimeFeedbackType)
+  case coach
 }
 
 final class AudioPlayerManager: NSObject, AudioPlayerManagerType, AVAudioPlayerDelegate {
@@ -83,6 +84,8 @@ final class AudioPlayerManager: NSObject, AudioPlayerManagerType, AVAudioPlayerD
       fetchAudioObservable = audioUseCase.getPaceFeedbackAudio(type: type.rawValue)
     case .time(let type):
       fetchAudioObservable = audioUseCase.getTimeFeedbackAudio(type: type.rawValue)
+    case .coach:
+      fetchAudioObservable = audioUseCase.getCoachAudio()
     }
 
     fetchAudioObservable

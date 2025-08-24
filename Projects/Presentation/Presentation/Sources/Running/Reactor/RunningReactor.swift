@@ -307,7 +307,7 @@ public final class RunningReactor: Reactor {
     audioManager.playAudio(for: nextEvent) { [weak self] success in
       guard let self = self, success else { return }
       self.action.onNext(.dequeueAudio(nextEvent))
-      print("▶️▶️▶️▶️ 재생 후 총\(currentState.audioQueue.count)개\n", currentState.audioQueue, "\n\n\n")
+      print("▶️▶️ 재생 후 총\(currentState.audioQueue.count)개")
       self.playNextAudioIfNeeded()
     }
   }
@@ -328,13 +328,11 @@ public final class RunningReactor: Reactor {
     let hasDistanceGoal = state.goalDistance != nil
     let hasTimeGoal = state.goalTime != nil
 
-    // runnerType 피드백은 항상 처리
-    if UserDefaults.standard.bool(forKey: "running.setting.audioCoaching") {
+    if UserDefaults.standard.bool(forKey: MyRunningSettingViewController.Item.audioCoaching.userDefaultsKey) {
       allFeedbackMutations.append(_generateRunnerTypeFeedback(totalDistance: totalDistance))
     }
 
-    // 목표 설정에 따라 피드백 로직 실행
-    if UserDefaults.standard.bool(forKey: "running.setting.audioFeedback") {
+    if UserDefaults.standard.bool(forKey: MyRunningSettingViewController.Item.audioFeedback.userDefaultsKey) {
       if hasDistanceGoal && hasPaceGoal {
         allFeedbackMutations.append(_generateDistanceFeedback(totalDistance: totalDistance))
         allFeedbackMutations.append(_generatePaceFeedback())
@@ -370,10 +368,6 @@ public final class RunningReactor: Reactor {
     let lastKmReached = state.lastDistanceFeedbackKm
     let currentKmReached = Int(totalDistance / 1000.0)
 
-    guard currentKmReached > lastKmReached else {
-      return .empty()
-    }
-
     var feedbackInterval = 1
     if let runnerType = state.runnerType {
       switch runnerType {
@@ -384,14 +378,19 @@ public final class RunningReactor: Reactor {
       }
     }
 
-    if currentKmReached > 0 && currentKmReached % feedbackInterval == 0 && currentKmReached > lastKmReached {
-      let audioType = DistanceFeedbackType.passKm(currentKmReached)
-      print(" 📏 runnerType 피드백 트리거됨: \(currentKmReached)km (\(audioType))")
-      mutations.append(.just(.enqueueAudio(.distance(audioType))))
-      mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
+    guard currentKmReached > 0,
+          currentKmReached % feedbackInterval == 0,
+          currentKmReached > lastKmReached
+    else {
+        return .empty()
     }
 
+    print(" 📌 runnerType 피드백 트리거됨: \(currentKmReached)km")
+    mutations.append(.just(.enqueueAudio(.coach)))
+    mutations.append(.just(.setLastDistanceFeedbackKm(currentKmReached)))
+
     guard !mutations.isEmpty else { return .empty() }
+
     return Observable.concat(mutations)
   }
 
