@@ -484,17 +484,23 @@ public final class RunningReactor: Reactor {
     var mutations: [Observable<Mutation>] = []
 
     if let goalTime = state.goalTime {
-      let currentElapsedTime = state.elapsedTime
+      let currentElapsedTime = state.elapsedTime * 1000
 
       let fiftyPercentTime = goalTime * 0.5
+
       if currentElapsedTime >= fiftyPercentTime && !state.lastTimeFeedback50PercentGiven {
         mutations.append(.just(.setLastTimeFeedback50PercentGiven(true)))
         print(" ⏱️ 시간 피드백 트리거됨: 50% 지점")
         mutations.append(.just(.enqueueAudio(.time(.passHalf))))
       }
 
-      let fiveMinBeforeTime = goalTime - (5 * 60)
-      if currentElapsedTime >= fiveMinBeforeTime && !state.lastTimeFeedback5MinBeforeGiven && fiveMinBeforeTime > 0 {
+      let fiveMinBeforeTime = goalTime - (5 * 60 * 1000)
+      if
+        goalTime > (5 * 60 * 1000) &&
+        currentElapsedTime >= fiveMinBeforeTime &&
+        !state.lastTimeFeedback5MinBeforeGiven &&
+        fiveMinBeforeTime > 0
+      {
         mutations.append(.just(.setLastTimeFeedback5MinBeforeGiven(true)))
         print(" ⏱️ 시간 피드백 트리거됨: 5분 전")
         mutations.append(.just(.enqueueAudio(.time(.left5Min))))
