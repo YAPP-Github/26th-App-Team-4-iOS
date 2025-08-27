@@ -19,6 +19,7 @@ public protocol MyPageCoordinator: Coordinator {
   func showRunningSetting()
   func showMyNotiSettingVC()
   func showWalkthrough()
+  func pop()
 }
 
 public final class MyPageCoordinatorImpl: MyPageCoordinator {
@@ -75,6 +76,7 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
   
   public func showMyGoalSettingVC() {
     let vc = resolver.resolve(MyGoalSettingViewController.self)!
+    vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)
   }
   
@@ -98,6 +100,10 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
   public func showWalkthrough() {
     self.navigationController.viewControllers.removeAll()
     self.finish()
+  }
+
+  public func pop() {
+    self.navigationController.popViewController(animated: false)
   }
 }
 

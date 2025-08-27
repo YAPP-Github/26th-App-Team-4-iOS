@@ -303,7 +303,8 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
         guard let timeGoal = goalInfo.timeGoal else {
           return nil
         }
-        return "\(timeGoal)분"
+        print(">>>>>goalInfo.timeGoal", timeGoal)
+        return "\(Int(timeGoal) / 60000)분"
 
       case .goalPace:
         guard let paceGoalMs = goalInfo.paceGoal else {
