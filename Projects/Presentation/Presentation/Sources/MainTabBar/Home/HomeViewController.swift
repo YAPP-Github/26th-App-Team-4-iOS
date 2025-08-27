@@ -11,7 +11,6 @@ import Core
 import ReactorKit
 import NMapsMap
 import Domain
-//import Data
 
 public final class HomeViewController: BaseViewController, View {
 
@@ -43,13 +42,18 @@ public final class HomeViewController: BaseViewController, View {
     $0.layer.cornerRadius = 50
   }
   
-  let cardView = WeeklyRunningGoalCardView()
-  
-  let mapView = NMFMapView(frame: .zero).then {
+  private let cardView = WeeklyRunningGoalCardView()
+
+  private let mapView = NMFMapView(frame: .zero).then {
     $0.positionMode = .direction
     $0.locationOverlay.hidden = false
+    $0.positionMode = .compass
   }
-  
+
+  private lazy var locationButton = NMFLocationButton().then {
+    $0.mapView = mapView
+  }
+
   public override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     FRLocationManager.shared.requestAuthorization()
@@ -88,10 +92,18 @@ public final class HomeViewController: BaseViewController, View {
       $0.centerX.equalToSuperview()
       $0.width.height.equalTo(100)
     }
+
     mapView.moveCamera(.withZoomIn())
     mapView.snp.makeConstraints {
       $0.top.equalTo(cardContainerView.snp.bottom).offset(-12)
       $0.leading.trailing.bottom.equalToSuperview()
+    }
+
+    mapView.addSubview(locationButton)
+    locationButton.snp.makeConstraints { make in
+      make.trailing.equalToSuperview().offset(-10)
+      make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-10)
+      make.size.equalTo(40)
     }
   }
   
@@ -116,7 +128,6 @@ public final class HomeViewController: BaseViewController, View {
     FRLocationManager.shared.location
       .observe(on: MainScheduler.instance)
       .subscribe(onNext: { [weak self] location in
-//        print("Current Location: \(location.coordinate.latitude), \(location.coordinate.longitude)")
         guard let self = self else { return }
 
         let latLng = NMGLatLng(lat: location.coordinate.latitude,
