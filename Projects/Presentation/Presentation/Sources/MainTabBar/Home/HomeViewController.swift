@@ -42,7 +42,9 @@ public final class HomeViewController: BaseViewController, View {
     $0.layer.cornerRadius = 50
   }
   
-  private let cardView = WeeklyRunningGoalCardView()
+  private let cardView = WeeklyRunningGoalCardView().then {
+    $0.editButton.isHidden = true
+  }
 
   private let mapView = NMFMapView(frame: .zero).then {
     $0.positionMode = .direction
