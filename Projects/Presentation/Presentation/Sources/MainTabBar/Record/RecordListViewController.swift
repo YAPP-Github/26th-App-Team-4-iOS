@@ -119,7 +119,7 @@ public final class RecordListViewController: BaseViewController, View {
       .observe(on: MainScheduler.instance)
       .distinctUntilChanged()
       .subscribe(with: self) { owner, hasNextPage in
-        owner.loadMoreButton.isHidden = !hasNextPage
+        owner.tableView.tableFooterView?.isHidden = !hasNextPage
       }
       .disposed(by: self.disposeBag)
   }
@@ -201,7 +201,7 @@ extension RecordListViewController: UITableViewDelegate, UITableViewDataSource {
         time: record.totalTime,
         imageURL: record.imageUrl
       )
-      print("recordimageUrl>>>>>>>>>>>>\n", record.imageUrl)
+
       cell.contentView.rx.tapGesture()
         .when(.recognized)
         .subscribe(with: self) { owner, _ in
