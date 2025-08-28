@@ -70,12 +70,12 @@ public final class MyPageAssembly: Assembly {
     // MARK: - 목표 시간, 거리
     container.autoregister(MyGoalSettingReactor.self, initializer: MyGoalSettingReactor.init)
 
-    container.register(MyGoalSettingViewController.self) { r in
-      let vc = MyGoalSettingViewController()
+    container.register(MyGoalSettingViewController.self) { (r, goalInputType: GoalInputType) in
+      let vc = MyGoalSettingViewController(goalInputType: goalInputType)
       vc.reactor = r.resolve(MyGoalSettingReactor.self)
       return vc
     }
-    
+
     // MARK: - 러닝 설정
     container.register(MyRunningSettingReactor.self) { r in
       return MyRunningSettingReactor()

@@ -53,7 +53,7 @@ public final class MyRunningSettingViewController: BaseViewController, View {
     $0.tintColor = .black
   }
   
-  private let navLabel = UILabel().then { // 20
+  private let navLabel = UILabel().then {
     $0.text = "러닝 설정"
     $0.font = .systemFont(ofSize: 16, weight: .bold)
     $0.textColor = FRColor.Fg.Text.primary

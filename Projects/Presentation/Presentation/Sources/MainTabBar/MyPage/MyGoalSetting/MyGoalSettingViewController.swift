@@ -23,7 +23,7 @@ public final class MyGoalSettingViewController: BaseViewController, View {
     $0.tintColor = .black
   }
 
-  private let goalSegmentedView = MyGoalSegmentView()
+  private let goalSegmentedView: MyGoalSegmentView
 
   private let goalDistanceView = GoalRunningTimeView(unit: "km").then {
     $0.isHidden = true
@@ -42,7 +42,8 @@ public final class MyGoalSettingViewController: BaseViewController, View {
     $0.isHidden = true
   }
 
-  public override init() {
+  public init(goalInputType: GoalInputType) {
+    goalSegmentedView = MyGoalSegmentView(initialSegment: goalInputType == .distance ? .goalDistance : .goalTime)
     super.init()
     self.hidesBottomBarWhenPushed = true
   }

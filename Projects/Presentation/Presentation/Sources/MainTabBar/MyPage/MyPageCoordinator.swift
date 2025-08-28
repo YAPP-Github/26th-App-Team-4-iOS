@@ -14,7 +14,8 @@ public protocol MyPageCoordinator: Coordinator {
   func showMyPurposeSetting()
   func showMyProfile()
   func showDeleteAccount(mode: DeleteAccountViewController.Mode)
-  func showMyGoalSettingVC()
+  func showMyDistanceGoalSettingVC()
+  func showMyTimeGoalSettingVC()
   func showPaceCountSettingVC()
   func showRunningSetting()
   func showMyNotiSettingVC()
@@ -74,8 +75,14 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
     navigationController.pushViewController(vc, animated: true)
   }
   
-  public func showMyGoalSettingVC() {
-    let vc = resolver.resolve(MyGoalSettingViewController.self)!
+  public func showMyDistanceGoalSettingVC() {
+    let vc = resolver.resolve(MyGoalSettingViewController.self, argument: GoalInputType.distance)!
+    vc.coordinator = self
+    navigationController.pushViewController(vc, animated: true)
+  }
+
+  public func showMyTimeGoalSettingVC() {
+    let vc = resolver.resolve(MyGoalSettingViewController.self, argument: GoalInputType.time)!
     vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)
   }

@@ -333,9 +333,9 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
       .subscribe(with: self) { owner, _ in
         switch item {
         case .goalDistance:
-          owner.coordinator?.showMyGoalSettingVC()
+          owner.coordinator?.showMyDistanceGoalSettingVC()
         case .goalTime:
-          owner.coordinator?.showMyGoalSettingVC()
+          owner.coordinator?.showMyTimeGoalSettingVC()
         case .goalPace:
           owner.coordinator?.showPaceCountSettingVC()
         case .runningCount:
