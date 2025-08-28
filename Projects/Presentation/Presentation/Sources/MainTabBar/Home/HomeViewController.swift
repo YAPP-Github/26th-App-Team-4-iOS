@@ -162,7 +162,6 @@ public final class HomeViewController: BaseViewController, View {
     titleLabel.text = message(for: homeInfo.totalDistance ?? 0)
     cardView.setData(homeInfo)
   }
-  
 }
 
 extension HomeViewController {
@@ -209,5 +208,4 @@ extension HomeViewController {
     // 0 미만일 땐 첫 문구
     return thresholds[0].message
   }
-  
 }

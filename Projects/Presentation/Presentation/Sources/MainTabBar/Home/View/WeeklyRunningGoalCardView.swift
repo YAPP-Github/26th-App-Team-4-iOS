@@ -139,7 +139,7 @@ public class WeeklyRunningGoalCardView: BaseView {
   /// 홈 정보로 카드에 표시될 내용을 업데이트합니다.
   public func setData(_ homeInfo: HomeInfo) {
     // 1) 목표/최근 페이스 포맷(기존과 동일)
-    if let paceGoal = homeInfo.paceGoal {
+    if let paceGoal = homeInfo.paceGoal, paceGoal != 0 {
       let sec = Int(paceGoal)
       let m = sec / 60, s = sec % 60
       targetValueLabel.text = "\(m)'\(String(format: "%02d", s))\""
