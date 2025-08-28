@@ -20,8 +20,8 @@ public final class PaceCountSettingViewController: BaseViewController, View {
     $0.tintColor = .black
   }
   
-  private let goalSegmentedView = PaceCountGoalSegmentedView()
-  
+  private let goalSegmentedView: PaceCountGoalSegmentedView
+
   private let goalRunningCountView = GoalRunningCountView().then {
     $0.isHidden = true
   }
@@ -38,7 +38,8 @@ public final class PaceCountSettingViewController: BaseViewController, View {
     $0.isHidden = true
   }
   
-  override init() {
+  init(segment: PaceCountGoalSegmentedView.Segment) {
+    self.goalSegmentedView = PaceCountGoalSegmentedView(segment: segment)
     super.init()
     self.hidesBottomBarWhenPushed = true
   }

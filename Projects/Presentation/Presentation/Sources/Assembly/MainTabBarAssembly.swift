@@ -35,8 +35,8 @@ public final class MainTabBarAssembly: Assembly {
     
     container.autoregister(PaceCountSettingReactor.self, initializer: PaceCountSettingReactor.init)
     
-    container.register(PaceCountSettingViewController.self) { r in
-      let vc = PaceCountSettingViewController()
+    container.register(PaceCountSettingViewController.self) { (r, segment: PaceCountGoalSegmentedView.Segment) in
+      let vc = PaceCountSettingViewController(segment: segment)
       vc.reactor = r.resolve(PaceCountSettingReactor.self)
       return vc
     }

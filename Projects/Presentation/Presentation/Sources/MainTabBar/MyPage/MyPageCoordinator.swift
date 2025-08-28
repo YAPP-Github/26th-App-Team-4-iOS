@@ -16,7 +16,8 @@ public protocol MyPageCoordinator: Coordinator {
   func showDeleteAccount(mode: DeleteAccountViewController.Mode)
   func showMyDistanceGoalSettingVC()
   func showMyTimeGoalSettingVC()
-  func showPaceCountSettingVC()
+  func showPaceSettingVC()
+  func showCountSettingVC()
   func showRunningSetting()
   func showMyNotiSettingVC()
   func showWalkthrough()
@@ -87,8 +88,13 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
     navigationController.pushViewController(vc, animated: true)
   }
   
-  public func showPaceCountSettingVC() {
-    let vc = resolver.resolve(PaceCountSettingViewController.self)!
+  public func showPaceSettingVC() {
+    let vc = resolver.resolve(PaceCountSettingViewController.self, argument: PaceCountGoalSegmentedView.Segment.pace)!
+    navigationController.pushViewController(vc, animated: true)
+  }
+
+  public func showCountSettingVC() {
+    let vc = resolver.resolve(PaceCountSettingViewController.self, argument: PaceCountGoalSegmentedView.Segment.runningCount)!
     navigationController.pushViewController(vc, animated: true)
   }
   

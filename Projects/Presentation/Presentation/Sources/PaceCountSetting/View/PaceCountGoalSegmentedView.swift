@@ -71,6 +71,11 @@ public final class PaceCountGoalSegmentedView: BaseView {
 
   // MARK: - Init
 
+  init(segment: Segment) {
+    super.init(frame: .zero)
+    switchTo(segment: segment)
+  }
+
   override init(frame: CGRect) {
     super.init(frame: frame)
   }

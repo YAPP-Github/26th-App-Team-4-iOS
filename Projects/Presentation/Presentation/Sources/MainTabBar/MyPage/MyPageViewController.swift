@@ -337,9 +337,9 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
         case .goalTime:
           owner.coordinator?.showMyTimeGoalSettingVC()
         case .goalPace:
-          owner.coordinator?.showPaceCountSettingVC()
+          owner.coordinator?.showPaceSettingVC()
         case .runningCount:
-          owner.coordinator?.showPaceCountSettingVC()
+          owner.coordinator?.showCountSettingVC()
         default:
           break
         }
