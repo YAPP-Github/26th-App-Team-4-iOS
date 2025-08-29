@@ -359,7 +359,7 @@ extension RecordDetailViewController: UITableViewDelegate, UITableViewDataSource
     guard let detail = self.reactor?.currentState.detail else { return cell }
 
     cell.setData(
-      distance: detail.isDistanceGoalAchieved,
+      distance: detail.isDistanceGoalAchieved, // TODO: - pacegoal가 0일때 성공으로 옴 (서버 수정 필요)
       pace: detail.isPaceGoalAchieved,
       time: detail.isTimeGoalAchieved
     )
@@ -475,7 +475,7 @@ extension RecordDetailViewController: NMFMapViewRenderDelegate {
         let cameraUpdate = NMFCameraUpdate(fit: bounds, padding: 50)
 
         mapView.moveCamera(cameraUpdate) { [weak self] _ in
-          DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+          DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             guard let capturedImage = mapView.asImage() else { return }
             self?.reactor?.action.onNext(.mapRendered(capturedImage))
           }

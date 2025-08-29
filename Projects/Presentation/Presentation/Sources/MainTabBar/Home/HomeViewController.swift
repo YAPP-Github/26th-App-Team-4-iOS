@@ -50,16 +50,11 @@ public final class HomeViewController: BaseViewController, View {
   private let mapView = NMFMapView(frame: .zero).then {
     $0.positionMode = .direction
     $0.locationOverlay.hidden = false
-    $0.positionMode = .compass
+    $0.positionMode = .normal
   }
 
   private lazy var locationButton = NMFLocationButton().then {
     $0.mapView = mapView
-  }
-
-  public override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-    FRLocationManager.shared.requestAuthorization()
   }
   
   public override func initUI() {
