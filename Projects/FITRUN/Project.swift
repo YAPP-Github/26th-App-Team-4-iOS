@@ -35,7 +35,13 @@ let appTargetInfoPlist: InfoPlist = .extendingDefault(
       "NSAllowsArbitraryLoads": true
     ],
     "NSLocationAlwaysUsageDescription": "사용자의 위치를 받습니다.",
-    "NSLocationWhenInUseUsageDescription": "앱 사용 중 위치를 받습니다."
+    "NSLocationWhenInUseUsageDescription": "앱 사용 중 위치를 받습니다.",
+    "UIAppFonts": [
+        "Pretendard-Regular.otf",
+        "Pretendard-Medium.otf",
+        "Pretendard-SemiBold.otf",
+        "Pretendard-Bold.otf"
+    ]
   ]
 )
 

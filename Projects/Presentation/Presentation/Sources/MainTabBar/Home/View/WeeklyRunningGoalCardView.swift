@@ -26,7 +26,7 @@ public class WeeklyRunningGoalCardView: BaseView {
   
   private let titleLabel = UILabel().then {
     $0.text = "🔥 이번주 러닝 목표"
-    $0.font = .systemFont(ofSize: 16, weight: .semibold)
+    $0.apply(style: AppTypography.body3_bold)
     $0.textColor = .black
   }
 

@@ -30,6 +30,7 @@ public final class HomeViewController: BaseViewController, View {
   private let titleLabel = UILabel().then {
     $0.text = "나에게 딱 맞는 러닝을\n핏런에서 함께해요!"
     $0.font = UIFont.systemFont(ofSize: 22, weight: .bold)
+    $0.apply(style: AppTypography.h3_bold)
     $0.textColor = FRColor.Fg.Text.primary
     $0.numberOfLines = 0
   }
