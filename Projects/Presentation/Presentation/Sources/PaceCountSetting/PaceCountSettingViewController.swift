@@ -13,7 +13,7 @@ import RxKeyboard
 
 public final class PaceCountSettingViewController: BaseViewController, View {
   
-  var coordinator: HomeCoordinator?
+  var coordinator: MyPageCoordinator?
   
   private let backButton = UIButton().then {
     $0.setImage(.init(systemName: "chevron.left"), for: .normal)
@@ -212,8 +212,9 @@ public final class PaceCountSettingViewController: BaseViewController, View {
           animations: {
             self.goalSaveAlertView.alpha = 0
           },
-          completion: { _ in
-            self.goalSaveAlertView.isHidden = true
+          completion: { [weak self] _ in
+            self?.goalSaveAlertView.isHidden = true
+            self?.coordinator?.pop()
           }
         )
       }
