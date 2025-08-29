@@ -12,7 +12,7 @@ public enum AppFontWeight: String {
   case medium = "Pretendard-Medium"
   case semibold = "Pretendard-SemiBold"
   case bold = "Pretendard-Bold"
-  case heavyitalic = "SFPro-HeavyItalic"
+  case heavyitalic = "SF-Pro-Text-HeavyItalicSF"
 }
 
 public struct AppTextStyle {

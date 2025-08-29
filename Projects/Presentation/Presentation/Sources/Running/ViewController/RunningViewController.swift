@@ -39,17 +39,17 @@ final class RunningViewController: BaseViewController, View {
   }
 
   private let distanceLabel = UILabel().then {
-    $0.font = UIFont.systemFont(ofSize: 80, weight: .bold)
     $0.textColor = FRColor.Fg.Text.Interactive.inverse
     $0.textAlignment = .center
     $0.text = "0.00"
+    $0.apply(style: AppTypography.number1_ios)
   }
 
   private let unitLabel = UILabel().then {
-    $0.font = UIFont.systemFont(ofSize: 30, weight: .regular)
     $0.textColor = .gray700
     $0.textAlignment = .center
     $0.text = "km"
+    $0.font = .italicSystemFont(ofSize: 34)
   }
 
   private let bottomContainerView = UIView().then {
@@ -60,30 +60,30 @@ final class RunningViewController: BaseViewController, View {
   }
 
   private let paceTitleLabel = UILabel().then {
-    $0.font = UIFont.systemFont(ofSize: 16, weight: .medium)
     $0.textColor = FRColor.Fg.Text.tertiary
     $0.text = "평균 페이스"
+    $0.apply(style: AppTypography.body4_medium)
     $0.textAlignment = .center
   }
 
   private let paceValueLabel = UILabel().then {
-    $0.font = UIFont.systemFont(ofSize: 30, weight: .bold)
     $0.textColor = FRColor.Fg.Text.primary
     $0.text = "00'00\""
+    $0.apply(style: AppTypography.number3_bold)
     $0.textAlignment = .center
   }
 
   private let timeTitleLabel = UILabel().then {
-    $0.font = UIFont.systemFont(ofSize: 16, weight: .medium)
     $0.textColor = FRColor.Fg.Text.tertiary
     $0.text = "시간"
+    $0.apply(style: AppTypography.body4_medium)
     $0.textAlignment = .center
   }
 
   private let timeValueLabel = UILabel().then {
-    $0.font = UIFont.systemFont(ofSize: 30, weight: .bold)
     $0.textColor = FRColor.Fg.Text.primary
     $0.text = "00:00:00"
+    $0.apply(style: AppTypography.number3_bold)
     $0.textAlignment = .center
   }
 
