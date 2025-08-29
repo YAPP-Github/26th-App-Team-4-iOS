@@ -26,8 +26,8 @@ public class WeeklyRunningGoalCardView: BaseView {
   
   private let titleLabel = UILabel().then {
     $0.text = "🔥 이번주 러닝 목표"
-    $0.apply(style: AppTypography.body3_bold)
     $0.textColor = .black
+    $0.apply(style: AppTypography.body3_bold)
   }
 
   let editButton = UIButton(type: .system).then {
@@ -70,13 +70,14 @@ public class WeeklyRunningGoalCardView: BaseView {
     $0.text = "목표 페이스"
     $0.font = .systemFont(ofSize: 10)
     $0.textColor = FRColor.Fg.Text.tertiary
+    $0.apply(style: AppTypography.caption4_semibold)
   }
 
   private let targetValueLabel = UILabel().then {
     $0.text = "--'--\""
-    $0.font = .systemFont(ofSize: 12, weight: .semibold)
     $0.textColor = .black
     $0.textAlignment = .right
+    $0.apply(style: AppTypography.caption3_semibold)
   }
   
   private lazy var recentContainerStackView = UIStackView(
@@ -94,13 +95,14 @@ public class WeeklyRunningGoalCardView: BaseView {
     $0.text = "최근 페이스"
     $0.font = .systemFont(ofSize: 10)
     $0.textColor = FRColor.Fg.Text.tertiary
+    $0.apply(style: AppTypography.caption4_semibold)
   }
 
   private let recentValueLabel = UILabel().then {
     $0.text = "--'--\""
-    $0.font = .systemFont(ofSize: 12, weight: .semibold)
     $0.textColor = .black
     $0.textAlignment = .right
+    $0.apply(style: AppTypography.caption3_semibold)
   }
   
   // MARK: - Layout

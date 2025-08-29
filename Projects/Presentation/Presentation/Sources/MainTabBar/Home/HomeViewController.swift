@@ -106,7 +106,7 @@ public final class HomeViewController: BaseViewController, View {
     locationButton.snp.makeConstraints { make in
       make.trailing.equalToSuperview().offset(-10)
       make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-10)
-      make.size.equalTo(40)
+      make.size.equalTo(44)
     }
   }
   
