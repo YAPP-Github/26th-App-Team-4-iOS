@@ -16,12 +16,14 @@ public final class MyGoalSettingViewController: BaseViewController, View {
 
   public typealias Reactor = MyGoalSettingReactor
 
+  var coordinator: MyPageCoordinator?
+
   private let backButton = UIButton().then {
     $0.setImage(.init(systemName: "chevron.left"), for: .normal)
     $0.tintColor = .black
   }
 
-  private let goalSegmentedView = MyGoalSegmentView()
+  private let goalSegmentedView: MyGoalSegmentView
 
   private let goalDistanceView = GoalRunningTimeView(unit: "km").then {
     $0.isHidden = true
@@ -40,7 +42,8 @@ public final class MyGoalSettingViewController: BaseViewController, View {
     $0.isHidden = true
   }
 
-  public override init() {
+  public init(goalInputType: GoalInputType) {
+    goalSegmentedView = MyGoalSegmentView(initialSegment: goalInputType == .distance ? .goalDistance : .goalTime)
     super.init()
     self.hidesBottomBarWhenPushed = true
   }
@@ -174,8 +177,8 @@ public final class MyGoalSettingViewController: BaseViewController, View {
       .take(1)
       .observe(on: MainScheduler.instance)
       .subscribe(with: self) { owner, profile in
-        owner.goalDistanceView.setCount(Int((profile.goal.distanceMeterGoal ?? 0) / 1000))
-        owner.goalTimeView.setCount(profile.goal.timeGoal ?? 0)
+        owner.goalDistanceView.setCount(Int((profile.goal.distanceMeterGoal ?? 3) / 1000))
+        owner.goalTimeView.setCount(Int((profile.goal.timeGoal ?? 30000) / 60000))
       }
       .disposed(by: disposeBag)
   }
@@ -214,8 +217,9 @@ public final class MyGoalSettingViewController: BaseViewController, View {
           animations: {
             self.goalSaveAlertView.alpha = 0
           },
-          completion: { _ in
-            self.goalSaveAlertView.isHidden = true
+          completion: { [weak self] _ in
+            self?.goalSaveAlertView.isHidden = true
+            self?.coordinator?.pop()
           }
         )
       }

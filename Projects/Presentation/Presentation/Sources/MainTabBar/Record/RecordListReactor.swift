@@ -36,7 +36,7 @@ public class RecordListReactor: Reactor {
     fileprivate(set) var summary: RecordList?
     fileprivate(set) var records: [RecordEntity] = []
     fileprivate(set) var isLoading: Bool = false
-    fileprivate(set) var hasNextPage: Bool = true
+    fileprivate(set) var hasNextPage: Bool = false
     @Pulse fileprivate(set) var error: Error?
   }
 
@@ -57,7 +57,6 @@ public class RecordListReactor: Reactor {
       resetPagination()
       return Observable.concat([
         .just(.setLoading(true)),
-        .just(.setHasNextPage(true)),
         load(page: 0),
         .just(.setLoading(false))
       ])

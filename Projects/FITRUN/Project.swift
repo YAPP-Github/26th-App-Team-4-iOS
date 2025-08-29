@@ -35,7 +35,14 @@ let appTargetInfoPlist: InfoPlist = .extendingDefault(
       "NSAllowsArbitraryLoads": true
     ],
     "NSLocationAlwaysUsageDescription": "사용자의 위치를 받습니다.",
-    "NSLocationWhenInUseUsageDescription": "앱 사용 중 위치를 받습니다."
+    "NSLocationWhenInUseUsageDescription": "앱 사용 중 위치를 받습니다.",
+    "UIAppFonts": [
+        "Pretendard-Regular.otf",
+        "Pretendard-Medium.otf",
+        "Pretendard-SemiBold.otf",
+        "Pretendard-Bold.otf"
+    ],
+    "UIBackgroundModes": ["location"]
   ]
 )
 
@@ -73,6 +80,7 @@ let project = Project(
       infoPlist: appTargetInfoPlist,
       sources: ["Sources/**"],
       resources: ["Resources/**"],
+      entitlements: .file(path: .relativeToRoot("Projects/FITRUN/Resources/FITRUN.entitlements")),
       dependencies: dependencies,
       settings: .settings(configurations: [
         .debug(name: "Debug", settings: ["BASE_URL": "http://fitrun.p-e.kr/api/v1"], xcconfig: "Configs/Debug.xcconfig"),

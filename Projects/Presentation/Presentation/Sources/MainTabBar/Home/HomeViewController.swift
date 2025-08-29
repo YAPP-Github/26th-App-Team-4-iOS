@@ -11,7 +11,6 @@ import Core
 import ReactorKit
 import NMapsMap
 import Domain
-//import Data
 
 public final class HomeViewController: BaseViewController, View {
 
@@ -31,6 +30,7 @@ public final class HomeViewController: BaseViewController, View {
   private let titleLabel = UILabel().then {
     $0.text = "나에게 딱 맞는 러닝을\n핏런에서 함께해요!"
     $0.font = UIFont.systemFont(ofSize: 22, weight: .bold)
+    $0.apply(style: AppTypography.h3_bold)
     $0.textColor = FRColor.Fg.Text.primary
     $0.numberOfLines = 0
   }
@@ -43,16 +43,18 @@ public final class HomeViewController: BaseViewController, View {
     $0.layer.cornerRadius = 50
   }
   
-  let cardView = WeeklyRunningGoalCardView()
-  
-  let mapView = NMFMapView(frame: .zero).then {
+  private let cardView = WeeklyRunningGoalCardView().then {
+    $0.editButton.isHidden = true
+  }
+
+  private let mapView = NMFMapView(frame: .zero).then {
     $0.positionMode = .direction
     $0.locationOverlay.hidden = false
+    $0.positionMode = .normal
   }
-  
-  public override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-    FRLocationManager.shared.requestAuthorization()
+
+  private lazy var locationButton = NMFLocationButton().then {
+    $0.mapView = mapView
   }
   
   public override func initUI() {
@@ -72,7 +74,6 @@ public final class HomeViewController: BaseViewController, View {
     titleLabel.snp.makeConstraints {
       $0.top.equalTo(view.safeAreaLayoutGuide).offset(52)
       $0.leading.trailing.equalToSuperview().inset(20)
-      $0.height.equalTo(54)
     }
     
     cardContainerView.addSubview(cardView)
@@ -88,10 +89,18 @@ public final class HomeViewController: BaseViewController, View {
       $0.centerX.equalToSuperview()
       $0.width.height.equalTo(100)
     }
+
     mapView.moveCamera(.withZoomIn())
     mapView.snp.makeConstraints {
       $0.top.equalTo(cardContainerView.snp.bottom).offset(-12)
       $0.leading.trailing.bottom.equalToSuperview()
+    }
+
+    mapView.addSubview(locationButton)
+    locationButton.snp.makeConstraints { make in
+      make.trailing.equalToSuperview().offset(-10)
+      make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-10)
+      make.size.equalTo(44)
     }
   }
   
@@ -116,7 +125,6 @@ public final class HomeViewController: BaseViewController, View {
     FRLocationManager.shared.location
       .observe(on: MainScheduler.instance)
       .subscribe(onNext: { [weak self] location in
-//        print("Current Location: \(location.coordinate.latitude), \(location.coordinate.longitude)")
         guard let self = self else { return }
 
         let latLng = NMGLatLng(lat: location.coordinate.latitude,
@@ -149,7 +157,6 @@ public final class HomeViewController: BaseViewController, View {
     titleLabel.text = message(for: homeInfo.totalDistance ?? 0)
     cardView.setData(homeInfo)
   }
-  
 }
 
 extension HomeViewController {
@@ -173,19 +180,19 @@ extension HomeViewController {
       (35,  "부산 해운대–송정 해안선을 뛴 셈이에요."),
       (40,  "백두대간 둘레길 하루 코스를 뛰었어요"),
       (45,  "남산 타워 10번 오른 만큼 뛰어왔어요"),
-      (50,  "서울–천안 종단! \n뛸수록 멘탈도 강해져요."),
+      (50,  "서울–천안 종단!\n뛸수록 멘탈도 강해져요."),
       (55,  "제주 올레길 한 코스 클리어!"),
       (60,  "한라산을 두번이나 완등한 셈이에요."),
       (70,  "서울에서 충주까지 달려왔어요."),
-      (80,  "대전–전주 거리만큼 뛰었어요! \n국토대장정에 도전해보세요."),
+      (80,  "대전–전주 거리만큼 뛰었어요!\n국토대장정에 도전해보세요."),
       (90,  "남한산성 8코스 다 돌았어요!"),
       (100, "국토 대장정 첫 구간 마무리를 축하해요!"),
-      (120, "한반도 종단의 1/5 에 도착했어요!"),
+      (120, "한반도 종단의 1/5에 도착했어요!"),
       (150, "남도 해안길을 잇는 기록을 세웠어요!"),
       (180, "서울–대구 거리만큼 달렸어요."),
-      (200, "수도권에서 강릉까지 완주한 셈이에요"),
-      (250, "국토 종단의 절반, 진짜 대단해요!"),
-      (300, "러너계의 무사! 전국 일주 중입니다.")
+      (200, "수도권에서 강릉까지\n완주한 셈이에요"),
+      (250, "국토 종단의 절반,\n진짜 대단해요!"),
+      (300, "러너계의 무사!\n전국 일주 중입니다.")
     ]
     // 가장 높은 threshold부터 내려오며 매칭
     for (km, text) in thresholds.sorted(by: { $0.km > $1.km }) {
@@ -196,5 +203,4 @@ extension HomeViewController {
     // 0 미만일 땐 첫 문구
     return thresholds[0].message
   }
-  
 }

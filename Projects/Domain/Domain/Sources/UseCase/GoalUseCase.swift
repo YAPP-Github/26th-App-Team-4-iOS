@@ -38,7 +38,8 @@ public final class GoalUseCaseImpl: GoalUseCase {
   }
 
   public func saveGoalTime(time: Int) -> RxSwift.Single<Bool> {
-    return goalRepository.saveGoalTime(time: time)
+    let goalTimeMS = time * 60 * 1000
+    return goalRepository.saveGoalTime(time: goalTimeMS)
   }
 
   public func saveGoalDistance(distance: Int) -> RxSwift.Single<Bool> {

@@ -14,11 +14,14 @@ public protocol MyPageCoordinator: Coordinator {
   func showMyPurposeSetting()
   func showMyProfile()
   func showDeleteAccount(mode: DeleteAccountViewController.Mode)
-  func showMyGoalSettingVC()
-  func showPaceCountSettingVC()
+  func showMyDistanceGoalSettingVC()
+  func showMyTimeGoalSettingVC()
+  func showPaceSettingVC()
+  func showCountSettingVC()
   func showRunningSetting()
   func showMyNotiSettingVC()
   func showWalkthrough()
+  func pop()
 }
 
 public final class MyPageCoordinatorImpl: MyPageCoordinator {
@@ -73,13 +76,27 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
     navigationController.pushViewController(vc, animated: true)
   }
   
-  public func showMyGoalSettingVC() {
-    let vc = resolver.resolve(MyGoalSettingViewController.self)!
+  public func showMyDistanceGoalSettingVC() {
+    let vc = resolver.resolve(MyGoalSettingViewController.self, argument: GoalInputType.distance)!
+    vc.coordinator = self
+    navigationController.pushViewController(vc, animated: true)
+  }
+
+  public func showMyTimeGoalSettingVC() {
+    let vc = resolver.resolve(MyGoalSettingViewController.self, argument: GoalInputType.time)!
+    vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)
   }
   
-  public func showPaceCountSettingVC() {
-    let vc = resolver.resolve(PaceCountSettingViewController.self)!
+  public func showPaceSettingVC() {
+    let vc = resolver.resolve(PaceCountSettingViewController.self, argument: PaceCountGoalSegmentedView.Segment.pace)!
+    vc.coordinator = self
+    navigationController.pushViewController(vc, animated: true)
+  }
+
+  public func showCountSettingVC() {
+    let vc = resolver.resolve(PaceCountSettingViewController.self, argument: PaceCountGoalSegmentedView.Segment.runningCount)!
+    vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)
   }
   
@@ -98,6 +115,10 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
   public func showWalkthrough() {
     self.navigationController.viewControllers.removeAll()
     self.finish()
+  }
+
+  public func pop() {
+    self.navigationController.popViewController(animated: false)
   }
 }
 

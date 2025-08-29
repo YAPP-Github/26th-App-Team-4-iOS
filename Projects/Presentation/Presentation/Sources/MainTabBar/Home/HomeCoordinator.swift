@@ -49,11 +49,7 @@ extension HomeCoordinatorImpl {
   }
   
   public func showPaceCountSetting() {
-    guard let viewController = resolver.resolve(PaceCountSettingViewController.self) else {
-      fatalError("Failed to resolve PaceCountSettingViewController. Ensure it is registered correctly in Swinject.")
-    }
-    viewController.coordinator = self
-    navigationController.pushViewController(viewController, animated: true)
+    
   }
 }
 

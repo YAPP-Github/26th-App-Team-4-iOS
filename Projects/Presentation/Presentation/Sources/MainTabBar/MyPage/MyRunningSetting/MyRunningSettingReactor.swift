@@ -30,15 +30,22 @@ public final class MyRunningSettingReactor: Reactor {
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .initialize:
-      return .empty()
-      
+      var initialItems: [MyRunningSettingViewController.Item: Bool] = [:]
+
+      for item in MyRunningSettingViewController.Item.allCases {
+        let isOff = UserDefaults.standard.bool(forKey: item.userDefaultsKey)
+        initialItems[item] = !isOff
+      }
+      return .just(.setItems(initialItems))
+
     case .toggleItem(item: let item):
       var newItems = currentState.items
-      if let currentValue = newItems[item] {
-        newItems[item] = !currentValue
-      } else {
-        newItems[item] = true
-      }
+      let currentValue = newItems[item] ?? false
+      let newValue = !currentValue
+      newItems[item] = newValue
+
+      UserDefaults.standard.set(!newValue, forKey: item.userDefaultsKey)
+
       return .just(.setItems(newItems))
     }
   }

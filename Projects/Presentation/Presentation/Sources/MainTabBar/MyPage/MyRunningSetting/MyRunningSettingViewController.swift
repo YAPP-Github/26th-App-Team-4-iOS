@@ -35,6 +35,15 @@ public final class MyRunningSettingViewController: BaseViewController, View {
         return "러닝 중 실시간 페이스에 따라 맞춤형 안내가 음성으로 제공되는 기능이에요"
       }
     }
+
+    var userDefaultsKey: String {
+      switch self {
+      case .audioCoaching:
+        return "running.setting.audioCoaching.isOff"
+      case .audioFeedback:
+        return "running.setting.audioFeedback.isOff"
+      }
+    }
   }
   
   var coordinator: MyPageCoordinator?
@@ -44,7 +53,7 @@ public final class MyRunningSettingViewController: BaseViewController, View {
     $0.tintColor = .black
   }
   
-  private let navLabel = UILabel().then { // 20
+  private let navLabel = UILabel().then {
     $0.text = "러닝 설정"
     $0.font = .systemFont(ofSize: 16, weight: .bold)
     $0.textColor = FRColor.Fg.Text.primary

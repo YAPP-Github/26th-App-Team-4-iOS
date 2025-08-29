@@ -18,7 +18,7 @@ public final class GoalRunningTimeView: BaseView {
   }
 
   private let weekLabel = UILabel().then {
-    $0.text = "일주일에"
+    $0.text = "한 번 달릴 때"
     $0.font = .systemFont(ofSize: 16, weight: .semibold)
     $0.textColor = UIColor(hex: "#555D6D")
     $0.textAlignment = .center

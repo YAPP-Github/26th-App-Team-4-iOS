@@ -303,10 +303,11 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
         guard let timeGoal = goalInfo.timeGoal else {
           return nil
         }
-        return "\(timeGoal)분"
+        print(">>>>>goalInfo.timeGoal", timeGoal)
+        return "\(Int(timeGoal) / 60000)분"
 
       case .goalPace:
-        guard let paceGoalMs = goalInfo.paceGoal else {
+        guard let paceGoalMs = goalInfo.paceGoal, paceGoalMs != 0 else {
           return nil
         }
         let paceGoal = paceGoalMs / 1000
@@ -332,13 +333,13 @@ extension MyPageViewController: UITableViewDelegate, UITableViewDataSource {
       .subscribe(with: self) { owner, _ in
         switch item {
         case .goalDistance:
-          owner.coordinator?.showMyGoalSettingVC()
+          owner.coordinator?.showMyDistanceGoalSettingVC()
         case .goalTime:
-          owner.coordinator?.showMyGoalSettingVC()
+          owner.coordinator?.showMyTimeGoalSettingVC()
         case .goalPace:
-          owner.coordinator?.showPaceCountSettingVC()
+          owner.coordinator?.showPaceSettingVC()
         case .runningCount:
-          owner.coordinator?.showPaceCountSettingVC()
+          owner.coordinator?.showCountSettingVC()
         default:
           break
         }

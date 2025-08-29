@@ -68,6 +68,11 @@ public final class MyGoalSegmentView: BaseView {
 
   // MARK: - Init
 
+  public init(initialSegment: Segment) {
+    super.init(frame: .zero)
+    self.switchTo(segment: initialSegment)
+  }
+
   override init(frame: CGRect) {
     super.init(frame: frame)
   }
