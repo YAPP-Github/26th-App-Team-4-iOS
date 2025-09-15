@@ -77,13 +77,17 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
   }
   
   public func showMyDistanceGoalSettingVC() {
-    let vc = resolver.resolve(MyGoalSettingViewController.self, argument: GoalInputType.distance)!
+    guard let vc = resolver.resolve(MyDistanceGoalSettingViewController.self) else {
+      fatalError("Failed to resolve MyDistanceGoalSettingViewController. Ensure it is registered in Swinject.")
+    }
     vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)
   }
 
   public func showMyTimeGoalSettingVC() {
-    let vc = resolver.resolve(MyGoalSettingViewController.self, argument: GoalInputType.time)!
+    guard let vc = resolver.resolve(MyTimeGoalSettingViewController.self) else {
+      fatalError("Failed to resolve MyTimeGoalSettingViewController. Ensure it is registered in Swinject.")
+    }
     vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)
   }

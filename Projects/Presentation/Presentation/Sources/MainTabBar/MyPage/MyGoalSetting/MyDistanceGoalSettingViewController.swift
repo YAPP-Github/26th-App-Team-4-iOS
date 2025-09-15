@@ -1,8 +1,8 @@
 //
-//  MyGoalSettingViewController.swift
+//  MyDistanceGoalSettingViewController.swift
 //  Presentation
 //
-//  Created by JDeoks on 8/15/25.
+//  Created by dong eun shin on 9/15/25.
 //
 
 import UIKit
@@ -12,7 +12,7 @@ import RxSwift
 import RxCocoa
 import RxKeyboard
 
-public final class MyGoalSettingViewController: BaseViewController, View {
+public final class MyDistanceGoalSettingViewController: BaseViewController, View {
 
   public typealias Reactor = MyGoalSettingReactor
 
@@ -23,13 +23,7 @@ public final class MyGoalSettingViewController: BaseViewController, View {
     $0.tintColor = .black
   }
 
-  private let goalSegmentedView: MyGoalSegmentView
-
-  private let goalDistanceView = GoalRunningTimeView(unit: "km").then {
-    $0.isHidden = true
-  }
-
-  private let goalTimeView = GoalRunningTimeView()
+  private let goalDistanceView = GoalRunningTimeView(unit: "km")
 
   private let nextButton = UIButton().then {
     $0.setTitle("설정하기", for: .normal)
@@ -42,8 +36,7 @@ public final class MyGoalSettingViewController: BaseViewController, View {
     $0.isHidden = true
   }
 
-  public init(goalInputType: GoalInputType) {
-    goalSegmentedView = MyGoalSegmentView(initialSegment: goalInputType == .distance ? .goalDistance : .goalTime)
+  public override init() {
     super.init()
     self.hidesBottomBarWhenPushed = true
   }
@@ -64,22 +57,11 @@ public final class MyGoalSettingViewController: BaseViewController, View {
       $0.width.height.equalTo(24)
     }
 
-    view.addSubview(goalSegmentedView)
-    goalSegmentedView.snp.makeConstraints {
-      $0.top.equalTo(backButton.snp.bottom).offset(32)
-      $0.leading.trailing.equalToSuperview().inset(20)
-    }
-
     view.addSubview(goalDistanceView)
     goalDistanceView.snp.makeConstraints {
-      $0.top.equalTo(goalSegmentedView.snp.bottom).offset(24)
+      $0.top.equalTo(view.safeAreaLayoutGuide).offset(126)
       $0.leading.trailing.equalToSuperview().inset(20)
       $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
-    }
-
-    view.addSubview(goalTimeView)
-    goalTimeView.snp.makeConstraints {
-      $0.edges.equalTo(goalDistanceView)
     }
 
     view.addSubview(nextButton)
@@ -118,19 +100,8 @@ public final class MyGoalSettingViewController: BaseViewController, View {
         obj.view.layoutIfNeeded()
       }
       .disposed(by: disposeBag)
-
-    // 세그 전환 (로컬)
-    goalSegmentedView.selectedSegment
-      .distinctUntilChanged()
-      .observe(on: MainScheduler.asyncInstance)
-      .subscribe(with: self) { obj, index in
-        obj.view.endEditing(true)
-        obj.switchGoalView(to: index)
-      }
-      .disposed(by: disposeBag)
   }
 
-  // ✅ 리액터 입력/상태 바인딩 전부 여기로
   public func bind(reactor: Reactor) {
     // Actions -> Reactor
     rx.methodInvoked(#selector(UIViewController.viewDidAppear(_:)))
@@ -144,10 +115,7 @@ public final class MyGoalSettingViewController: BaseViewController, View {
       .throttle(.milliseconds(500), scheduler: MainScheduler.instance)
       .withUnretained(self)
       .map { owner, _ -> Reactor.Action in
-        let isTimeVisible = !owner.goalTimeView.isHidden
-        let timeMinutes: Int? = isTimeVisible ? owner.goalTimeView.currentCount : nil
-        let distanceKm: Int?  = isTimeVisible ? nil : owner.goalDistanceView.currentCount
-        return .save(timeMinutes: timeMinutes, distanceMeter: distanceKm)
+        return .save(timeMinutes: nil, distanceMeter: owner.goalDistanceView.currentCount)
       }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
@@ -178,27 +146,8 @@ public final class MyGoalSettingViewController: BaseViewController, View {
       .observe(on: MainScheduler.instance)
       .subscribe(with: self) { owner, profile in
         owner.goalDistanceView.setCount(Int((profile.goal.distanceMeterGoal ?? 3) / 1000))
-        owner.goalTimeView.setCount(Int((profile.goal.timeGoal ?? 30000) / 60000))
       }
       .disposed(by: disposeBag)
-  }
-
-  // 세그 전환 애니메이션 (로컬 UI)
-  private func switchGoalView(to index: MyGoalSegmentView.Segment) {
-    let showTimeView = (index == .goalTime)
-    let toHideView = showTimeView ? goalDistanceView : goalTimeView
-    let toShowView = showTimeView ? goalTimeView : goalDistanceView
-
-    UIView.animate(withDuration: 0.15, animations: {
-      toHideView.alpha = 0
-    }, completion: { _ in
-      toHideView.isHidden = true
-      toShowView.alpha = 0
-      toShowView.isHidden = false
-      UIView.animate(withDuration: 0.15) {
-        toShowView.alpha = 1
-      }
-    })
   }
 
   private func showGoalSaveAlert() {
