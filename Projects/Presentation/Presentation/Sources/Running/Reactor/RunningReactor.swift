@@ -151,7 +151,7 @@ public final class RunningReactor: Reactor {
       let fetchGoalMutation = runningGoalUseCase.getRunningGoal()
         .asObservable()
         .flatMap { goal -> Observable<Mutation> in
-          let serverPaceGoalSecondsPerKm: TimeInterval? = goal.paceGoal.flatMap { $0 == 0 ? nil : TimeInterval($0) }
+          let serverPaceGoalSecondsPerKm: TimeInterval? = goal.paceGoal.flatMap { TimeInterval($0) }
           let serverTimeGoalSeconds = goal.timeGoal.map { TimeInterval($0) }
           let serverDistanceGoalMeters = goal.distanceMeterGoal
           let runnerType = goal.runnerType
