@@ -93,13 +93,13 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
   }
   
   public func showPaceSettingVC() {
-    let vc = resolver.resolve(PaceCountSettingViewController.self, argument: PaceCountGoalSegmentedView.Segment.pace)!
+    let vc = resolver.resolve(MyPaceGoalSettingViewController.self)!
     vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)
   }
 
   public func showCountSettingVC() {
-    let vc = resolver.resolve(PaceCountSettingViewController.self, argument: PaceCountGoalSegmentedView.Segment.runningCount)!
+    let vc = resolver.resolve(MyRunningCountViewController.self)!
     vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)
   }
