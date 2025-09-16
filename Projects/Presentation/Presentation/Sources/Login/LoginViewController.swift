@@ -194,11 +194,7 @@ public class LoginViewController: BaseViewController, View {
 
   // MARK: - Navigation
   private func navigateToNextScreen() {
-    if UserDefaults.standard.bool(forKey: "hasCompletedOnboarding") {
-      coordinator?.showMainTabbar()
-    } else {
-      coordinator?.showOnboarding()
-    }
+    coordinator?.showMainTabbar()
   }
 
   // MARK: - Helper

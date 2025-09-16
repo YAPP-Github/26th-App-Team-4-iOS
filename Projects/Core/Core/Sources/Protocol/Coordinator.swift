@@ -45,6 +45,5 @@ public enum CoordinatorType {
 public protocol AppCoordinator: Coordinator {
   func showWalkthrough()
   func showLogin()
-  func showOnboarding()
   func showMainTab()
 }

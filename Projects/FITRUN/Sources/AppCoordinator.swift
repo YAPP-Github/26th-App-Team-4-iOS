@@ -59,16 +59,7 @@ extension AppCoordinatorImpl: AppCoordinator {
     childCoordinators.append(coordinator)
     coordinator.start()
   }
-
-  func showOnboarding() {
-    guard let coordinator = resolver.resolve(OnboardingCoordinatorImpl.self, argument: navigationController) else {
-      fatalError("Failed to resolve OnboardingCoordinatorImpl. Ensure it is registered correctly in Swinject.")
-    }
-    coordinator.finishDelegate = self
-    childCoordinators.append(coordinator)
-    coordinator.start()
-  }
-
+  
   func showRunnerType() {
     self.navigationController.viewControllers.removeAll()
 

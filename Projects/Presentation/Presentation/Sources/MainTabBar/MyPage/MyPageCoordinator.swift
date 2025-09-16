@@ -93,13 +93,17 @@ public final class MyPageCoordinatorImpl: MyPageCoordinator {
   }
   
   public func showPaceSettingVC() {
-    let vc = resolver.resolve(MyPaceGoalSettingViewController.self)!
+    guard let vc = resolver.resolve(MyPaceGoalSettingViewController.self) else {
+      fatalError("Failed to resolve MyPaceGoalSettingViewController. Ensure it is registered in Swinject.")
+    }
     vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)
   }
 
   public func showCountSettingVC() {
-    let vc = resolver.resolve(MyRunningCountViewController.self)!
+    guard let vc = resolver.resolve(MyRunningCountViewController.self) else {
+      fatalError("Failed to resolve MyRunningCountViewController. Ensure it is registered in Swinject.")
+    }
     vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)
   }
